@@ -44,13 +44,17 @@ class Cursor:
         if move is None:
             return
 
-        shared.cursor_pos.x += move[0]
-        shared.cursor_pos.y += move[1]
+        if shared.cursor_pos.x + move[0] >= 0:
+            shared.cursor_pos.x += move[0]
 
-        if len(shared.chars) < shared.cursor_pos.y:
+        if shared.cursor_pos.y + move[1] >= 0:
+            shared.cursor_pos.y += move[1]
+
+        if len(shared.chars) - 1 < shared.cursor_pos.y:
             shared.chars.insert(shared.cursor_pos.y, [])
-        if len(shared.chars[shared.cursor_pos.y]) < shared.cursor_pos.x:
-            shared.chars[shared.cursor_pos.y].append(" ")
+        if (line_len := len(shared.chars[shared.cursor_pos.y])) < shared.cursor_pos.x:
+            diff = shared.cursor_pos.x - line_len
+            shared.chars[shared.cursor_pos.y].extend([" "] * diff)
 
     def update(self):
         self.move()

@@ -22,6 +22,8 @@ class Editor:
 
     def gen_image(self):
         text = self.get_text()
+        if text.strip() == "":
+            text = ""
         self.image = shared.FONT.render(text, True, "white")
 
     @property
@@ -71,16 +73,8 @@ class Editor:
         pre = line[: shared.cursor_pos.x]
         shared.chars[shared.cursor_pos.y] = pre
         post = line[shared.cursor_pos.x :]
-        print(
-            f"""
-{pre = }
-{post = }
-{shared.cursor_pos.y = }
-        """
-        )
-        print(shared.chars)
+
         shared.chars.insert(shared.cursor_pos.y + 1, post)
-        print(shared.chars)
         shared.cursor_pos.y += 1
         shared.cursor_pos.x = 0
         self.typing = True
@@ -89,8 +83,8 @@ class Editor:
         return shared.chars[shared.cursor_pos.y]
 
     def delete_chars(self):
-        if not self.get_line():
-            if len(shared.chars) < 2:
+        if not "".join(self.get_line()).strip():
+            if shared.cursor_pos.y == 0:
                 return
             self.go_prev_line()
             return
