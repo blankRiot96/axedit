@@ -11,7 +11,14 @@ FONT = pygame.font.Font(FONT_PATH, font_size)
 
 
 # Shared Variables
-cursor_pos: pygame.Vector2 = pygame.Vector2()
+class Pos:
+    def __init__(self, x: int, y: int) -> None:
+        self.x = x
+        self.y = y
+
+
+chars: list[list[str]] = [[]]
+cursor_pos: Pos = Pos(0, 0)
 screen: pygame.Surface
 events: list[pygame.event.Event]
 keys: list[bool]

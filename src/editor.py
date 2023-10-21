@@ -6,8 +6,7 @@ from src.utils import EventManager, InputManager, KeyManager, Time
 
 class Editor:
     def __init__(self) -> None:
-        self.chars = []
-        self.image = shared.FONT.render("".join(self.chars), True, "white")
+        self.gen_image()
         self.blink_timer = Time(0.5)
         self._typing = False
         self.input_manager = InputManager(
@@ -21,6 +20,10 @@ class Editor:
         self.key_manager = KeyManager({pygame.K_BACKSPACE: self.delete_chars})
         self.delete_timer = Time(0.5)
 
+    def gen_image(self):
+        text = self.get_text()
+        self.image = shared.FONT.render(text, True, "white")
+
     @property
     def typing(self) -> bool:
         return self._typing
@@ -30,11 +33,11 @@ class Editor:
         self._typing = val
         self.blink_timer.reset()
 
-    def update(self):
-        self.handle_input()
-        self.blink_cursor()
-
-        self.image = shared.FONT.render("".join(self.chars), True, "white")
+    def get_text(self):
+        text = ""
+        for row in shared.chars:
+            text += "".join(row) + "\n"
+        return text
 
     def blink_cursor(self):
         if self.typing and self.blink_timer.tick():
@@ -59,36 +62,64 @@ class Editor:
 
     def write_char(self, text):
         for char in text:
-            self.chars.append(char)
+            self.get_line().insert(shared.cursor_pos.x, char)
             shared.cursor_pos.x += 1
             self.typing = True
 
     def new_line(self):
-        self.chars.append("\n")
+        line = self.get_line()
+        pre = line[: shared.cursor_pos.x]
+        shared.chars[shared.cursor_pos.y] = pre
+        post = line[shared.cursor_pos.x :]
+        print(
+            f"""
+{pre = }
+{post = }
+{shared.cursor_pos.y = }
+        """
+        )
+        print(shared.chars)
+        shared.chars.insert(shared.cursor_pos.y + 1, post)
+        print(shared.chars)
         shared.cursor_pos.y += 1
         shared.cursor_pos.x = 0
         self.typing = True
 
     def get_line(self):
-        if "\n" not in self.chars:
-            return self.chars
-        line_start = "".join(self.chars).rfind("\n") + 1
-        return self.chars[line_start:]
+        return shared.chars[shared.cursor_pos.y]
 
     def delete_chars(self):
-        if not self.chars:
+        if not self.get_line():
+            if len(shared.chars) < 2:
+                return
+            self.go_prev_line()
             return
-        char = self.chars.pop()
-        if char == "\n":
-            shared.cursor_pos.y -= 1
-            shared.cursor_pos.x = len(self.get_line()) + 1
+
+        if shared.cursor_pos.x == 0:
+            shared.chars[shared.cursor_pos.y - 1].extend(
+                shared.chars[shared.cursor_pos.y]
+            )
+            self.go_prev_line()
+
+            return
         shared.cursor_pos.x -= 1
+        self.get_line().pop(shared.cursor_pos.x)
         self.typing = True
+
+    def go_prev_line(self):
+        shared.chars.pop(shared.cursor_pos.y)
+        shared.cursor_pos.y -= 1
+        shared.cursor_pos.x = len(self.get_line())
 
     def delete_single_char(self):
         self.delete_chars()
         self.delete_timer.reset()
         self.delete_timer.time_to_pass = 0.5
+
+    def update(self):
+        self.handle_input()
+        self.blink_cursor()
+        self.gen_image()
 
     def draw(self):
         shared.screen.blit(self.image, (0, 0))

@@ -3,7 +3,6 @@ import math
 import time
 import typing as t
 from functools import lru_cache
-from typing import Any
 
 import pygame
 
@@ -49,10 +48,11 @@ class EventManager:
             if call is not None:
                 call(event)
 
+
 class KeyManager:
     def __init__(self, mapping: dict[PgKey, t.Callable]) -> None:
         self.mapping = mapping
-    
+
     def update(self, keys):
         for key, call in self.mapping.items():
             if keys[key]:
