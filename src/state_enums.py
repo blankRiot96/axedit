@@ -6,7 +6,6 @@ class State(Enum):
 
 
 class EditorState(StrEnum):
-    WRITE = auto()
+    INSERT = auto()
     SELECT = auto()
-    UI = auto()
     NORMAL = auto()
