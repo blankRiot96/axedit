@@ -11,6 +11,7 @@ class Core:
 
     def win_init(self):
         shared.screen = pygame.display.set_mode((1100, 650))
+        shared.srect = shared.screen.get_rect()
         self.clock = pygame.time.Clock()
 
     def update(self):

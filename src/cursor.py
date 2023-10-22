@@ -1,6 +1,7 @@
 import pygame
 
 from src import shared
+from src.state_enums import EditorState
 from src.utils import EventManager, Time
 
 
@@ -13,10 +14,7 @@ class Cursor:
     }
 
     def __init__(self) -> None:
-        self.width = shared.FONT.render("w", True, "white").get_width()
-        self.height = shared.FONT.get_height()
-        self.image = pygame.Surface((self.width, self.height))
-        self.image.fill("white")
+        self.gen_image()
         self.pos = pygame.Vector2()
         self.alpha = 255
         self.blink_speed = 350
@@ -24,9 +22,13 @@ class Cursor:
         self.event_manager = EventManager({pygame.KEYDOWN: self.handle_input})
         self.move_timer = Time(0.5)
 
+    def gen_image(self):
+        self.image = pygame.Surface((shared.FONT_WIDTH, shared.FONT_HEIGHT))
+        self.image.fill("white")
+
     def move(self):
-        self.pos.x = shared.cursor_pos.x * self.width
-        self.pos.y = shared.cursor_pos.y * self.height
+        self.pos.x = shared.cursor_pos.x * shared.FONT_WIDTH
+        self.pos.y = shared.cursor_pos.y * shared.FONT_HEIGHT
 
     def blink(self):
         delta_alpha = self.blink_speed * shared.dt
@@ -39,7 +41,7 @@ class Cursor:
 
         self.image.set_alpha(self.alpha)
 
-    def handle_input(self, event: pygame.Event):
+    def handle_arrows(self, event: pygame.Event):
         move = Cursor.KEYS.get(event.key)
         if move is None:
             return
@@ -56,10 +58,16 @@ class Cursor:
             diff = shared.cursor_pos.x - line_len
             shared.chars[shared.cursor_pos.y].extend([" "] * diff)
 
+    def handle_normals(self):
+        ...
+
+    def handle_input(self, event: pygame.Event):
+        self.handle_arrows(event)
+
     def update(self):
         self.move()
         self.blink()
         self.event_manager.update(shared.events)
 
-    def draw(self):
-        shared.screen.blit(self.image, self.pos)
+    def draw(self, editor_surf: pygame.Surface):
+        editor_surf.blit(self.image, self.pos)

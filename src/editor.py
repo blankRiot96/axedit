@@ -6,6 +6,7 @@ from src.utils import EventManager, InputManager, KeyManager, Time
 
 class Editor:
     def __init__(self) -> None:
+        self.surf = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
         self.gen_image()
         self.blink_timer = Time(0.5)
         self._typing = False
@@ -116,4 +117,5 @@ class Editor:
         self.gen_image()
 
     def draw(self):
-        shared.screen.blit(self.image, (0, 0))
+        self.surf.fill("black")
+        self.surf.blit(self.image, (0, 0))

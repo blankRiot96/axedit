@@ -23,13 +23,14 @@ PgKey: t.TypeAlias = int
 
 
 class InputManager:
-    def __init__(self, mapping: dict[PgKey, t.Callable]) -> None:
+    def __init__(self, mapping: dict[PgKey | list[PgKey], t.Callable]) -> None:
         self.mapping = mapping
 
     def update(self, events):
         for event in events:
             if event.type != pygame.KEYDOWN:
                 continue
+
             call = self.mapping.get(event.key)
             if call is not None:
                 call()
@@ -57,6 +58,41 @@ class KeyManager:
         for key, call in self.mapping.items():
             if keys[key]:
                 call()
+
+
+class AcceleratedKeyPress:
+    def __init__(
+        self,
+        key: PgKey,
+        callback: t.Callable,
+        timer_cd: float = 0.5,
+        timer_delta: float = 0.3,
+        timer_min: float = 0.02,
+    ) -> None:
+        self.key = key
+        self.callback = callback
+        self.timer = Time(timer_cd)
+        self.timer_cd = timer_cd
+        self.timer_delta = timer_delta
+        self.timer_min = timer_min
+
+        self.input_manager = InputManager({key: self.on_first_call})
+        self.key_manager = KeyManager({key: self.callback})
+
+    def on_first_call(self):
+        self.callback()
+        self.timer.reset()
+        self.timer.time_to_pass = self.timer_cd
+
+    def update(self, events: list[pygame.Event], keys: list[bool]):
+        self.input_manager.update(events)
+
+        if self.timer.tick():
+            self.key_manager.update(keys)
+            if self.timer.time_to_pass <= self.timer_min:
+                self.timer.time_to_pass = self.timer_min
+                return
+            self.timer.time_to_pass -= self.timer_delta
 
 
 class SinWave:

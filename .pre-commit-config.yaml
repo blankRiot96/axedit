@@ -8,4 +8,4 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
-        args: [--linelength, 88]
+        args: [--line-length, "88"]
