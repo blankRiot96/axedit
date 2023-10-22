@@ -17,7 +17,7 @@ class EditorState:
         self.status_bar = StatusBar()
         shared.cursor = Cursor()
 
-        self.offset = 2
+        self.offset = 4
 
     def offset_font_size(self, offset: int):
         shared.font_size += offset

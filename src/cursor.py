@@ -1,8 +1,10 @@
+from functools import partial
+
 import pygame
 
 from src import shared
 from src.state_enums import EditorState
-from src.utils import EventManager, Time
+from src.utils import AcceleratedKeyPress, Time
 
 
 class Cursor:
@@ -19,7 +21,10 @@ class Cursor:
         self.alpha = 255
         self.blink_speed = 350
         self.direction = -1
-        self.event_manager = EventManager({pygame.KEYDOWN: self.handle_input})
+        self.accels = [
+            AcceleratedKeyPress(key, partial(self.handle_input, key))
+            for key in self.KEYS
+        ]
         self.move_timer = Time(0.5)
 
     def gen_image(self):
@@ -41,8 +46,8 @@ class Cursor:
 
         self.image.set_alpha(self.alpha)
 
-    def handle_arrows(self, event: pygame.Event):
-        move = Cursor.KEYS.get(event.key)
+    def handle_arrows(self, key: int):
+        move = Cursor.KEYS.get(key)
         if move is None:
             return
 
@@ -61,13 +66,17 @@ class Cursor:
     def handle_normals(self):
         ...
 
-    def handle_input(self, event: pygame.Event):
-        self.handle_arrows(event)
+    def handle_input(self, key):
+        self.handle_arrows(key)
+
+    def update_accels(self):
+        for accel in self.accels:
+            accel.update(shared.events, shared.keys)
 
     def update(self):
         self.move()
         self.blink()
-        self.event_manager.update(shared.events)
+        self.update_accels()
 
     def draw(self, editor_surf: pygame.Surface):
         editor_surf.blit(self.image, self.pos)

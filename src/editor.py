@@ -1,7 +1,7 @@
 import pygame
 
 from src import shared
-from src.utils import EventManager, InputManager, KeyManager, Time
+from src.utils import AcceleratedKeyPress, EventManager, InputManager, Time
 
 
 class Editor:
@@ -12,14 +12,14 @@ class Editor:
         self._typing = False
         self.input_manager = InputManager(
             {
-                pygame.K_RETURN: self.new_line,
-                pygame.K_BACKSPACE: self.delete_single_char,
                 pygame.K_TAB: lambda: self.write_char(" " * 4),
             }
         )
         self.event_manager = EventManager({pygame.TEXTINPUT: self.on_write_char})
-        self.key_manager = KeyManager({pygame.K_BACKSPACE: self.delete_chars})
-        self.delete_timer = Time(0.5)
+        self.accelerated_backspace = AcceleratedKeyPress(
+            pygame.K_BACKSPACE, self.delete_chars
+        )
+        self.accelerated_new_line = AcceleratedKeyPress(pygame.K_RETURN, self.new_line)
 
     def gen_image(self):
         text = self.get_text()
@@ -52,13 +52,8 @@ class Editor:
     def handle_input(self):
         self.input_manager.update(shared.events)
         self.event_manager.update(shared.events)
-
-        if self.delete_timer.tick():
-            self.key_manager.update(shared.keys)
-            if self.delete_timer.time_to_pass <= 0.02:
-                self.delete_timer.time_to_pass = 0.02
-                return
-            self.delete_timer.time_to_pass -= 0.3
+        self.accelerated_backspace.update(shared.events, shared.keys)
+        self.accelerated_new_line.update(shared.events, shared.keys)
 
     def on_write_char(self, event):
         self.write_char(event.text)
@@ -105,11 +100,6 @@ class Editor:
         shared.chars.pop(shared.cursor_pos.y)
         shared.cursor_pos.y -= 1
         shared.cursor_pos.x = len(self.get_line())
-
-    def delete_single_char(self):
-        self.delete_chars()
-        self.delete_timer.reset()
-        self.delete_timer.time_to_pass = 0.5
 
     def update(self):
         self.handle_input()
