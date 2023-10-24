@@ -115,7 +115,7 @@ class NormalMode:
                 pygame.K_q: self.on_q,
                 pygame.K_w: self.on_w,
                 pygame.K_e: self.on_e,
-                pygame.K_s: self.on_s,
+                # pygame.K_s: self.on_s,
                 pygame.K_f: self.on_f,
             }
         )
