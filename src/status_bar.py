@@ -11,13 +11,12 @@ class StatusBar:
     """
 
     def __init__(self) -> None:
-        self.file_name = None
         self.status_str = "FILE: {file_name} | MODE: {mode} | LOC: {loc}"
         self.gen_surf()
 
     def gen_surf(self):
         out_str = self.status_str.format(
-            file_name=self.file_name,
+            file_name=shared.file_name,
             mode=shared.mode.name,
             loc=f"{shared.cursor_pos.x}, {shared.cursor_pos.y}",
         )

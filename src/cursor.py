@@ -3,7 +3,7 @@ from functools import partial
 import pygame
 
 from src import shared
-from src.state_enums import EditorState
+from src.state_enums import FileState
 from src.utils import AcceleratedKeyPress, Time
 
 
@@ -13,6 +13,12 @@ class Cursor:
         pygame.K_RIGHT: (1, 0),
         pygame.K_UP: (0, -1),
         pygame.K_DOWN: (0, 1),
+    }
+    NORMAL_KEYS = {
+        pygame.K_j: (-1, 0),
+        pygame.K_l: (1, 0),
+        pygame.K_i: (0, -1),
+        pygame.K_k: (0, 1),
     }
 
     def __init__(self) -> None:
@@ -24,6 +30,10 @@ class Cursor:
         self.accels = [
             AcceleratedKeyPress(key, partial(self.handle_input, key))
             for key in self.KEYS
+        ]
+        self.normal_accels = [
+            AcceleratedKeyPress(key, partial(self.handle_input, key))
+            for key in self.NORMAL_KEYS
         ]
         self.move_timer = Time(0.5)
 
@@ -46,11 +56,7 @@ class Cursor:
 
         self.image.set_alpha(self.alpha)
 
-    def handle_arrows(self, key: int):
-        move = Cursor.KEYS.get(key)
-        if move is None:
-            return
-
+    def handle_cursor_delta(self, move: tuple):
         if shared.cursor_pos.x + move[0] >= 0:
             shared.cursor_pos.x += move[0]
 
@@ -63,14 +69,68 @@ class Cursor:
             diff = shared.cursor_pos.x - line_len
             shared.chars[shared.cursor_pos.y].extend([" "] * diff)
 
-    def handle_normals(self):
-        ...
+    def handle_arrows(self, key: int):
+        move = Cursor.KEYS.get(key)
+        if move is None:
+            return
+
+        self.handle_cursor_delta(move)
+
+    def purifier(self, line):
+        # out = ""
+        # for char in line:
+        #     if not char.isalnum():
+        #         char = " "
+        #     out += char
+        # out = out.strip()
+        # return out
+        return line.strip()
+
+    def get_cursor_shift(self, remaining_line: list):
+        cursor_shift = 0
+        remaining_line = "".join(remaining_line)
+        purified = self.purifier(remaining_line)
+        for char in purified:
+            if char in (" ", ".", ":"):
+                break
+
+            cursor_shift += 1
+
+        cursor_shift += len(remaining_line) - len(purified)
+        print(cursor_shift)
+        return cursor_shift
+
+    def handle_normals(self, key: int):
+        move = Cursor.NORMAL_KEYS.get(key)
+        if move is None:
+            return
+
+        if shared.keys[pygame.K_LSHIFT]:
+            line = shared.chars[shared.cursor_pos.y]
+            if move[0] > 0:
+                remaining = line[shared.cursor_pos.x :]
+            else:
+                remaining = line[: shared.cursor_pos.x]
+            cursor_shift = self.get_cursor_shift(remaining)
+            move = (move[0] * cursor_shift, move[1])
+
+        self.handle_cursor_delta(move)
 
     def handle_input(self, key):
         self.handle_arrows(key)
 
+        if shared.mode == FileState.NORMAL:
+            for _ in range(shared.registered_number):
+                self.handle_normals(key)
+
     def update_accels(self):
         for accel in self.accels:
+            accel.update(shared.events, shared.keys)
+
+        if shared.mode != FileState.NORMAL:
+            return
+
+        for accel in self.normal_accels:
             accel.update(shared.events, shared.keys)
 
     def update(self):

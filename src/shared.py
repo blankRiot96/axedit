@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pygame
 
-from src.state_enums import EditorState
+from src.state_enums import FileState
 
 pygame.font.init()
 
@@ -29,4 +29,6 @@ events: list[pygame.event.Event]
 keys: list[bool]
 dt: float
 cursor: object
-mode: EditorState = EditorState.NORMAL
+mode: FileState = FileState.NORMAL
+file_name: str | None = None
+registered_number: int = 1

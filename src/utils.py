@@ -7,6 +7,17 @@ from functools import lru_cache
 import pygame
 
 
+class Empty:
+    def update(self):
+        ...
+
+    def draw(self):
+        ...
+
+
+empty = Empty()
+
+
 class Projectile:
     def __init__(self, radians: float, speed: float) -> None:
         self.radians = radians
@@ -68,6 +79,7 @@ class AcceleratedKeyPress:
         timer_cd: float = 0.5,
         timer_delta: float = 0.3,
         timer_min: float = 0.02,
+        base_keys: list[PgKey] | None = None,
     ) -> None:
         self.key = key
         self.callback = callback
@@ -79,20 +91,36 @@ class AcceleratedKeyPress:
         self.input_manager = InputManager({key: self.on_first_call})
         self.key_manager = KeyManager({key: self.callback})
 
+        self.base_keys = base_keys
+
     def on_first_call(self):
         self.callback()
         self.timer.reset()
         self.timer.time_to_pass = self.timer_cd
 
-    def update(self, events: list[pygame.Event], keys: list[bool]):
-        self.input_manager.update(events)
-
+    def handle_timer(self, keys):
         if self.timer.tick():
             self.key_manager.update(keys)
             if self.timer.time_to_pass <= self.timer_min:
                 self.timer.time_to_pass = self.timer_min
                 return
             self.timer.time_to_pass -= self.timer_delta
+
+    def get_base_key_status(self, keys: list[bool]) -> bool:
+        if self.base_keys is None:
+            return True
+
+        for key in self.base_keys:
+            if not keys[key]:
+                return False
+
+        return True
+
+    def update(self, events: list[pygame.Event], keys: list[bool]):
+        if not self.get_base_key_status(keys):
+            return
+        self.input_manager.update(events)
+        self.handle_timer(keys)
 
 
 class SinWave:

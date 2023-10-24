@@ -5,7 +5,7 @@ class State(Enum):
     EDITOR = auto()
 
 
-class EditorState(StrEnum):
-    INSERT = auto()
+class FileState(StrEnum):
+    WRITE = auto()
     SELECT = auto()
     NORMAL = auto()
