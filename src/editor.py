@@ -4,16 +4,11 @@ from itertools import cycle
 import pygame
 
 from src import shared
+from src.autocompletions import AutoCompletions
+from src.funcs import get_text, save_file
 from src.state_enums import FileState
 from src.syntax_highlighting import apply_syntax_highlighting
 from src.utils import AcceleratedKeyPress, EventManager, InputManager, Time
-
-
-def get_text():
-    text = ""
-    for row in shared.chars:
-        text += "".join(row) + "\n"
-    return text
 
 
 class WriteMode:
@@ -174,15 +169,11 @@ class NormalMode:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     shared.file_name = shared.file_name[:-1]
-                    self.save_file()
+                    save_file()
                     self.naming_file = False
                 elif event.key == pygame.K_BACKSPACE:
                     shared.file_name = shared.file_name[:-2]
                     shared.file_name += self.mini_cur
-
-    def save_file(self):
-        with open(shared.file_name, "w") as f:
-            f.write(get_text())
 
     def handle_input(self):
         self.name_file()
@@ -203,9 +194,16 @@ class Editor:
             FileState.NORMAL: NormalMode().handle_input,
             FileState.SELECT: self.handle_select_input,
         }
+        self.autocompletion = AutoCompletions()
 
     def gen_image(self):
-        self.image = apply_syntax_highlighting()
+        if shared.file_name is not None and shared.file_name.endswith(".py"):
+            self.image = apply_syntax_highlighting()
+        else:
+            text = get_text()
+            if text.strip() == "":
+                text = ""
+            self.image = shared.FONT.render(text, True, "white")
 
     def handle_select_input(self):
         ...
@@ -215,9 +213,11 @@ class Editor:
         input_handler()
 
     def update(self):
+        self.autocompletion.update()
         self.handle_input()
         self.gen_image()
 
     def draw(self):
         self.surf.fill("black")
         self.surf.blit(self.image, (0, 0))
+        self.autocompletion.draw(self.surf)
