@@ -1,4 +1,5 @@
 # VSCode
+pylspconfig.yaml
 .vscode/
 test.py
 
