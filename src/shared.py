@@ -32,3 +32,5 @@ cursor: object
 mode: FileState = FileState.NORMAL
 file_name: str | None = None
 registered_number: int = 1
+autocompleting = False
+text_writing = False

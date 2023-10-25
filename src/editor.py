@@ -53,9 +53,13 @@ class WriteMode:
         for char in text:
             self.get_line().insert(shared.cursor_pos.x, char)
             shared.cursor_pos.x += 1
-            self.typing = True
+        self.typing = True
+        shared.text_writing = True
 
     def new_line(self):
+        if shared.autocompleting:
+            return
+
         line = self.get_line()
         pre = line[: shared.cursor_pos.x]
         shared.chars[shared.cursor_pos.y] = pre
@@ -96,6 +100,7 @@ class WriteMode:
         shared.cursor_pos.x = len(self.get_line())
 
     def handle_input(self):
+        shared.text_writing = False
         self.input_manager.update(shared.events)
         self.event_manager.update(shared.events)
         self.accelerated_backspace.update(shared.events, shared.keys)
@@ -213,8 +218,8 @@ class Editor:
         input_handler()
 
     def update(self):
-        self.autocompletion.update()
         self.handle_input()
+        self.autocompletion.update()
         self.gen_image()
 
     def draw(self):
