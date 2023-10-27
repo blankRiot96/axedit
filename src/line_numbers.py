@@ -14,7 +14,7 @@ class LineNumbers:
 
     def draw(self):
         self.surf = pygame.Surface(
-            (shared.FONT_WIDTH * 3, shared.srect.height), pygame.SRCALPHA
+            (shared.FONT_WIDTH * 5, shared.srect.height), pygame.SRCALPHA
         )
         for i in range(len(shared.chars)):
             text = shared.FONT.render(str(i + 1), True, "white")

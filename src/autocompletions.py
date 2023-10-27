@@ -8,11 +8,13 @@ from src.funcs import get_text
 from src.utils import InputManager
 
 _POSSIBLE_COMPLETIONS = {
-    "module": "blue",
-    "class": "yellow",
-    "param": "cyan",
-    "function": "seagreen",
-    "statement": "green",
+    "module": ("󰅩", "purple"),
+    "class": ("", "yellow"),
+    "param": ("󰭅", "cyan"),
+    "function": ("", "seagreen"),
+    "statement": ("", "green"),
+    "keyword": ("", "magenta"),
+    "instance": ("", "aquamarine"),
 }
 
 
@@ -30,11 +32,13 @@ class AutoCompletions:
         self.suggestions = []
         self.selected_suggestion_index = 0
         self.pos_at_autocompleting = 0
-        self.once = True
         self.shared_suggestion_length = 0
         self.input_manager = InputManager({pygame.K_RETURN: self.on_completion})
 
     def on_completion(self):
+        if not self.suggestions:
+            self.after_autocompletion()
+            return
         line = shared.chars[shared.cursor_pos.y]
         shared.chars[shared.cursor_pos.y] = line[: self.pos_at_autocompleting] + list(
             self.suggestions[self.selected_suggestion_index].name
@@ -55,7 +59,7 @@ class AutoCompletions:
         if nums:
             word_index = min(nums) + 1
         else:
-            word_index = 1
+            word_index = 0
         top_suggestion = self.suggestions[0].name
 
         max_index = word_index + len(top_suggestion)
@@ -73,51 +77,79 @@ class AutoCompletions:
     def at_autocompletion(self):
         self.pos_at_autocompleting = shared.cursor_pos.x - self.shared_suggestion_length
         shared.autocompleting = True
-        self.once = False
 
     def after_autocompletion(self):
         shared.autocompleting = False
-        self.once = True
+        self.suggestions = []
+
+    def is_typing_variable(self):
+        for event in shared.events:
+            if event.type == pygame.TEXTINPUT:
+                if event.text.isalpha() or event.text in "._":
+                    return True
+
+        return False
+
+    def is_python_file(self):
+        return shared.file_name is not None and shared.file_name.endswith(".py")
+
+    def is_typing_breaker(self):
+        for event in shared.events:
+            if event.type == pygame.TEXTINPUT:
+                if not event.text.isalpha() and event.text not in "._":
+                    return True
+
+        return False
 
     def update(self):
-        # TODO: Fix autocomplete conditions
-        if (
-            shared.file_name is None
-            or not shared.file_name.endswith(".py")
-            or shared.cursor_pos.x == 0
-            or shared.chars[shared.cursor_pos.y][shared.cursor_pos.x - 1]
-            not in ascii_letters + "."
-            and not shared.autocompleting
-            and not shared.text_writing
-        ):
-            self.suggestions = []
+        if self.is_typing_variable() and self.is_python_file():
+            self.gen_suggestions()
+            self.at_autocompletion()
+
+        if self.is_typing_breaker():
+            self.after_autocompletion()
             return
 
-        self.gen_suggestions()
-        if self.once:
-            self.at_autocompletion()
         self.input_manager.update(shared.events)
+
+    def get_icon_surf(self, suggestion) -> pygame.Surface:
+        icon, color = _POSSIBLE_COMPLETIONS.get(suggestion.type, ("", "green"))
+        icon += " "
+        icon_surf = shared.FONT.render(icon, True, color)
+        return icon_surf
+
+    def render_selected_suggestion(self, suggestion, index):
+        surf_1 = shared.FONT.render(
+            suggestion.name[: self.shared_suggestion_length], True, "white"
+        )
+        surf_2 = shared.FONT.render(
+            suggestion.name[self.shared_suggestion_length :], True, "grey"
+        )
+        icon_surf = self.get_icon_surf(suggestion)
+
+        self.image.blit(icon_surf, (0, index * shared.FONT_HEIGHT))
+        self.image.blit(surf_1, (icon_surf.get_width(), index * shared.FONT_HEIGHT))
+        self.image.blit(
+            surf_2,
+            (icon_surf.get_width() + surf_1.get_width(), index * shared.FONT_HEIGHT),
+        )
+
+    def render_generic_suggestion(self, suggestion, index):
+        surf = shared.FONT.render(suggestion.name, True, "grey")
+        icon_surf = self.get_icon_surf(suggestion)
+        self.image.blit(icon_surf, (0, index * shared.FONT_HEIGHT))
+        self.image.blit(surf, (icon_surf.get_width(), index * shared.FONT_HEIGHT))
 
     def blit_surf_by_relevance(self, suggestion, index) -> pygame.Surface:
         if index == self.selected_suggestion_index:
-            surf_1 = shared.FONT.render(
-                suggestion.name[: self.shared_suggestion_length], True, "white"
-            )
-            surf_2 = shared.FONT.render(
-                suggestion.name[self.shared_suggestion_length :], True, "grey"
-            )
-
-            self.image.blit(surf_1, (0, index * shared.FONT_HEIGHT))
-            self.image.blit(surf_2, (surf_1.get_width(), index * shared.FONT_HEIGHT))
+            self.render_selected_suggestion(suggestion, index)
         else:
-            surf = shared.FONT.render(suggestion.name, True, "grey")
-            self.image.blit(surf, (0, index * shared.FONT_HEIGHT))
+            self.render_generic_suggestion(suggestion, index)
 
     def render_suggestions(self):
         SUGGESTION_BOX_WIDTH = (
-            max(len(suggestion.name) for suggestion in self.suggestions)
-            * shared.FONT_WIDTH
-        )
+            max(len(suggestion.name) for suggestion in self.suggestions) + 2
+        ) * shared.FONT_WIDTH
         SUGGESTION_BOX_HEIGHT = len(self.suggestions) * shared.FONT_HEIGHT
 
         self.image = pygame.Surface((SUGGESTION_BOX_WIDTH, SUGGESTION_BOX_HEIGHT))

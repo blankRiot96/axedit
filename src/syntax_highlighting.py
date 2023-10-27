@@ -51,7 +51,7 @@ def apply_precedence(word: str) -> Color:
     return final_color
 
 
-def index_colors(row: list[str]) -> dict[t.Generator, Color]:
+def index_colors(row: str) -> dict[t.Generator, Color]:
     color_ranges = {}
 
     final_index = len(row) - 1
@@ -67,7 +67,7 @@ def index_colors(row: list[str]) -> dict[t.Generator, Color]:
             continue
 
         if char in "\"'":
-            string_pos = "".join(row).find(char, current_index + 1)
+            string_pos = row.find(char, current_index + 1)
             if string_pos < 0:
                 string_pos = int(10e6)
             r = range(
@@ -99,7 +99,7 @@ def index_colors(row: list[str]) -> dict[t.Generator, Color]:
     return color_ranges
 
 
-def line_wise_stitching(row: list[str], color_ranges: dict) -> pygame.Surface:
+def line_wise_stitching(row: str, color_ranges: dict) -> pygame.Surface:
     image = pygame.Surface((shared.srect.width, shared.FONT_HEIGHT))
     for x, char in enumerate(row):
         color = "white"
@@ -113,9 +113,34 @@ def line_wise_stitching(row: list[str], color_ranges: dict) -> pygame.Surface:
     return image
 
 
-def apply_syntax_highlighting() -> pygame.Surface:
+def is_necessary_to_render(y: int, line: str) -> bool:
+    if y == shared.cursor_pos.y:
+        return True
+    stripped = line.strip()
+    required_rerenders = ("def", "class", "import")
+    for render in required_rerenders:
+        if stripped.startswith(render):
+            return True
+
+    return False
+
+
+def apply_syntax_highlighting(
+    pre_rendered_lines: dict[str, pygame.Surface]
+) -> pygame.Surface:
+    _MODULES.clear()
+    _CLASSES.clear()
+    _METHODS.clear()
+
+    # TODO: Test this
     image = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
-    for y, row in enumerate(shared.chars):
+    for y, item in enumerate(zip(shared.chars, pre_rendered_lines)):
+        row, surf = item
+        row = "".join(row)
+        if not is_necessary_to_render(y, row) and surf is not None:
+            print(row)
+            image.blit(surf, (0, y * shared.FONT_HEIGHT))
+            continue
         color_ranges = index_colors(row)
         row_image = line_wise_stitching(row, color_ranges)
 

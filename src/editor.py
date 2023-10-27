@@ -12,6 +12,12 @@ from src.utils import AcceleratedKeyPress, EventManager, InputManager, Time
 
 
 class WriteMode:
+    BRACKET_MATCHERS = {
+        "(": ")",
+        "[": "]",
+        "{": "}",
+    }
+
     def __init__(self) -> None:
         self.input_manager = InputManager(
             {
@@ -53,6 +59,10 @@ class WriteMode:
         for char in text:
             self.get_line().insert(shared.cursor_pos.x, char)
             shared.cursor_pos.x += 1
+
+        closing_bracket = WriteMode.BRACKET_MATCHERS.get(text)
+        if closing_bracket is not None:
+            self.get_line().insert(shared.cursor_pos.x, closing_bracket)
         self.typing = True
         shared.text_writing = True
 
@@ -74,6 +84,16 @@ class WriteMode:
         return shared.chars[shared.cursor_pos.y]
 
     def delete_chars(self):
+        if shared.cursor_pos.x == 0:
+            if shared.cursor_pos.y == 0:
+                return
+            shared.chars[shared.cursor_pos.y - 1].extend(
+                shared.chars[shared.cursor_pos.y]
+            )
+            self.go_prev_line()
+
+            return
+
         line = "".join(self.get_line())
         if not line.strip():
             shared.chars[shared.cursor_pos.y] = []
@@ -83,13 +103,6 @@ class WriteMode:
             self.go_prev_line()
             return
 
-        if shared.cursor_pos.x == 0:
-            shared.chars[shared.cursor_pos.y - 1].extend(
-                shared.chars[shared.cursor_pos.y]
-            )
-            self.go_prev_line()
-
-            return
         shared.cursor_pos.x -= 1
         self.get_line().pop(shared.cursor_pos.x)
         self.typing = True
@@ -200,10 +213,11 @@ class Editor:
             FileState.SELECT: self.handle_select_input,
         }
         self.autocompletion = AutoCompletions()
+        self.pre_rendered_lines: list[pygame.Surface] = [None for _ in shared.chars]
 
     def gen_image(self):
         if shared.file_name is not None and shared.file_name.endswith(".py"):
-            self.image = apply_syntax_highlighting()
+            self.image = apply_syntax_highlighting(self.pre_rendered_lines)
         else:
             text = get_text()
             if text.strip() == "":
@@ -217,7 +231,17 @@ class Editor:
         input_handler = self.input_handlers[shared.mode]
         input_handler()
 
+    def pre_render_lines(self):
+        surfs = self.pre_rendered_lines.copy()
+        self.pre_rendered_lines = []
+        for y in range(len(shared.chars)):
+            if y < len(surfs) and surfs[y] is not None:
+                self.pre_rendered_lines.append(surfs[y])
+                continue
+            self.pre_rendered_lines.append(None)
+
     def update(self):
+        self.pre_render_lines()
         self.handle_input()
         self.autocompletion.update()
         self.gen_image()
