@@ -1,18 +1,31 @@
 import pygame
+from pygame._sdl2 import Window
 
 from src import shared
+from src.funcs import open_file
 from src.states import StateManager
+from src.wallpapers import get_windows_wallpaper
 
 
 class Core:
     def __init__(self) -> None:
+        open_file("src/syntax_highlighting.py")
         self.win_init()
         self.state_manager = StateManager()
+        self.create_blur()
 
     def win_init(self):
         shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE)
         shared.srect = shared.screen.get_rect()
         self.clock = pygame.time.Clock()
+
+        window = Window.from_display_module()
+        window.opacity = 0.9
+
+    def create_blur(self):
+        return
+        self.blur_effect = pygame.image.load(get_windows_wallpaper()).convert()
+        self.blur_effect = pygame.transform.gaussian_blur(self.blur_effect, 10)
 
     def update(self):
         shared.events = pygame.event.get()
@@ -24,11 +37,13 @@ class Core:
                 exit()
             elif event.type == pygame.VIDEORESIZE:
                 shared.srect = shared.screen.get_rect()
+                self.create_blur()
 
         self.state_manager.update()
 
     def draw(self):
         shared.screen.fill("black")
+        # shared.screen.blit(self.blur_effect, (0, 0))
         self.state_manager.draw()
         pygame.display.update()
 

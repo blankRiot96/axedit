@@ -1,6 +1,14 @@
 from src import shared
 
 
+def open_file(file: str) -> None:
+    with open(file) as f:
+        content = f.readlines()
+
+    shared.file_name = file
+    shared.chars = [list(line) for line in content]
+
+
 def get_text():
     text = ""
     for row in shared.chars:

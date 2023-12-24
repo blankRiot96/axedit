@@ -3,6 +3,7 @@ import typing as t
 import pygame
 
 from src.editorstate import EditorState
+from src.file_select_state import FileSelectState
 from src.state_enums import State
 
 
@@ -18,7 +19,10 @@ class StateLike(t.Protocol):
 
 class StateManager:
     def __init__(self) -> None:
-        self.state_dict: dict[State, StateLike] = {State.EDITOR: EditorState}
+        self.state_dict: dict[State, StateLike] = {
+            State.EDITOR: EditorState,
+            State.FILE_SELECT: FileSelectState,
+        }
         # self.songs = {
         #     State.MENU: "assets/audio/main-menu-bgm.wav",
         #     State.TUTORIAL: "assets/audio/game-bgm.wav",

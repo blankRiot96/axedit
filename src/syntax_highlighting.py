@@ -25,13 +25,12 @@ _PRECENDENCE = {
     "orange": _SINGLETONS,
 }
 
-
 Color: t.TypeAlias = str
 
 
 def add_context(word: str, prev_word: str) -> Color:
     if prev_word == "import":
-        _MODULES.append(word)
+        _MODULES.append(word.strip())
     elif prev_word == "def":
         _METHODS.append(word)
     elif prev_word == "class":
@@ -133,17 +132,17 @@ def apply_syntax_highlighting(
     _METHODS.clear()
 
     # TODO: Test this
-    image = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
+    image = pygame.Surface(
+        (shared.srect.width, len(shared.chars) * shared.FONT_HEIGHT), pygame.SRCALPHA
+    )
     for y, item in enumerate(zip(shared.chars, pre_rendered_lines)):
         row, surf = item
         row = "".join(row)
         if not is_necessary_to_render(y, row) and surf is not None:
-            print(row)
             image.blit(surf, (0, y * shared.FONT_HEIGHT))
             continue
         color_ranges = index_colors(row)
         row_image = line_wise_stitching(row, color_ranges)
-
         image.blit(row_image, (0, y * shared.FONT_HEIGHT))
 
     return image

@@ -4,7 +4,7 @@ from src import shared
 from src.cursor import Cursor
 from src.editor import Editor
 from src.line_numbers import LineNumbers
-from src.state_enums import State
+from src.state_enums import FileState, State
 from src.status_bar import StatusBar
 from src.utils import render_at
 
@@ -18,6 +18,13 @@ class EditorState:
         shared.cursor = Cursor()
 
         self.offset = 4
+
+    def on_o(self):
+        if shared.mode != FileState.NORMAL:
+            return
+        for event in shared.events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_o:
+                self.next_state = State.FILE_SELECT
 
     def offset_font_size(self, offset: int):
         shared.font_size += offset
@@ -38,6 +45,9 @@ class EditorState:
                     self.offset_font_size(-self.offset)
 
     def update(self):
+        self.on_o()
+        if self.next_state is not None:
+            return
         self.handle_font_offset()
         self.editor.update()
         self.line_numbers.update()
@@ -49,13 +59,17 @@ class EditorState:
         editor_width, editor_height = self.editor.surf.get_size()
         status_width, status_height = self.status_bar.surf.get_size()
 
-        render_at(shared.screen, self.line_numbers.surf, "topleft")
-        render_at(shared.screen, self.editor.surf, "topleft", (line_width, 0))
+        render_at(shared.screen, self.line_numbers.surf, "topleft", self.editor.offset)
+        render_at(
+            shared.screen,
+            self.editor.surf,
+            "topleft",
+            (line_width, 0) + self.editor.offset,
+        )
         render_at(
             shared.screen,
             self.status_bar.surf,
             "bottomleft",
-            (shared.FONT_WIDTH, -shared.FONT_WIDTH),
         )
 
     def draw(self):

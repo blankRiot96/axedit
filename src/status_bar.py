@@ -1,6 +1,7 @@
 import pygame
 
 from src import shared
+from src.utils import render_at
 
 
 class StatusBar:
@@ -20,7 +21,13 @@ class StatusBar:
             mode=shared.mode.name,
             loc=f"{shared.cursor_pos.x}, {shared.cursor_pos.y}",
         )
-        self.surf = shared.FONT.render(out_str, True, "white")
+        self.surf = pygame.Surface(
+            (shared.srect.width, shared.FONT_HEIGHT + shared.FONT_WIDTH)
+        )
+        self.surf.fill((48, 25, 52))
+        render_at(
+            self.surf, shared.FONT.render(out_str, True, "white"), "midleft", (5, 0)
+        )
 
     def update(self):
         ...

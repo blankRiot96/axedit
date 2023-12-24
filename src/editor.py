@@ -153,6 +153,7 @@ class NormalMode:
             self.registering_number = False
 
     def on_f(self):
+        return
         if shared.file_name is not None:
             os.remove(shared.file_name)
         shared.file_name = self.mini_cur
@@ -204,8 +205,13 @@ class NormalMode:
 
 class Editor:
     def __init__(self) -> None:
-        self.surf = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
+        self.surf = pygame.Surface(
+            (shared.srect.width, len(shared.chars) * shared.FONT_HEIGHT),
+            pygame.SRCALPHA,
+        )
+        self.pre_rendered_lines: list[pygame.Surface] = [None for _ in shared.chars]
         self.gen_image()
+        self.offset = pygame.Vector2()
 
         self.input_handlers = {
             FileState.WRITE: WriteMode().handle_input,
@@ -213,7 +219,12 @@ class Editor:
             FileState.SELECT: self.handle_select_input,
         }
         self.autocompletion = AutoCompletions()
-        self.pre_rendered_lines: list[pygame.Surface] = [None for _ in shared.chars]
+
+    def on_scroll(self):
+        for event in shared.events:
+            if event.type == pygame.MOUSEWHEEL:
+                self.offset.y += event.y * 30
+                self.offset.y = min(self.offset.y, 0)
 
     def gen_image(self):
         if shared.file_name is not None and shared.file_name.endswith(".py"):
@@ -245,8 +256,12 @@ class Editor:
         self.handle_input()
         self.autocompletion.update()
         self.gen_image()
+        self.on_scroll()
 
     def draw(self):
-        self.surf.fill("black")
+        self.surf = pygame.Surface(
+            (shared.srect.width, len(shared.chars) * shared.FONT_HEIGHT),
+            pygame.SRCALPHA,
+        )
         self.surf.blit(self.image, (0, 0))
         self.autocompletion.draw(self.surf)
