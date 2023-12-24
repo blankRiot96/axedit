@@ -26,6 +26,16 @@ class EditorState:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_o:
                 self.next_state = State.FILE_SELECT
 
+    def on_n(self):
+        if shared.mode != FileState.NORMAL:
+            return
+
+        for event in shared.events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
+                shared.file_name = None
+                shared.chars = [[""]]
+                self.next_state = State.EDITOR
+
     def offset_font_size(self, offset: int):
         shared.font_size += offset
         shared.FONT = pygame.font.Font(shared.FONT_PATH, shared.font_size)
@@ -46,6 +56,7 @@ class EditorState:
 
     def update(self):
         self.on_o()
+        self.on_n()
         if self.next_state is not None:
             return
         self.handle_font_offset()

@@ -2,14 +2,12 @@ import pygame
 from pygame._sdl2 import Window
 
 from src import shared
-from src.funcs import open_file
 from src.states import StateManager
 from src.wallpapers import get_windows_wallpaper
 
 
 class Core:
     def __init__(self) -> None:
-        open_file("src/syntax_highlighting.py")
         self.win_init()
         self.state_manager = StateManager()
         self.create_blur()
@@ -40,6 +38,7 @@ class Core:
                 self.create_blur()
 
         self.state_manager.update()
+        # pygame.display.set_caption(f"{self.clock.get_fps()}")
 
     def draw(self):
         shared.screen.fill("black")

@@ -72,6 +72,7 @@ class AutoCompletions:
     def gen_suggestions(self):
         script = jedi.Script(code=get_text())
         self.suggestions = script.complete(shared.cursor_pos.y + 1, shared.cursor_pos.x)
+
         self.calc_shared_suggestion_length()
 
     def at_autocompletion(self):

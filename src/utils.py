@@ -252,6 +252,31 @@ def circle_surf(radius: float, color) -> pygame.Surface:
     return surf
 
 
+def highlight_text(
+    font: pygame.font.Font,
+    text: str,
+    antialias: bool,
+    color: str,
+    indeces: list[int],
+    highlight_color: str,
+) -> pygame.Surface:
+    size = font.render(text, antialias, "white").get_size()
+    surf = pygame.Surface(size, pygame.SRCALPHA)
+
+    acc_width = 0
+    for index, char in enumerate(text):
+        if index in indeces:
+            col = highlight_color
+        else:
+            col = color
+
+        char_surf = font.render(char, True, col)
+        surf.blit(char_surf, (acc_width, 0))
+        acc_width += char_surf.get_width()
+
+    return surf
+
+
 def get_images(
     sheet: pygame.Surface,
     size: tuple[int],

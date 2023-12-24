@@ -143,6 +143,7 @@ def apply_syntax_highlighting(
             continue
         color_ranges = index_colors(row)
         row_image = line_wise_stitching(row, color_ranges)
+        pre_rendered_lines[y] = row_image
         image.blit(row_image, (0, y * shared.FONT_HEIGHT))
 
     return image

@@ -1,3 +1,5 @@
+import itertools
+from dataclasses import dataclass
 from pathlib import Path
 
 import pygame
@@ -5,13 +7,13 @@ import pygame
 from src import shared
 from src.funcs import open_file
 from src.state_enums import State
-from src.utils import render_at
+from src.utils import AcceleratedKeyPress, Time, highlight_text, render_at
 
 
 class Preview:
     def __init__(self) -> None:
         self.gen_blank()
-        self.last_selected_index = 0
+        self.last_selected_file = 0
         self.padding = 5
 
     def gen_blank(self):
@@ -21,6 +23,13 @@ class Preview:
     def draw_line(self):
         pygame.draw.line(self.surf, "white", (0, 0), (0, self.surf.get_height()), 2)
 
+    def get_lines(self, file: str | Path) -> list[str]:
+        try:
+            with open(file) as f:
+                return f.readlines()
+        except UnicodeDecodeError:
+            return ["THIS FILE FORMAT IS NOT SUPPORTED BY THE EDITOR"]
+
     def regen_image(self):
         n_lines = shared.srect.height // shared.FONT_HEIGHT
         file = UI.file_tree.preview_files[UI.file_tree.selected_index]
@@ -28,8 +37,8 @@ class Preview:
         if file.is_dir():
             self.gen_blank()
             return
-        with open(file) as f:
-            lines = f.readlines()
+
+        lines = self.get_lines(file)
 
         self.surf.fill("black")
         for y, line in enumerate(lines[:n_lines]):
@@ -41,36 +50,78 @@ class Preview:
         self.draw_line()
 
     def update(self):
-        if UI.file_tree.selected_index != self.last_selected_index:
+        file = UI.file_tree.preview_files[UI.file_tree.selected_index]
+
+        if file != self.last_selected_file:
             self.regen_image()
 
-        self.last_selected_index = UI.file_tree.selected_index
+        self.last_selected_file = file
 
     def draw(self):
         ...
 
 
 class SearchBar:
+    BAR = "|"
+
     def __init__(self) -> None:
         self.surf = pygame.Surface((shared.srect.width, shared.FONT_HEIGHT))
         self.icon_surf = shared.FONT.render("", True, "white")
         self.search_surf = shared.FONT.render("Search...", True, "grey")
         self.text = ""
+        self.cursors = itertools.cycle(("", SearchBar.BAR))
+        self.cursor = next(self.cursors)
+        self.blink_timer = Time(0.7)
+
+        self.accel = AcceleratedKeyPress(pygame.K_BACKSPACE, self.on_delete)
+
+    def on_delete(self):
+        self.text = self.text[:-1]
+        self.blink_timer.reset()
+        self.cursor = SearchBar.BAR
+
+        if self.text:
+            UI.file_tree.filter_preview_files()
+        else:
+            UI.file_tree.reset_preview_files()
+
+    def on_enter(self, event):
+        self.text += event.text
+        self.blink_timer.reset()
+        self.cursor = SearchBar.BAR
+
+        UI.file_tree.filter_preview_files()
 
     def update(self):
-        ...
+        self.accel.update(shared.events, shared.keys)
+        for event in shared.events:
+            if event.type == pygame.TEXTINPUT:
+                self.on_enter(event)
+
+        if self.blink_timer.tick():
+            self.cursor = next(self.cursors)
 
     def draw(self):
         self.surf.fill("black")
         render_at(self.surf, self.icon_surf, "topleft")
+        icon_offset = (self.icon_surf.get_width() + 10, 0)
         if not self.text:
             render_at(
                 self.surf,
                 self.search_surf,
                 "topleft",
-                (self.icon_surf.get_width() + 10, 0),
+                icon_offset,
             )
             return
+
+        text_surf = shared.FONT.render(self.text + self.cursor, True, "white")
+        render_at(self.surf, text_surf, "topleft", icon_offset)
+
+
+@dataclass
+class Match:
+    file: Path
+    matched_indeces: list[int]
 
 
 class FileTree:
@@ -78,6 +129,7 @@ class FileTree:
         self.surf = pygame.Surface(shared.srect.size)
         self.current_path = Path(".")
         self.preview_files: list[Path] = list(self.current_path.iterdir())
+        self.original_preview_files = self.preview_files.copy()
         self.selected_index = 0
         self.scroll = 0
 
@@ -85,7 +137,9 @@ class FileTree:
         file = self.preview_files[index]
         file_relative_path = file.__str__().replace("\\", "/")
         if file.is_dir():
-            if self.preview_files[index + 1].parent.name == file.name:
+            if index > len(self.preview_files) - 2:
+                symbol = "+"
+            elif self.preview_files[index + 1].parent.name == file.name:
                 symbol = "-"
             else:
                 symbol = "+"
@@ -123,12 +177,19 @@ class FileTree:
         else:
             self.scroll = 0
 
+    def enter_editor(self):
+        try:
+            open_file(self.preview_files[self.selected_index].__str__())
+        except UnicodeDecodeError:
+            return
+        UI.state.next_state = State.EDITOR
+
     def update(self):
         for event in shared.events:
             if event.type == pygame.KEYDOWN:
-                if event.key in (pygame.K_DOWN, pygame.K_s):
+                if event.key == pygame.K_DOWN:
                     self.selected_index += 1
-                elif event.key in (pygame.K_UP, pygame.K_w):
+                elif event.key == pygame.K_UP:
                     self.selected_index -= 1
 
                 elif event.key == pygame.K_RETURN:
@@ -136,23 +197,90 @@ class FileTree:
                     if file.is_dir():
                         self.expand_preview()
                     else:
-                        open_file(self.preview_files[self.selected_index].__str__())
-                        UI.state.next_state = State.EDITOR
+                        self.enter_editor()
+
+                elif event.key == pygame.K_ESCAPE:
+                    UI.state.next_state = State.EDITOR
+
         self.cap_selected_index()
         self.calc_scroll()
 
-    def draw(self):
-        self.surf.fill("black")
+    def reset_preview_files(self):
+        self.preview_files = self.original_preview_files.copy()
+
+    def render_unfiltered_preview_files(self):
         for y, toplevel in enumerate(self.preview_files):
             anchor_pos = (y * shared.FONT_HEIGHT) + self.scroll
             if y == self.selected_index:
                 rect = pygame.Rect(
                     0, anchor_pos, shared.srect.width, shared.FONT_HEIGHT
                 )
-                pygame.draw.rect(self.surf, "blue", rect)
+                pygame.draw.rect(self.surf, (100, 100, 255), rect)
 
             surf = shared.FONT.render(self.get_deco_name(y), True, "white")
             self.surf.blit(surf, (0, anchor_pos))
+
+    def get_match_indeces(self, file_name: str) -> list[int] | None:
+        UI.file_tree.selected_index = 0
+        search_text = UI.search_bar.text
+        text = itertools.cycle(search_text)
+        current_search_char = next(text)
+        passers = []
+        for index, char in enumerate(file_name):
+            if char == current_search_char:
+                passers.append(index)
+                if len(passers) == len(search_text):
+                    break
+                current_search_char = next(text)
+
+        if len(passers) == len(search_text):
+            return passers
+
+        return None
+
+    def get_matches(self):
+        self.matches: list[Match] = []
+        for file in Path(".").rglob("*"):
+            match_indeces = self.get_match_indeces(file.__str__().replace("\\", "/"))
+            if match_indeces is None:
+                continue
+
+            self.matches.append(Match(file, match_indeces))
+
+        self.matches.sort(key=lambda x: x.matched_indeces)
+
+    def filter_preview_files(self):
+        """Matches preview files to the text typed in search bar"""
+
+        self.get_matches()
+        self.preview_files = [match.file for match in self.matches]
+
+    def render_filtered_preview_files(self):
+        for y, match in enumerate(self.matches):
+            anchor_pos = (y * shared.FONT_HEIGHT) + self.scroll
+            if y == self.selected_index:
+                rect = pygame.Rect(
+                    0, anchor_pos, shared.srect.width, shared.FONT_HEIGHT
+                )
+                pygame.draw.rect(self.surf, (100, 100, 255), rect)
+
+            offseted_match_indeces = [index + 4 for index in match.matched_indeces]
+            surf = highlight_text(
+                shared.FONT,
+                self.get_deco_name(y),
+                True,
+                "white",
+                offseted_match_indeces,
+                "tomato",
+            )
+            self.surf.blit(surf, (0, anchor_pos))
+
+    def draw(self):
+        self.surf.fill("black")
+        if UI.search_bar.text:
+            self.render_filtered_preview_files()
+            return
+        self.render_unfiltered_preview_files()
 
 
 class FileSelectState:

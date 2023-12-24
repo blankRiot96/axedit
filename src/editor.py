@@ -153,7 +153,6 @@ class NormalMode:
             self.registering_number = False
 
     def on_f(self):
-        return
         if shared.file_name is not None:
             os.remove(shared.file_name)
         shared.file_name = self.mini_cur
@@ -252,6 +251,7 @@ class Editor:
             self.pre_rendered_lines.append(None)
 
     def update(self):
+        # TODO: Figure this out - You can do it!
         self.pre_render_lines()
         self.handle_input()
         self.autocompletion.update()
