@@ -1,3 +1,6 @@
+# Custom
+*.exe
+
 # VSCode
 pylspconfig.yaml
 .vscode/
