@@ -5,9 +5,9 @@ import keyboard
 import pygame
 from pygame._sdl2 import Window
 
-from src import shared
-from src.states import StateManager
-from src.wallpapers import get_windows_wallpaper
+from axedit import shared
+from axedit.states import StateManager
+from axedit.wallpapers import get_windows_wallpaper
 
 # TERMINAL_PATH = "C:/Program Files/WindowsApps/Microsoft.WindowsTerminal_1.18.3181.0_x64__8wekyb3d8bbwe/WindowsTerminal.exe"
 TERMINAL_PATH = "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.18.3181.0_x64__8wekyb3d8bbwe\wt.exe"
@@ -63,7 +63,10 @@ class Core:
     # * Occurs when switching from terminal to app
     def on_terminal_switch(self):
         window = gw.getWindowsWithTitle(next(self.titles))
-        window[0].activate()
+        try:
+            window[0].activate()
+        except gw.PyGetWindowException:
+            return
 
     def update(self):
         shared.events = pygame.event.get()

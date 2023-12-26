@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pygame
 
-from src.state_enums import FileState
+from axedit.state_enums import FileState
 
 pygame.font.init()
 
@@ -36,3 +36,4 @@ file_name: str | None = None
 registered_number: int = 1
 autocompleting = False
 text_writing = False
+naming_file: bool

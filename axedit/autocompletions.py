@@ -3,9 +3,9 @@ from string import ascii_letters
 import jedi
 import pygame
 
-from src import shared
-from src.funcs import get_text
-from src.utils import InputManager
+from axedit import shared
+from axedit.funcs import get_text
+from axedit.utils import InputManager
 
 _POSSIBLE_COMPLETIONS = {
     "module": ("󰅩", "purple"),
@@ -71,7 +71,14 @@ class AutoCompletions:
 
     def gen_suggestions(self):
         script = jedi.Script(code=get_text())
-        self.suggestions = script.complete(shared.cursor_pos.y + 1, shared.cursor_pos.x)
+        try:
+            self.suggestions = script.complete(
+                shared.cursor_pos.y + 1, shared.cursor_pos.x
+            )
+        except ValueError as e:
+            print(e)
+            # print(f"{shared.cursor_pos.x = }, {shared.cursor_pos.y = }")
+            # print(get_text())
 
         self.calc_shared_suggestion_length()
 

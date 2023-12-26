@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pygame
 
-from src import shared
-from src.funcs import open_file
-from src.state_enums import State
-from src.utils import AcceleratedKeyPress, Time, highlight_text, render_at
+from axedit import shared
+from axedit.funcs import open_file
+from axedit.state_enums import State
+from axedit.utils import AcceleratedKeyPress, Time, highlight_text, render_at
 
 
 class Preview:
@@ -32,6 +32,7 @@ class Preview:
 
     def regen_image(self):
         n_lines = shared.srect.height // shared.FONT_HEIGHT
+
         file = UI.file_tree.preview_files[UI.file_tree.selected_index]
 
         if file.is_dir():
@@ -50,6 +51,8 @@ class Preview:
         self.draw_line()
 
     def update(self):
+        if not UI.file_tree.preview_files:
+            return
         file = UI.file_tree.preview_files[UI.file_tree.selected_index]
 
         if file != self.last_selected_file:
@@ -148,6 +151,8 @@ class FileTree:
         return f" F  {file_relative_path}"
 
     def collapse_preview(self) -> None:
+        if UI.search_bar.text:
+            return
         folder = self.preview_files[self.selected_index]
         for path in self.preview_files[:]:
             if path.parent.name == folder.name:
@@ -156,7 +161,11 @@ class FileTree:
     def expand_preview(self) -> None:
         folder = self.preview_files[self.selected_index]
 
-        if self.preview_files[self.selected_index + 1].parent.name == folder.name:
+        last_preview_file = self.selected_index + 1 == len(self.preview_files)
+        if (
+            not last_preview_file
+            and self.preview_files[self.selected_index + 1].parent.name == folder.name
+        ):
             self.collapse_preview()
             return
 

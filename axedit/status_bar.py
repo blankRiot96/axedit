@@ -1,7 +1,7 @@
 import pygame
 
-from src import shared
-from src.utils import render_at
+from axedit import shared
+from axedit.utils import render_at
 
 
 class StatusBar:

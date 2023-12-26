@@ -2,9 +2,9 @@ import typing as t
 
 import pygame
 
-from src.editorstate import EditorState
-from src.file_select_state import FileSelectState
-from src.state_enums import State
+from axedit.editorstate import EditorState
+from axedit.file_select_state import FileSelectState
+from axedit.state_enums import State
 
 
 class StateLike(t.Protocol):

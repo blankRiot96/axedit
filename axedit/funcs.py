@@ -1,0 +1,33 @@
+import os
+from pathlib import Path
+
+from axedit import shared
+
+
+def open_file(file: str) -> None:
+    with open(file) as f:
+        content = f.readlines()
+
+    shared.cursor_pos = shared.Pos(0, 0)
+    shared.file_name = file
+    shared.chars = [list(line[:-1]) for line in content]
+    if not shared.chars:
+        shared.chars.append([])
+
+
+def get_text():
+    text = ""
+    for row in shared.chars:
+        text += "".join(row) + "\n"
+    return text
+
+
+def save_file():
+    if shared.file_name is None:
+        return
+    file = Path(shared.file_name)
+    if file.exists():
+        os.remove(file)
+    with open(file, "w") as f:
+        print(file.absolute())
+        f.write(get_text())

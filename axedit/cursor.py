@@ -2,9 +2,9 @@ from functools import partial
 
 import pygame
 
-from src import shared
-from src.state_enums import FileState
-from src.utils import AcceleratedKeyPress, Time
+from axedit import shared
+from axedit.state_enums import FileState
+from axedit.utils import AcceleratedKeyPress, Time
 
 
 class Cursor:
@@ -63,11 +63,23 @@ class Cursor:
         if shared.cursor_pos.y + move[1] >= 0:
             shared.cursor_pos.y += move[1]
 
+        if move[0] < 0 and shared.cursor_pos.x == 0:
+            shared.cursor_pos.y -= 1
+            shared.cursor_pos.y = max(0, shared.cursor_pos.y)
+            return
+
         if len(shared.chars) - 1 < shared.cursor_pos.y:
             shared.chars.insert(shared.cursor_pos.y, [])
         if (line_len := len(shared.chars[shared.cursor_pos.y])) < shared.cursor_pos.x:
-            diff = shared.cursor_pos.x - line_len
-            shared.chars[shared.cursor_pos.y].extend([" "] * diff)
+            # diff = shared.cursor_pos.x - line_len
+            # shared.chars[shared.cursor_pos.y].extend([" "] * diff)
+
+            if move[1] == 0:
+                shared.cursor_pos.y += 1
+
+            shared.cursor_pos.x = line_len - 1
+
+            shared.cursor_pos.x = max(0, shared.cursor_pos.x)
 
     def handle_arrows(self, key: int):
         move = Cursor.KEYS.get(key)

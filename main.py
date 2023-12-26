@@ -1,4 +1,4 @@
-from src.core import Core
+from axedit.core import Core
 
 
 def main():

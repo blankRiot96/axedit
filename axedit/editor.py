@@ -1,14 +1,15 @@
 import os
 from itertools import cycle
+from pathlib import Path
 
 import pygame
 
-from src import shared
-from src.autocompletions import AutoCompletions
-from src.funcs import get_text, save_file
-from src.state_enums import FileState
-from src.syntax_highlighting import apply_syntax_highlighting
-from src.utils import AcceleratedKeyPress, EventManager, InputManager, Time
+from axedit import shared
+from axedit.autocompletions import AutoCompletions
+from axedit.funcs import get_text, save_file
+from axedit.state_enums import FileState
+from axedit.syntax_highlighting import apply_syntax_highlighting
+from axedit.utils import AcceleratedKeyPress, EventManager, InputManager, Time
 
 
 class WriteMode:
@@ -72,10 +73,11 @@ class WriteMode:
 
         line = self.get_line()
         pre = line[: shared.cursor_pos.x]
+
         shared.chars[shared.cursor_pos.y] = pre
         post = line[shared.cursor_pos.x :]
-
         shared.chars.insert(shared.cursor_pos.y + 1, post)
+
         shared.cursor_pos.y += 1
         shared.cursor_pos.x = 0
         self.typing = True
@@ -133,7 +135,7 @@ class NormalMode:
             }
         )
         self.event_manager = EventManager({pygame.TEXTINPUT: self.register_number})
-        self.naming_file = False
+        shared.naming_file = False
         self.mini_curs = cycle(("|", "_"))
         self.mini_timer = Time(0.5)
         self.mini_cur = "_"
@@ -153,10 +155,8 @@ class NormalMode:
             self.registering_number = False
 
     def on_f(self):
-        if shared.file_name is not None:
-            os.remove(shared.file_name)
         shared.file_name = self.mini_cur
-        self.naming_file = True
+        shared.naming_file = True
 
     def on_w(self):
         shared.mode = FileState.WRITE
@@ -172,7 +172,7 @@ class NormalMode:
         shared.cursor_pos.x = len(shared.chars[-1])
 
     def name_file(self):
-        if not self.naming_file:
+        if not shared.naming_file:
             return
 
         if self.mini_timer.tick():
@@ -188,7 +188,7 @@ class NormalMode:
                 if event.key == pygame.K_RETURN:
                     shared.file_name = shared.file_name[:-1]
                     save_file()
-                    self.naming_file = False
+                    shared.naming_file = False
                 elif event.key == pygame.K_BACKSPACE:
                     shared.file_name = shared.file_name[:-2]
                     shared.file_name += self.mini_cur
@@ -196,7 +196,7 @@ class NormalMode:
     def handle_input(self):
         self.name_file()
         shared.cursor.alpha = 255
-        if self.naming_file:
+        if shared.naming_file:
             return
         self.input_manager.update(shared.events)
         self.event_manager.update(shared.events)
@@ -245,9 +245,9 @@ class Editor:
         surfs = self.pre_rendered_lines.copy()
         self.pre_rendered_lines = []
         for y in range(len(shared.chars)):
-            if y < len(surfs) and surfs[y] is not None:
-                self.pre_rendered_lines.append(surfs[y])
-                continue
+            # if y < len(surfs) and surfs[y] is not None:
+            # self.pre_rendered_lines.append(surfs[y])
+            # continue
             self.pre_rendered_lines.append(None)
 
     def update(self):

@@ -4,7 +4,7 @@ import typing as t
 
 import pygame
 
-from src import shared
+from axedit import shared
 
 LOGICAL_PUNCTUATION = " .(){}[],:;/\\|+=-*%\"'"
 

@@ -1,12 +1,13 @@
 import pygame
 
-from src import shared
-from src.cursor import Cursor
-from src.editor import Editor
-from src.line_numbers import LineNumbers
-from src.state_enums import FileState, State
-from src.status_bar import StatusBar
-from src.utils import render_at
+from axedit import shared
+from axedit.cursor import Cursor
+from axedit.editor import Editor
+from axedit.funcs import save_file
+from axedit.line_numbers import LineNumbers
+from axedit.state_enums import FileState, State
+from axedit.status_bar import StatusBar
+from axedit.utils import render_at
 
 
 class EditorState:
@@ -20,10 +21,11 @@ class EditorState:
         self.offset = 4
 
     def on_o(self):
-        if shared.mode != FileState.NORMAL:
+        if shared.mode != FileState.NORMAL or shared.naming_file:
             return
         for event in shared.events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_o:
+                save_file()
                 self.next_state = State.FILE_SELECT
 
     def on_n(self):

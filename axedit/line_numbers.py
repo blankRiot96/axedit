@@ -1,6 +1,6 @@
 import pygame
 
-from src import shared
+from axedit import shared
 
 
 class LineNumbers:
