@@ -37,3 +37,4 @@ registered_number: int = 1
 autocompleting = False
 text_writing = False
 naming_file: bool
+saved: bool

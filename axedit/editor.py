@@ -66,21 +66,44 @@ class WriteMode:
             self.get_line().insert(shared.cursor_pos.x, closing_bracket)
         self.typing = True
         shared.text_writing = True
+        shared.saved = False
+
+    def get_indentation_after_colon(self, line: list[str]) -> list[str]:
+        count = 0
+
+        str_line = "".join(line).strip()
+        if str_line and str_line[-1] == ":":
+            count = 4  # Starts off as 4 since we are adding a level of indendation
+        for char in line:
+            if char != " ":
+                break
+            count += 1
+
+        return [" "] * count
 
     def new_line(self):
         if shared.autocompleting:
             return
 
         line = self.get_line()
+
+        # Pre line
         pre = line[: shared.cursor_pos.x]
-
         shared.chars[shared.cursor_pos.y] = pre
-        post = line[shared.cursor_pos.x :]
-        shared.chars.insert(shared.cursor_pos.y + 1, post)
 
+        # Update y pos
         shared.cursor_pos.y += 1
-        shared.cursor_pos.x = 0
+
+        # Post line
+        post = self.get_indentation_after_colon(line) + line[shared.cursor_pos.x :]
+        shared.chars.insert(shared.cursor_pos.y, post)
+
+        # Update x pos
+        shared.cursor_pos.x = len(post)
+
+        # Cleanup
         self.typing = True
+        shared.saved = False
 
     def get_line(self):
         return shared.chars[shared.cursor_pos.y]
@@ -104,6 +127,8 @@ class WriteMode:
                 return
             self.go_prev_line()
             return
+
+        shared.saved = False
 
         shared.cursor_pos.x -= 1
         self.get_line().pop(shared.cursor_pos.x)

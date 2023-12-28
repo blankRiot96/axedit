@@ -22,12 +22,15 @@ def get_text():
     return text
 
 
+def soft_save_file():
+    with open(shared.file_name, "w") as f:
+        f.write(get_text())
+
+
 def save_file():
     if shared.file_name is None:
         return
     file = Path(shared.file_name)
     if file.exists():
         os.remove(file)
-    with open(file, "w") as f:
-        print(file.absolute())
-        f.write(get_text())
+    soft_save_file()

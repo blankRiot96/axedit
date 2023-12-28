@@ -98,10 +98,10 @@ class AutoCompletions:
 
         return False
 
-    def is_python_file(self):
+    def is_python_file(self) -> bool:
         return shared.file_name is not None and shared.file_name.endswith(".py")
 
-    def is_typing_breaker(self):
+    def is_typing_breaker(self) -> bool:
         for event in shared.events:
             if event.type == pygame.TEXTINPUT:
                 if not event.text.isalpha() and event.text not in "._":
@@ -109,8 +109,15 @@ class AutoCompletions:
 
         return False
 
+    def is_non_empty_line(self) -> bool:
+        return bool("".join(shared.chars[shared.cursor_pos.y]).strip())
+
     def update(self):
-        if self.is_typing_variable() and self.is_python_file():
+        if (
+            self.is_typing_variable()
+            and self.is_python_file()
+            and self.is_non_empty_line()
+        ):
             self.gen_suggestions()
             self.at_autocompletion()
 
