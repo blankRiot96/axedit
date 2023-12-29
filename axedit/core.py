@@ -7,42 +7,12 @@ from pygame._sdl2 import Window
 
 from axedit import shared
 from axedit.states import StateManager
-from axedit.wallpapers import get_windows_wallpaper
-
-# TERMINAL_PATH = "C:/Program Files/WindowsApps/Microsoft.WindowsTerminal_1.18.3181.0_x64__8wekyb3d8bbwe/WindowsTerminal.exe"
-TERMINAL_PATH = "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.18.3181.0_x64__8wekyb3d8bbwe\wt.exe"
-
-import psutil
-import pygetwindow as gw
-
-
-def focus_on_application(file_path):
-    # Get the process ID of the application based on the file path
-    process_id = None
-    for process in psutil.process_iter(["pid", "name", "exe"]):
-        if process.info["exe"] and file_path.lower() in process.info["exe"].lower():
-            process_id = process.info["pid"]
-            break
-
-    if process_id is not None:
-        # Bring the application window to the front
-        window = gw.getWindowsWithTitle("")[
-            0
-        ]  # You can replace "" with the title of your application window
-        window.activate()
-        print(f"Focused on the application with file path: {file_path}")
-    else:
-        print(f"Application with file path {file_path} not found.")
 
 
 class Core:
     def __init__(self) -> None:
         self.win_init()
         self.state_manager = StateManager()
-        self.create_blur()
-
-        keyboard.add_hotkey("ctrl+grave", self.on_terminal_switch)
-        self.titles = itertools.cycle(("PowerShell", "axedit"))
 
     def win_init(self):
         shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE)
@@ -52,21 +22,6 @@ class Core:
 
         window = Window.from_display_module()
         window.opacity = 0.9
-
-    def create_blur(self):
-        return
-        self.blur_effect = pygame.image.load(get_windows_wallpaper()).convert()
-        self.blur_effect = pygame.transform.gaussian_blur(self.blur_effect, 10)
-
-    # TODO: Fix pygetwindow.PyGetWindowException: Error code from Windows: 0
-    # - The operation completed successfully.
-    # * Occurs when switching from terminal to app
-    def on_terminal_switch(self):
-        window = gw.getWindowsWithTitle(next(self.titles))
-        try:
-            window[0].activate()
-        except gw.PyGetWindowException:
-            return
 
     def update(self):
         shared.events = pygame.event.get()
@@ -78,7 +33,6 @@ class Core:
                 exit()
             elif event.type == pygame.VIDEORESIZE:
                 shared.srect = shared.screen.get_rect()
-                self.create_blur()
 
         self.state_manager.update()
         # pygame.display.set_caption(f"{self.clock.get_fps()}")
