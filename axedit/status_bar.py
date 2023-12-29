@@ -24,10 +24,16 @@ class StatusBar:
 
         return "*"
 
+    def get_file_name(self) -> str | None:
+        if shared.file_name is None:
+            return
+
+        return shared.file_name.replace("\\", "/")
+
     def gen_surf(self):
         out_str = self.status_str.format(
             saved=self.get_saved_status(),
-            file_name=shared.file_name,
+            file_name=self.get_file_name(),
             mode=shared.mode.name,
             loc=f"{shared.cursor_pos.x}, {shared.cursor_pos.y}",
         )
