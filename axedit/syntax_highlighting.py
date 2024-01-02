@@ -2,6 +2,7 @@ import ast
 import builtins
 import keyword
 import typing as t
+from typing import Any
 
 import pygame
 
@@ -33,8 +34,15 @@ Color: t.TypeAlias = str
 
 
 class ImportVisitor(ast.NodeVisitor):
-    def visit_ImportFrom(self, node: ast.ImportFrom):
-        _MODULES.extend(node.module.split("."))
+    def visit_ClassDef(self, node: ast.ClassDef) -> Any:
+        ...
+
+    def visit_ImportFrom(self, node: ast.ImportFrom | None):
+        mod_name = node.module
+        if node.module is None:
+            mod_name = "."
+
+        _MODULES.extend(mod_name.split("."))
 
         imports = []
         for naming_node in node.names:

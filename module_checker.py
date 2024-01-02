@@ -42,6 +42,12 @@ def _is_site_package_module(main_module_name: str, sub_module_name: str) -> bool
     return _is_submodule(mod_path, sub_module_name)
 
 
+def is_editable_module(main_module_name: str, sub_module_name: str) -> bool:
+    scripts_path = Path(sys.executable).parent / "Lib/site-packages/"
+    easy_install = scripts_path / "easy-install.pth"
+    
+
+
 def is_module(main_module_name: str, sub_module_name: str) -> bool:
     if _is_local_module(main_module_name, sub_module_name):
         return True
