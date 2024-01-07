@@ -1,8 +1,16 @@
 import os
 from pathlib import Path
 
+import pygame
+
 from axedit import shared
 
+
+def is_event_frame(event_type: int) -> bool:
+    for event in shared.events:
+        if event.type == event_type:
+            return True
+    return False
 
 def open_file(file: str) -> None:
     with open(file) as f:

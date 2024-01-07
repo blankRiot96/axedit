@@ -7,7 +7,7 @@ from typing import Any
 import pygame
 
 from axedit import shared
-from axedit.funcs import get_text
+from axedit.funcs import get_text, is_event_frame
 from axedit.module_checker import is_module
 
 LOGICAL_PUNCTUATION = " .(){}[],:;/\\|+=-*%\"'"
@@ -153,17 +153,26 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
 
             return color_ranges
 
-        if current_index > 0 and char == "(" and row[current_index - 1] != "(":
-            color = "seagreen"
-            if is_pascal(acc):
-                color = "yellow"
-            color_ranges[range(start_index, current_index)] = color
-            start_index = current_index + 1
-            acc = ""
-            continue
+        # if current_index > 0 and char == "(" and row[current_index - 1] != "(":
+        #     color = "seagreen"
+        #     if is_pascal(acc):
+        #         color = "yellow"
+        #     color_ranges[range(start_index, current_index)] = color
+        #     start_index = current_index + 1
+        #     acc = ""
+        #     continue
 
         if char in LOGICAL_PUNCTUATION:
             color = apply_precedence(acc)
+            if color == "white" and (current_index > 0 and char == "(" and row[current_index - 1] != "("):
+                color = "seagreen"
+                if is_pascal(acc):
+                    color = "yellow"
+                color_ranges[range(start_index, current_index)] = color
+                start_index = current_index + 1
+                acc = ""
+                continue
+
             color_ranges[range(start_index, current_index)] = color
             start_index = current_index + 1
             acc = ""
@@ -206,11 +215,12 @@ def is_necessary_to_render(y: int, line: str) -> bool:
 prev_image = None
 
 
+
 def apply_syntax_highlighting(
     pre_rendered_lines: dict[str, pygame.Surface]
 ) -> pygame.Surface:
     global prev_image
-    if shared.saved and prev_image is not None:
+    if not is_event_frame(pygame.VIDEORESIZE) and shared.saved and prev_image is not None and not pygame.event.get(pygame.VIDEORESIZE):
         return prev_image
 
     _MODULES.clear()
@@ -220,7 +230,7 @@ def apply_syntax_highlighting(
         import_visitor.visit(ast.parse(get_text()))
     except SyntaxError:
         pass
-
+    
     image = pygame.Surface(
         (shared.srect.width, len(shared.chars) * shared.FONT_HEIGHT), pygame.SRCALPHA
     )
