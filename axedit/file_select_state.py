@@ -52,6 +52,7 @@ class Preview:
 
     def update(self):
         if not UI.file_tree.preview_files:
+            self.gen_blank()
             return
         file = UI.file_tree.preview_files[UI.file_tree.selected_index]
 
@@ -193,6 +194,18 @@ class FileTree:
             return
         UI.state.next_state = State.EDITOR
 
+    def on_enter(self):
+        try:
+            file = self.preview_files[self.selected_index]
+        except IndexError:
+            # UI.preview.gen_blank()
+            return
+
+        if file.is_dir():
+            self.expand_preview()
+        else:
+            self.enter_editor()
+
     def update(self):
         for event in shared.events:
             if event.type == pygame.KEYDOWN:
@@ -202,11 +215,7 @@ class FileTree:
                     self.selected_index -= 1
 
                 elif event.key == pygame.K_RETURN:
-                    file = self.preview_files[self.selected_index]
-                    if file.is_dir():
-                        self.expand_preview()
-                    else:
-                        self.enter_editor()
+                    self.on_enter()
 
                 elif event.key == pygame.K_ESCAPE:
                     UI.state.next_state = State.EDITOR

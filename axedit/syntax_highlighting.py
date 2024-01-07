@@ -8,26 +8,25 @@ import pygame
 
 from axedit import shared
 from axedit.funcs import get_text
+from axedit.module_checker import is_module
 
 LOGICAL_PUNCTUATION = " .(){}[],:;/\\|+=-*%\"'"
 
 _KEYWORDS = keyword.kwlist[3:]
 _SINGLETONS = keyword.kwlist[:3]
 _BUILTINS = dir(builtins)
-_BUILTINS.extend(["self"])
 
 _MODULES = []
-_METHODS = []
 _CLASSES = []
 
 
 _PRECENDENCE = {
-    "cyan": _BUILTINS,
+    "steelblue": _BUILTINS,
     "aquamarine": _MODULES,
-    "seagreen": _METHODS,
     "yellow": _CLASSES,
     "magenta": _KEYWORDS,
     "orange": _SINGLETONS,
+    "purple": ["self"],
 }
 
 Color: t.TypeAlias = str
@@ -35,7 +34,7 @@ Color: t.TypeAlias = str
 
 class ImportVisitor(ast.NodeVisitor):
     def visit_ClassDef(self, node: ast.ClassDef) -> Any:
-        ...
+        _CLASSES.append(node.name)
 
     def visit_ImportFrom(self, node: ast.ImportFrom | None):
         mod_name = node.module
@@ -51,7 +50,9 @@ class ImportVisitor(ast.NodeVisitor):
                 imports.append(naming_node.asname)
 
         for imp in imports:
-            if is_pascal(imp):
+            if is_module(mod_name, imp):
+                _MODULES.append(imp)
+            elif is_pascal(imp):
                 _CLASSES.append(imp)
 
     def visit_Import(self, node: ast.Import):
@@ -82,33 +83,55 @@ def apply_precedence(word: str) -> Color:
 def is_pascal(word: str) -> bool:
     if not word:
         return False
+    if word[0] == "_":
+        return is_pascal(word[1:])
     return word[0].isupper() and word.find("_") == -1
 
 
+last_string_counter = 0
+within_line = True
+concluded_doc_string = True
+
+
 def index_colors(row: str) -> dict[t.Generator, Color]:
+    global last_string_counter, within_line, concluded_doc_string
     color_ranges = {}
 
     final_index = len(row) - 1
     acc = ""
     start_index = 0
-    prev_word = ""
 
-    string_counter = 0
+    # if last_string_counter > 0 and not (row.find("'") != -1 or row.find('"') != -1):
+    if not concluded_doc_string and not (row.find("'") != -1 or row.find('"') != -1):
+        within_line = False
+        return {range(start_index, final_index + 1): "green"}
+
+    string_counter = last_string_counter
+
     for current_index, char in enumerate(row):
-        if string_counter > 0:
+        if within_line and string_counter > 0:
             string_counter -= 1
+            last_string_counter = string_counter
             continue
 
         if char in "\"'":
-            string_pos = row.find(char, current_index + 1)
-            if string_pos < 0:
+            within_line = True
+            if row.count(char * 3) % 2 != 0:
+                concluded_doc_string = not concluded_doc_string
+                string_pos = final_index
+            else:
+                string_pos = row.find(char, current_index + 1)
+            incomplete_string = string_pos < 0
+            if incomplete_string:
                 string_pos = int(10e6)
+
             r = range(
                 current_index,
                 string_pos + 1,
             )
             color_ranges[r] = "green"
             string_counter = string_pos - current_index
+            last_string_counter = string_counter
 
             start_index = string_pos + 1
             acc = ""
@@ -122,7 +145,11 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
             comment_color = (100, 100, 100)
             color_ranges[range(current_index, finder + 1)] = comment_color
             color_ranges[range(finder, finder + 5)] = "red"
-            color_ranges[range(finder + 4, final_index + 1)] = comment_color
+            if finder:
+                remaining = finder + 4
+            else:
+                remaining = current_index + finder
+            color_ranges[range(remaining, final_index + 1)] = comment_color
 
             return color_ranges
 
@@ -132,7 +159,6 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
                 color = "yellow"
             color_ranges[range(start_index, current_index)] = color
             start_index = current_index + 1
-            prev_word = acc
             acc = ""
             continue
 
@@ -140,7 +166,6 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
             color = apply_precedence(acc)
             color_ranges[range(start_index, current_index)] = color
             start_index = current_index + 1
-            prev_word = acc
             acc = ""
             continue
         acc += char
@@ -190,7 +215,6 @@ def apply_syntax_highlighting(
 
     _MODULES.clear()
     _CLASSES.clear()
-    _METHODS.clear()
 
     try:
         import_visitor.visit(ast.parse(get_text()))
