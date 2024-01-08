@@ -53,6 +53,7 @@ class EditorState:
         shared.FONT_WIDTH = shared.FONT.render("w", True, "white").get_width()
         shared.FONT_HEIGHT = shared.FONT.get_height()
         shared.cursor.gen_image()
+        shared.saved = False
 
     def handle_font_offset(self):
         if not shared.keys[pygame.K_LCTRL]:

@@ -1,3 +1,4 @@
+import typing as t
 from pathlib import Path
 
 import pygame
@@ -38,3 +39,4 @@ autocompleting = False
 text_writing = False
 naming_file: bool
 saved: bool
+frame_cache: dict[t.Callable, t.Any]

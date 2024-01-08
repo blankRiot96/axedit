@@ -76,6 +76,7 @@ def apply_precedence(word: str) -> Color:
 
     if word.isdigit():
         final_color = "tomato"
+    
 
     return final_color
 
@@ -106,12 +107,12 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
         within_line = False
         return {range(start_index, final_index + 1): "green"}
 
-    string_counter = last_string_counter
+    string_counter = 0
 
     for current_index, char in enumerate(row):
         if within_line and string_counter > 0:
             string_counter -= 1
-            last_string_counter = string_counter
+            # last_string_counter = string_counter
             continue
 
         if char in "\"'":
@@ -131,7 +132,7 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
             )
             color_ranges[r] = "green"
             string_counter = string_pos - current_index
-            last_string_counter = string_counter
+            # last_string_counter = string_counter
 
             start_index = string_pos + 1
             acc = ""
@@ -168,6 +169,7 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
                 color = "seagreen"
                 if is_pascal(acc):
                     color = "yellow"
+
                 color_ranges[range(start_index, current_index)] = color
                 start_index = current_index + 1
                 acc = ""

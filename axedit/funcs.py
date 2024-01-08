@@ -1,7 +1,6 @@
 import os
+import typing as t
 from pathlib import Path
-
-import pygame
 
 from axedit import shared
 
@@ -42,3 +41,18 @@ def save_file():
     if file.exists():
         os.remove(file)
     soft_save_file()
+
+
+def cache_by_frame(func: t.Callable) -> t.Callable:
+    """Decorator that caches output per-frame"""
+    
+    def call_func(*args, **kwargs) -> t.Any:
+        cached_output = shared.frame_cache.get(func)
+        if cached_output is None:
+            shared.frame_cache[func] = func(*args, **kwargs)
+        
+        return shared.frame_cache.get(func)
+
+    return call_func
+
+
