@@ -12,7 +12,7 @@ class Core:
         self.frame_no = 0
 
     def win_init(self):
-        shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE)
+        shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=1)
         shared.srect = shared.screen.get_rect()
         self.clock = pygame.time.Clock()
         pygame.display.set_caption("axedit")
@@ -25,7 +25,7 @@ class Core:
     def update(self):
         shared.frame_cache.clear()
         shared.events = pygame.event.get()
-        shared.dt = self.clock.tick(60) / 1000
+        shared.dt = self.clock.tick() / 1000
         shared.dt = min(shared.dt, 0.1)
         shared.keys = pygame.key.get_pressed()
         
@@ -36,13 +36,13 @@ class Core:
             elif event.type == pygame.VIDEORESIZE:
                 shared.srect = shared.screen.get_rect()
         self.state_manager.update()
-        # pygame.display.set_caption(f"{self.clock.get_fps()}")
+        pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
 
     def draw(self):
         shared.screen.fill("black")
         # shared.screen.blit(self.blur_effect, (0, 0))
         self.state_manager.draw()
-        pygame.display.update()
+        pygame.display.flip()
 
     def run(self):
         while True:

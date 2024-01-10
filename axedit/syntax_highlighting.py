@@ -9,6 +9,7 @@ import pygame
 from axedit import shared
 from axedit.funcs import get_text, is_event_frame
 from axedit.module_checker import is_module
+from axedit.utils import Time
 
 LOGICAL_PUNCTUATION = " .(){}[],:;/\\|+=-*%\"'"
 
@@ -33,6 +34,10 @@ Color: t.TypeAlias = str
 
 
 class ImportVisitor(ast.NodeVisitor):
+    def __init__(self) -> None:
+        super().__init__()
+        self.import_timer = Time(0.5)
+
     def visit_ClassDef(self, node: ast.ClassDef) -> Any:
         _CLASSES.append(node.name)
 
@@ -50,7 +55,7 @@ class ImportVisitor(ast.NodeVisitor):
                 imports.append(naming_node.asname)
 
         for imp in imports:
-            if is_module(mod_name, imp):
+            if self.import_timer.tick() and is_module(mod_name, imp):
                 _MODULES.append(imp)
             elif is_pascal(imp):
                 _CLASSES.append(imp)
