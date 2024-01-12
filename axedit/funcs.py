@@ -11,13 +11,14 @@ def is_event_frame(event_type: int) -> bool:
             return True
     return False
 
+
 def open_file(file: str) -> None:
     with open(file) as f:
         content = f.readlines()
 
     shared.cursor_pos = shared.Pos(0, 0)
     shared.file_name = file
-    shared.chars = [list(line[:-1]) for line in content]
+    shared.chars = shared.CharList([list(line[:-1]) for line in content])
     if not shared.chars:
         shared.chars.append([])
 
@@ -45,14 +46,12 @@ def save_file():
 
 def cache_by_frame(func: t.Callable) -> t.Callable:
     """Decorator that caches output per-frame"""
-    
+
     def call_func(*args, **kwargs) -> t.Any:
         cached_output = shared.frame_cache.get(func)
         if cached_output is None:
             shared.frame_cache[func] = func(*args, **kwargs)
-        
+
         return shared.frame_cache.get(func)
 
     return call_func
-
-

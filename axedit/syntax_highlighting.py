@@ -9,7 +9,6 @@ import pygame
 from axedit import shared
 from axedit.funcs import get_text, is_event_frame
 from axedit.module_checker import is_module
-from axedit.utils import Time
 
 LOGICAL_PUNCTUATION = " .(){}[],:;/\\|+=-*%\"'"
 
@@ -36,12 +35,15 @@ Color: t.TypeAlias = str
 class ImportVisitor(ast.NodeVisitor):
     def __init__(self) -> None:
         super().__init__()
-        self.import_timer = Time(0.5)
+        self.first = True
 
     def visit_ClassDef(self, node: ast.ClassDef) -> Any:
         _CLASSES.append(node.name)
 
     def visit_ImportFrom(self, node: ast.ImportFrom | None):
+        if not self.first and not shared.import_line_changed:
+            return
+
         mod_name = node.module
         if node.module is None:
             mod_name = "."
@@ -55,12 +57,15 @@ class ImportVisitor(ast.NodeVisitor):
                 imports.append(naming_node.asname)
 
         for imp in imports:
-            if self.import_timer.tick() and is_module(mod_name, imp):
+            if is_module(mod_name, imp):
                 _MODULES.append(imp)
             elif is_pascal(imp):
                 _CLASSES.append(imp)
 
     def visit_Import(self, node: ast.Import):
+        if not self.first and not shared.import_line_changed:
+            return
+
         for naming_node in node.names:
             _MODULES.append(naming_node.name)
 
@@ -81,7 +86,6 @@ def apply_precedence(word: str) -> Color:
 
     if word.isdigit():
         final_color = "tomato"
-    
 
     return final_color
 
@@ -170,7 +174,9 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
 
         if char in LOGICAL_PUNCTUATION:
             color = apply_precedence(acc)
-            if color == "white" and (current_index > 0 and char == "(" and row[current_index - 1] != "("):
+            if color == "white" and (
+                current_index > 0 and char == "(" and row[current_index - 1] != "("
+            ):
                 color = "seagreen"
                 if is_pascal(acc):
                     color = "yellow"
@@ -222,22 +228,27 @@ def is_necessary_to_render(y: int, line: str) -> bool:
 prev_image = None
 
 
-
 def apply_syntax_highlighting(
     pre_rendered_lines: dict[str, pygame.Surface]
 ) -> pygame.Surface:
     global prev_image
-    if not is_event_frame(pygame.VIDEORESIZE) and shared.saved and prev_image is not None and not pygame.event.get(pygame.VIDEORESIZE):
+    if (
+        not is_event_frame(pygame.VIDEORESIZE)
+        and not shared.chars_changed
+        and prev_image is not None
+    ):
         return prev_image
 
-    _MODULES.clear()
+    if shared.import_line_changed:
+        _MODULES.clear()
     _CLASSES.clear()
 
     try:
         import_visitor.visit(ast.parse(get_text()))
+        import_visitor.first = False
     except SyntaxError:
         pass
-    
+
     image = pygame.Surface(
         (shared.srect.width, len(shared.chars) * shared.FONT_HEIGHT), pygame.SRCALPHA
     )

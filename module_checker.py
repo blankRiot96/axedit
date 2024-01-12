@@ -76,3 +76,10 @@ def is_module(main_module_name: str, sub_module_name: str) -> bool:
         return True
 
     return False
+
+
+if __name__ == "__main__":
+    MOD_NAME = "axedit"
+    TERM = "core"
+
+    print(is_module(MOD_NAME, TERM))
