@@ -5,7 +5,7 @@ import pygame
 
 from axedit import shared
 from axedit.funcs import get_text
-from axedit.utils import InputManager
+from axedit.utils import InputManager, KeyManager
 
 _POSSIBLE_COMPLETIONS = {
     "module": ("󰅩", "purple"),
@@ -26,6 +26,7 @@ class AutoCompletions:
 
     SELECTED_COLOR = (100, 100, 100)
     DEFAULT_COLOR = (50, 50, 50)
+    MAX_SUGGESTIONS = 10
 
     def __init__(self) -> None:
         self.image: pygame.Surface | None = None
@@ -33,7 +34,30 @@ class AutoCompletions:
         self.selected_suggestion_index = 0
         self.pos_at_autocompleting = 0
         self.shared_suggestion_length = 0
-        self.input_manager = InputManager({pygame.K_RETURN: self.on_completion})
+        self.input_manager = InputManager(
+            {
+                pygame.K_RETURN: self.on_completion,
+                pygame.K_TAB: self.on_completion,
+                pygame.K_UP: self.cycle_suggestions_up,
+                pygame.K_DOWN: self.cycle_suggestions_down,
+            }
+        )
+
+        self.suggestion_offset = 0
+
+    def cycle_suggestions_up(self):
+        self.selected_suggestion_index -= 1
+        # if self.selected_suggestion_index < (AutoCompletions.MAX_SUGGESTIONS / 2):
+        #     self.suggestion_offset -= 1
+
+        if self.selected_suggestion_index < 0:
+            self.selected_suggestion_index = len(self.suggestions) - 1
+
+    def cycle_suggestions_down(self):
+        self.selected_suggestion_index += 1
+
+        if self.selected_suggestion_index > len(self.suggestions):
+            self.selected_suggestion_index = 0
 
     def on_completion(self):
         if not self.suggestions:
@@ -87,6 +111,7 @@ class AutoCompletions:
         shared.autocompleting = True
 
     def after_autocompletion(self):
+        self.suggestion_offset = 0
         shared.autocompleting = False
         self.suggestions = []
 
@@ -162,17 +187,25 @@ class AutoCompletions:
             self.render_generic_suggestion(suggestion, index)
 
     def render_suggestions(self):
+        suggestions_to_be_rendered = self.suggestions[
+            self.suggestion_offset : AutoCompletions.MAX_SUGGESTIONS
+        ]
+
         SUGGESTION_BOX_WIDTH = (
-            max(len(suggestion.name) for suggestion in self.suggestions) + 2
+            max(len(suggestion.name) for suggestion in suggestions_to_be_rendered) + 2
         ) * shared.FONT_WIDTH
-        SUGGESTION_BOX_HEIGHT = len(self.suggestions) * shared.FONT_HEIGHT
+        SUGGESTION_BOX_HEIGHT = len(suggestions_to_be_rendered) * shared.FONT_HEIGHT
 
         self.image = pygame.Surface((SUGGESTION_BOX_WIDTH, SUGGESTION_BOX_HEIGHT))
         self.image.fill(AutoCompletions.DEFAULT_COLOR)
 
         selected_background = pygame.Surface((SUGGESTION_BOX_WIDTH, shared.FONT_HEIGHT))
         selected_background.fill(AutoCompletions.SELECTED_COLOR)
-        for index, suggestion in enumerate(self.suggestions):
+        for index, suggestion in enumerate(
+            suggestions_to_be_rendered[
+                self.suggestion_offset : AutoCompletions.MAX_SUGGESTIONS
+            ]
+        ):
             if self.selected_suggestion_index == index:
                 self.image.blit(selected_background, (0, index * shared.FONT_HEIGHT))
 

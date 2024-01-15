@@ -6,7 +6,7 @@ import pygame
 
 from axedit import shared
 from axedit.autocompletions import AutoCompletions
-from axedit.funcs import get_text, save_file
+from axedit.funcs import get_text, is_event_frame, save_file
 from axedit.state_enums import FileState
 from axedit.syntax_highlighting import apply_syntax_highlighting
 from axedit.utils import AcceleratedKeyPress, EventManager, InputManager, Time
@@ -23,7 +23,7 @@ class WriteMode:
         self.input_manager = InputManager(
             {
                 pygame.K_ESCAPE: self.on_esc,
-                pygame.K_TAB: lambda: self.write_char(" " * 4),
+                pygame.K_TAB: self.on_tab,
             }
         )
         self.event_manager = EventManager({pygame.TEXTINPUT: self.on_write_char})
@@ -33,6 +33,11 @@ class WriteMode:
         self.accelerated_new_line = AcceleratedKeyPress(pygame.K_RETURN, self.new_line)
         self.blink_timer = Time(0.5)
         self._typing = False
+
+    def on_tab(self):
+        if shared.autocompleting:
+            return
+        self.write_char(" " * 4)
 
     def on_esc(self):
         shared.mode = FileState.NORMAL
@@ -275,13 +280,36 @@ class Editor:
             # continue
             self.pre_rendered_lines.append(None)
 
+    def mouse_placement(self):
+        for event in shared.events:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                x_pos = shared.mouse_pos.x + self.offset.x - (shared.FONT_WIDTH * 5)
+                y_pos = shared.mouse_pos.y - self.offset.y
+
+                # Pixel to cursor pos
+                x_pos /= shared.FONT_WIDTH
+                y_pos /= shared.FONT_HEIGHT
+
+                # Inting
+                x_pos = int(x_pos)
+                y_pos = int(y_pos)
+
+                # Containing
+                if y_pos > len(shared.chars) - 1:
+                    y_pos = len(shared.chars) - 1
+
+                if x_pos > len(shared.chars[y_pos]) - 1:
+                    x_pos = len(shared.chars[y_pos])
+
+                shared.cursor_pos = shared.Pos(x_pos, y_pos)
+
     def update(self):
-        # TODO: Figure this out - You can do it!
         self.pre_render_lines()
         self.handle_input()
         self.autocompletion.update()
         self.gen_image()
         self.on_scroll()
+        self.mouse_placement()
 
     def draw(self):
         self.surf = pygame.Surface(

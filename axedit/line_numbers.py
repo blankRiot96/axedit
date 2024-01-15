@@ -6,7 +6,7 @@ from axedit import shared
 class LineNumbers:
     def __init__(self) -> None:
         self.surf = pygame.Surface(
-            (shared.FONT_WIDTH * 3, len(shared.chars) * shared.FONT_HEIGHT),
+            (shared.FONT_WIDTH * 5, len(shared.chars) * shared.FONT_HEIGHT),
             pygame.SRCALPHA,
         )
 

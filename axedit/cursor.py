@@ -136,6 +136,8 @@ class Cursor:
                 self.handle_normals(key)
 
     def update_accels(self):
+        if shared.autocompleting:
+            return
         for accel in self.accels:
             accel.update(shared.events, shared.keys)
 

@@ -72,6 +72,7 @@ cursor_pos: Pos = Pos(0, 0)
 screen: pygame.Surface
 srect: pygame.Rect
 events: list[pygame.event.Event]
+mouse_pos: pygame.Vector2
 keys: list[bool]
 dt: float
 cursor: object
