@@ -1,3 +1,5 @@
+from ctypes import byref, c_int, sizeof, windll
+
 import pygame
 from pygame._sdl2 import Window
 
@@ -20,6 +22,13 @@ class Core:
 
         window = Window.from_display_module()
         window.opacity = 0.9
+
+        info = pygame.display.get_wm_info()
+        HWND = info["window"]
+        title_bar_color = 0x00000000
+        windll.dwmapi.DwmSetWindowAttribute(
+            HWND, 35, byref(c_int(title_bar_color)), sizeof(c_int)
+        )
 
     def update(self):
         shared.frame_cache.clear()
