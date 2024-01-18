@@ -1,10 +1,19 @@
-from axedit.core import Core
+import inspect
+import subprocess
+import sys
+from pathlib import Path
 
 
-def fungus_khan():
-    """some info!!!"""
-
-
+# This function invokes the actual editor in a separate process
+# and exits the terminal!
 def main():
-    core = Core()
-    core.run()
+    file_path = Path(inspect.getfile(inspect.currentframe()))
+    main_path = file_path.parent.parent / "main.py"
+    command = [sys.executable, str(main_path.absolute())]
+    subprocess.Popen(
+        command,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        close_fds=True,
+    )
