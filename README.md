@@ -5,48 +5,36 @@
 
 ## Keymaps
 
-### Normal Mode
+### Modal bindings
 
-- **Defaults:**
+| Keys  | Action      |
+| ----- | ----------- |
+| `i`   | Insert mode |
+| `v`   | Visual mode |
+| `ESC` | Normal mode |
 
-| Key | Action         |
-| --- | -------------- |
-| W   | Write mode     |
-| S   | Select mode    |
-| F   | Edit file name |
+### Cursor bindings
 
-- **Movement binds**:
+ <!-- TODO: Continue this :) -->
 
-| Key       | Action                                |
-| --------- | ------------------------------------- |
-| Q         | Start of file                         |
-| E         | End of file                           |
-| M         | Set marker / Delete marker            |
-| I         | Up                                    |
-| K         | Down                                  |
-| L         | Right                                 |
-| J         | Left                                  |
-| Shift + I | Above marker                          |
-| Shift + K | Below marker                          |
-| Shift + L | Next word                             |
-| Shift + J | Previous word                         |
-| X         | Delete and copy line                  |
-| Y         | Copy line                             |
-| )         | Go to next bracket                    |
-| (         | Go to previous bracket                |
-| G         | Switch between corresponding brackets |
-| H         | Switch between corresponding quotes   |
+| Keys | Action            |
+| ---- | ----------------- |
+| `h`  | Move cursor left  |
+| `l`  | Move cursor right |
+| `j`  | Move cursor down  |
+| `k`  | Move cursor up    |
 
-- NOTE: Can combine any number before action to make it repeat _n_ times
+### Commands
 
-### Select Mode
+Note: Writing to/Saving the file also invokes on-save hooks
 
-- All movement binds from NORMAL mode
-- Selects text from cursor's position at start of SELECT mode to current cursor position
-
-### Write Mode
-
-- All insertions are added to the file
-- Arrow keys -> movement in file
-- ENTER -> create new line
-- BACKSPACE -> delete character
+| Command                         | Action                             |
+| ------------------------------- | ---------------------------------- |
+| `:`                             | Previous command                   |
+| `:q[uit]`                       | Quit the editor                    |
+| `:w[write]`                     | Write the file                     |
+| `:wq` or `:x`                   | Write and quit the editor          |
+| `:save[as] file-name`           | Save the file as                   |
+| `:theme theme-name`             | Set the theme of the editor        |
+| `:hooks`                        | Open the on-save hooks file        |
+| `:line-numbers:relative on/off` | Set whether line no to be relative |

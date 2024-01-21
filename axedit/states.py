@@ -4,6 +4,7 @@ import pygame
 
 from axedit.editorstate import EditorState
 from axedit.file_select_state import FileSelectState
+from axedit.menu_state import MenuState
 from axedit.state_enums import State
 
 
@@ -22,6 +23,7 @@ class StateManager:
         self.state_dict: dict[State, StateLike] = {
             State.EDITOR: EditorState,
             State.FILE_SELECT: FileSelectState,
+            State.MAIN_MENU: MenuState,
         }
         # self.songs = {
         #     State.MENU: "assets/audio/main-menu-bgm.wav",
@@ -30,7 +32,7 @@ class StateManager:
         #     State.GAME_OVER: "assets/audio/game-over-bgm.wav",
         #     State.VICTORY: "assets/audio/victory-bgm.wav",
         # }
-        self.state_enum = State.EDITOR
+        self.state_enum = State.MAIN_MENU
         self.state_obj: StateLike = self.state_dict.get(self.state_enum)()
 
     @property

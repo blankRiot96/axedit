@@ -26,5 +26,5 @@ setup(
     #     "Topic :: Multimedia :: Sound/Audio",
     #     "Intended Audience :: End Users/Desktop",
     # ],
-    entry_points={"console_scripts": ["axedit=axedit:main"]},
+    entry_points={"console_scripts": ["axedit=axedit:main", "axe=axedit:main"]},
 )

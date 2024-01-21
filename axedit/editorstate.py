@@ -3,7 +3,7 @@ import pygame
 from axedit import shared
 from axedit.cursor import Cursor
 from axedit.editor import Editor
-from axedit.funcs import save_file, soft_save_file
+from axedit.funcs import save_file, set_windows_title, soft_save_file
 from axedit.line_numbers import LineNumbers
 from axedit.state_enums import FileState, State
 from axedit.status_bar import StatusBar
@@ -39,6 +39,7 @@ class EditorState:
                 shared.file_name = None
                 shared.chars = shared.CharList([[""]])
                 self.next_state = State.EDITOR
+                set_windows_title()
 
     def on_ctrl_s(self):
         if not shared.keys[pygame.K_LCTRL]:
@@ -54,7 +55,7 @@ class EditorState:
         shared.FONT_WIDTH = shared.FONT.render("w", True, "white").get_width()
         shared.FONT_HEIGHT = shared.FONT.get_height()
         shared.cursor.gen_image()
-        shared.saved = False
+        shared.chars_changed = True
 
     def handle_font_offset(self):
         if not shared.keys[pygame.K_LCTRL]:

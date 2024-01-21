@@ -5,7 +5,7 @@ from pathlib import Path
 import pygame
 
 from axedit import shared
-from axedit.funcs import open_file
+from axedit.funcs import open_file, set_windows_title
 from axedit.state_enums import State
 from axedit.utils import AcceleratedKeyPress, Time, highlight_text, render_at
 
@@ -193,6 +193,7 @@ class FileTree:
         except UnicodeDecodeError:
             return
         UI.state.next_state = State.EDITOR
+        set_windows_title()
 
     def on_enter(self):
         try:

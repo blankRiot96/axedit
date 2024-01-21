@@ -1,3 +1,4 @@
+import inspect
 import typing as t
 from pathlib import Path
 
@@ -9,12 +10,15 @@ pygame.font.init()
 
 # Constants
 font_size: int = 24
+APP_NAME = "axe"
 FONT_PATH = Path(
     Path(__file__).parent.parent / "assets/fonts/IntoneMonoNerdFontMono-Regular.ttf"
 )
 FONT = pygame.font.Font(FONT_PATH, font_size)
 FONT_WIDTH = FONT.render("w", True, "white").get_width()
 FONT_HEIGHT = FONT.get_height()
+AXE_FOLDER_PATH = Path(inspect.getfile(inspect.currentframe())).parent.parent
+ASSETS_FOLDER = AXE_FOLDER_PATH / "assets"
 
 
 # Shared Variables

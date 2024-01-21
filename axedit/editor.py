@@ -1,12 +1,10 @@
-import os
 from itertools import cycle
-from pathlib import Path
 
 import pygame
 
 from axedit import shared
 from axedit.autocompletions import AutoCompletions
-from axedit.funcs import get_text, is_event_frame, save_file
+from axedit.funcs import get_text, save_file
 from axedit.state_enums import FileState
 from axedit.syntax_highlighting import apply_syntax_highlighting
 from axedit.utils import AcceleratedKeyPress, EventManager, InputManager, Time

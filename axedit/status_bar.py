@@ -28,19 +28,51 @@ class StatusBar:
         if shared.file_name is None:
             return
 
-        return shared.file_name.replace("\\", "/")
+        return self.get_saved_status() + shared.file_name.replace("\\", "/")
+
+    def add_loc(self, n_chars: int, out_str: str):
+        loc_str = f"{shared.cursor_pos.x + 1},{shared.cursor_pos.y + 1}"
+        out_str += " " * (n_chars - len(out_str) - len(loc_str) - 1)
+        out_str += loc_str
+
+        return out_str
+
+    def add_file_name(self, out_str: str) -> str:
+        file_name = self.get_file_name()
+        if file_name is None:
+            return out_str
+
+        out_str += " "
+        file_name = f" {file_name} "
+        angle_offset = 20
+        poly_botleft = shared.FONT_WIDTH * len(out_str), shared.FONT_HEIGHT
+        poly_topleft = poly_botleft[0] + angle_offset, 0
+        poly_topright = (
+            poly_topleft[0] + (len(file_name) * shared.FONT_WIDTH),
+            0,
+        )
+        poly_botright = poly_topright[0] - angle_offset, shared.FONT_HEIGHT
+
+        points = [poly_botleft, poly_topleft, poly_topright, poly_botright]
+        pygame.draw.polygon(self.surf, (24, 12, 21), points)
+        out_str += f"{file_name}"
+
+        return out_str
 
     def gen_surf(self):
-        out_str = self.status_str.format(
-            saved=self.get_saved_status(),
-            file_name=self.get_file_name(),
-            mode=shared.mode.name,
-            loc=f"{shared.cursor_pos.x}, {shared.cursor_pos.y}",
-        )
-        self.surf = pygame.Surface(
-            (shared.srect.width, shared.FONT_HEIGHT + shared.FONT_WIDTH)
-        )
+        # out_str = self.status_str.format(
+        #     saved=self.get_saved_status(),
+        #     file_name=self.get_file_name(),
+        #     mode=shared.mode.name,
+        #     loc=f"{shared.cursor_pos.x}, {shared.cursor_pos.y}",
+        # )
+        self.surf = pygame.Surface((shared.srect.width, shared.FONT_HEIGHT))
         self.surf.fill((48, 25, 52))
+
+        n_chars = int(shared.srect.width / shared.FONT_WIDTH)
+        out_str = f"--{shared.mode.name}--"
+        # out_str = self.add_loc(n_chars, out_str)
+        out_str = self.add_file_name(out_str)
         render_at(
             self.surf, shared.FONT.render(out_str, True, "white"), "midleft", (5, 0)
         )

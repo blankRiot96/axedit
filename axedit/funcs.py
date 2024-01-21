@@ -2,6 +2,8 @@ import os
 import typing as t
 from pathlib import Path
 
+import pygame
+
 from axedit import shared
 
 
@@ -31,6 +33,8 @@ def get_text():
 
 
 def soft_save_file():
+    if shared.file_name is None:
+        return
     with open(shared.file_name, "w") as f:
         f.write(get_text())
 
@@ -55,3 +59,39 @@ def cache_by_frame(func: t.Callable) -> t.Callable:
         return shared.frame_cache.get(func)
 
     return call_func
+
+
+def get_icon(tinge="white") -> pygame.Surface:
+    icon = pygame.image.load(shared.ASSETS_FOLDER / "images/logo.png")
+    surf = pygame.Surface(icon.get_size())
+    surf.fill(tinge)
+
+    icon.blit(surf, (0, 0), special_flags=pygame.BLEND_MULT)
+
+    return icon
+
+
+def _gausian_sub(char: str):
+    if char in shared.file_name:
+        return shared.file_name[shared.file_name.find(char) + 1 :]
+
+    return shared.file_name
+
+
+def set_windows_title() -> None:
+    title_bar_text = shared.APP_NAME
+
+    if shared.file_name is not None:
+        file_name = shared.file_name
+        file_name = _gausian_sub("/")
+        file_name = _gausian_sub("\\")
+        title_bar_text = f"{shared.APP_NAME} - {file_name}"
+    w = int(shared.srect.width / 3.5)
+
+    pre_check_title = "⬞" + title_bar_text.rjust(w // 2)
+    if len(pre_check_title) < 255:
+        title_bar_text = pre_check_title
+    else:
+        title_bar_text = ""
+
+    pygame.display.set_caption(title_bar_text)
