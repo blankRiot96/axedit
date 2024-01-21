@@ -1,10 +1,11 @@
+from pathlib import Path
+
 from setuptools import find_packages, setup
 
 VERSION = "0.1.0"
 DESCRIPTION = "Modal Editor"
 LONG_DESCRIPTION = """Modal text editor"""
 
-# Setup
 setup(
     name="axedit",
     version=VERSION,
@@ -27,4 +28,10 @@ setup(
     #     "Intended Audience :: End Users/Desktop",
     # ],
     entry_points={"console_scripts": ["axedit=axedit:main", "axe=axedit:main"]},
+    include_package_data=True,
+    # data_files=[
+    #     "axedit/assets/fonts/IntoneMonoNerdFontMono-Regular.ttf",
+    #     "axedit/assets/images/logo.png",
+    # ],
+    data_files=[str(p) for p in Path("assets/").rglob("*") if not p.is_dir()],
 )

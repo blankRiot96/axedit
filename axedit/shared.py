@@ -12,12 +12,12 @@ pygame.font.init()
 font_size: int = 24
 APP_NAME = "axe"
 FONT_PATH = Path(
-    Path(__file__).parent.parent / "assets/fonts/IntoneMonoNerdFontMono-Regular.ttf"
+    Path(__file__).parent / "assets/fonts/IntoneMonoNerdFontMono-Regular.ttf"
 )
 FONT = pygame.font.Font(FONT_PATH, font_size)
 FONT_WIDTH = FONT.render("w", True, "white").get_width()
 FONT_HEIGHT = FONT.get_height()
-AXE_FOLDER_PATH = Path(inspect.getfile(inspect.currentframe())).parent.parent
+AXE_FOLDER_PATH = Path(inspect.getfile(inspect.currentframe())).parent
 ASSETS_FOLDER = AXE_FOLDER_PATH / "assets"
 
 

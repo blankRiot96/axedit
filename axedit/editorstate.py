@@ -3,7 +3,7 @@ import pygame
 from axedit import shared
 from axedit.cursor import Cursor
 from axedit.editor import Editor
-from axedit.funcs import save_file, set_windows_title, soft_save_file
+from axedit.funcs import offset_font_size, save_file, set_windows_title, soft_save_file
 from axedit.line_numbers import LineNumbers
 from axedit.state_enums import FileState, State
 from axedit.status_bar import StatusBar
@@ -49,14 +49,6 @@ class EditorState:
                 soft_save_file()
                 shared.saved = True
 
-    def offset_font_size(self, offset: int):
-        shared.font_size += offset
-        shared.FONT = pygame.font.Font(shared.FONT_PATH, shared.font_size)
-        shared.FONT_WIDTH = shared.FONT.render("w", True, "white").get_width()
-        shared.FONT_HEIGHT = shared.FONT.get_height()
-        shared.cursor.gen_image()
-        shared.chars_changed = True
-
     def handle_font_offset(self):
         if not shared.keys[pygame.K_LCTRL]:
             return
@@ -64,9 +56,9 @@ class EditorState:
         for event in shared.events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_EQUALS:
-                    self.offset_font_size(self.offset)
+                    offset_font_size(self.offset)
                 elif event.key == pygame.K_MINUS:
-                    self.offset_font_size(-self.offset)
+                    offset_font_size(-self.offset)
 
     def update(self):
         self.char_handler()

@@ -95,3 +95,14 @@ def set_windows_title() -> None:
         title_bar_text = ""
 
     pygame.display.set_caption(title_bar_text)
+
+
+def offset_font_size(offset: int):
+    shared.font_size += offset
+    shared.FONT = pygame.font.Font(shared.FONT_PATH, shared.font_size)
+    shared.FONT_WIDTH = shared.FONT.render("w", True, "white").get_width()
+    shared.FONT_HEIGHT = shared.FONT.get_height()
+    shared.chars_changed = True
+    if not hasattr(shared, "cursor"):
+        return
+    shared.cursor.gen_image()
