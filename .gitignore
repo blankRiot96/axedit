@@ -1,6 +1,7 @@
 # Custom
 *.exe
 todo.txt
+*.prof
 
 # VSCode
 pylspconfig.yaml
