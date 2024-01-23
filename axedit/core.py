@@ -47,6 +47,7 @@ class Core:
         shared.dt = self.clock.tick() / 1000
         shared.dt = min(shared.dt, 0.1)
         shared.keys = pygame.key.get_pressed()
+        shared.kp = pygame.key.get_just_pressed()
         shared.mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
 
         for event in shared.events:

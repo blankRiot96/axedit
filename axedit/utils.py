@@ -34,16 +34,20 @@ PgKey: t.TypeAlias = int
 
 
 class InputManager:
-    def __init__(self, mapping: dict[PgKey | list[PgKey], t.Callable]) -> None:
+    def __init__(self, mapping: dict[PgKey | tuple[PgKey, ...], t.Callable]) -> None:
         self.mapping = mapping
 
-    def update(self, events):
-        for event in events:
-            if event.type != pygame.KEYDOWN:
-                continue
+    def scan_for_input(
+        self, key_just_pressed: list[bool], binding: PgKey | tuple[PgKey]
+    ) -> bool:
+        if isinstance(binding, tuple):
+            return all(self.scan_for_input(key_just_pressed, key) for key in binding)
 
-            call = self.mapping.get(event.key)
-            if call is not None:
+        return key_just_pressed[binding]
+
+    def update(self, key_just_pressed):
+        for binding, call in self.mapping.items():
+            if self.scan_for_input(key_just_pressed, binding):
                 call()
 
 
@@ -116,10 +120,10 @@ class AcceleratedKeyPress:
 
         return True
 
-    def update(self, events: list[pygame.Event], keys: list[bool]):
+    def update(self, key_just_pressed: list[bool], keys: list[bool]):
         if not self.get_base_key_status(keys):
             return
-        self.input_manager.update(events)
+        self.input_manager.update(key_just_pressed)
         self.handle_timer(keys)
 
 
@@ -309,8 +313,6 @@ def get_images(
             images.append(image)
 
     return images
-
-
 
 
 def render_at(

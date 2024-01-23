@@ -4,6 +4,7 @@ import pygame
 
 from axedit import shared
 from axedit.autocompletions import AutoCompletions
+from axedit.classes import Pos
 from axedit.funcs import get_text, save_file
 from axedit.state_enums import FileState
 from axedit.syntax_highlighting import apply_syntax_highlighting
@@ -144,10 +145,10 @@ class WriteMode:
 
     def handle_input(self):
         shared.text_writing = False
-        self.input_manager.update(shared.events)
+        self.input_manager.update(shared.kp)
         self.event_manager.update(shared.events)
-        self.accelerated_backspace.update(shared.events, shared.keys)
-        self.accelerated_new_line.update(shared.events, shared.keys)
+        self.accelerated_backspace.update(shared.kp, shared.keys)
+        self.accelerated_new_line.update(shared.kp, shared.keys)
         self.blink_cursor()
 
 
@@ -155,11 +156,11 @@ class NormalMode:
     def __init__(self) -> None:
         self.input_manager = InputManager(
             {
-                pygame.K_q: self.on_q,
-                pygame.K_w: self.on_w,
-                pygame.K_e: self.on_e,
-                # pygame.K_s: self.on_s,
-                pygame.K_f: self.on_f,
+                # (pygame.K_g, pygame.K_g): self.on_gg,
+                pygame.K_i: self.on_i,
+                (pygame.K_LSHIFT, pygame.K_g): self.on_shift_g,
+                # pygame.K_v: self.on_v,
+                # pygame.K_f: self.on_f,
             }
         )
         self.event_manager = EventManager({pygame.TEXTINPUT: self.register_number})
@@ -186,16 +187,16 @@ class NormalMode:
         shared.file_name = self.mini_cur
         shared.naming_file = True
 
-    def on_w(self):
-        shared.mode = FileState.WRITE
+    def on_i(self):
+        shared.mode = FileState.INSERT
 
-    def on_s(self):
-        shared.mode = FileState.SELECT
+    def on_v(self):
+        shared.mode = FileState.VISUAL
 
-    def on_q(self):
+    def on_gg(self):
         shared.cursor_pos.x, shared.cursor_pos.y = 0, 0
 
-    def on_e(self):
+    def on_shift_g(self):
         shared.cursor_pos.y = len(shared.chars) - 1
         shared.cursor_pos.x = len(shared.chars[-1])
 
@@ -226,7 +227,7 @@ class NormalMode:
         shared.cursor.alpha = 255
         if shared.naming_file:
             return
-        self.input_manager.update(shared.events)
+        self.input_manager.update(shared.kp)
         self.event_manager.update(shared.events)
 
 
@@ -241,9 +242,9 @@ class Editor:
         self.offset = pygame.Vector2()
 
         self.input_handlers = {
-            FileState.WRITE: WriteMode().handle_input,
+            FileState.INSERT: WriteMode().handle_input,
             FileState.NORMAL: NormalMode().handle_input,
-            FileState.SELECT: self.handle_select_input,
+            FileState.VISUAL: self.handle_select_input,
         }
         self.autocompletion = AutoCompletions()
 
@@ -299,7 +300,7 @@ class Editor:
                 if x_pos > len(shared.chars[y_pos]) - 1:
                     x_pos = len(shared.chars[y_pos])
 
-                shared.cursor_pos = shared.Pos(x_pos, y_pos)
+                shared.cursor_pos = Pos(x_pos, y_pos)
 
     def update(self):
         self.pre_render_lines()

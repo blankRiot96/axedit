@@ -5,6 +5,7 @@ from pathlib import Path
 import pygame
 
 from axedit import shared
+from axedit.classes import CharList, Pos
 
 
 def is_event_frame(event_type: int) -> bool:
@@ -18,9 +19,9 @@ def open_file(file: str) -> None:
     with open(file) as f:
         content = f.readlines()
 
-    shared.cursor_pos = shared.Pos(0, 0)
+    shared.cursor_pos = Pos(0, 0)
     shared.file_name = file
-    shared.chars = shared.CharList([list(line[:-1]) for line in content])
+    shared.chars = CharList([list(line[:-1]) for line in content])
     if not shared.chars:
         shared.chars.append([])
 
@@ -98,8 +99,8 @@ def set_windows_title() -> None:
 
 
 def offset_font_size(offset: int):
-    shared.font_size += offset
-    shared.FONT = pygame.font.Font(shared.FONT_PATH, shared.font_size)
+    shared.FONT_SIZE += offset
+    shared.FONT = pygame.font.Font(shared.FONT_PATH, shared.FONT_SIZE)
     shared.FONT_WIDTH = shared.FONT.render("w", True, "white").get_width()
     shared.FONT_HEIGHT = shared.FONT.get_height()
     shared.chars_changed = True

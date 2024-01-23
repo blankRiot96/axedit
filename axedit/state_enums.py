@@ -8,6 +8,6 @@ class State(Enum):
 
 
 class FileState(StrEnum):
-    WRITE = auto()
-    SELECT = auto()
+    INSERT = auto()
+    VISUAL = auto()
     NORMAL = auto()

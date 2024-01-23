@@ -15,10 +15,10 @@ class Cursor:
         pygame.K_DOWN: (0, 1),
     }
     NORMAL_KEYS = {
-        pygame.K_j: (-1, 0),
+        pygame.K_h: (-1, 0),
         pygame.K_l: (1, 0),
-        pygame.K_i: (0, -1),
-        pygame.K_k: (0, 1),
+        pygame.K_k: (0, -1),
+        pygame.K_j: (0, 1),
     }
 
     def __init__(self) -> None:
@@ -69,7 +69,7 @@ class Cursor:
             return
 
         if len(shared.chars) - 1 < shared.cursor_pos.y:
-            shared.chars.insert(shared.cursor_pos.y, [])
+            shared.cursor_pos.y -= 1 
         if (line_len := len(shared.chars[shared.cursor_pos.y])) < shared.cursor_pos.x:
             # diff = shared.cursor_pos.x - line_len
             # shared.chars[shared.cursor_pos.y].extend([" "] * diff)
@@ -139,13 +139,13 @@ class Cursor:
         if shared.autocompleting:
             return
         for accel in self.accels:
-            accel.update(shared.events, shared.keys)
+            accel.update(shared.kp, shared.keys)
 
         if shared.mode != FileState.NORMAL:
             return
 
         for accel in self.normal_accels:
-            accel.update(shared.events, shared.keys)
+            accel.update(shared.kp, shared.keys)
 
     def update(self):
         self.move()

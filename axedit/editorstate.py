@@ -1,6 +1,7 @@
 import pygame
 
 from axedit import shared
+from axedit.classes import CharList, Pos
 from axedit.cursor import Cursor
 from axedit.editor import Editor
 from axedit.funcs import offset_font_size, save_file, set_windows_title, soft_save_file
@@ -9,35 +10,47 @@ from axedit.state_enums import FileState, State
 from axedit.status_bar import StatusBar
 from axedit.utils import render_at
 
+shared.chars = CharList([CharList([])])
+
 
 class EditorState:
     def __init__(self) -> None:
-        shared.saved = True
-        shared.import_line_changed = False
+        self.shared_reset()
         self.next_state: State | None = None
         self.editor = Editor()
         self.line_numbers = LineNumbers()
         self.status_bar = StatusBar()
-        shared.cursor = Cursor()
-
         self.offset = 4
 
-    def on_o(self):
+    def shared_reset(self):
+        shared.cursor_pos = Pos(0, 0)
+        shared.saved = True
+        shared.import_line_changed = False
+        shared.cursor = Cursor()
+
+    def on_ctrl_p(self):
         if shared.mode != FileState.NORMAL or shared.naming_file:
             return
+
+        if not shared.keys[pygame.K_LCTRL]:
+            return
+
         for event in shared.events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_o:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 save_file()
                 self.next_state = State.FILE_SELECT
 
-    def on_n(self):
+    def on_ctrl_n(self):
         if shared.mode != FileState.NORMAL:
+            return
+
+        if not shared.keys[pygame.K_LCTRL]:
             return
 
         for event in shared.events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
                 shared.file_name = None
-                shared.chars = shared.CharList([[""]])
+                shared.chars = CharList([[""]])
                 self.next_state = State.EDITOR
                 set_windows_title()
 
@@ -62,8 +75,8 @@ class EditorState:
 
     def update(self):
         self.char_handler()
-        self.on_o()
-        self.on_n()
+        self.on_ctrl_p()
+        self.on_ctrl_n()
         if self.next_state is not None:
             return
         self.handle_font_offset()
@@ -76,8 +89,8 @@ class EditorState:
     def char_handler(self):
         shared.chars_changed = False
         for i, lst in enumerate(shared.chars):
-            if not isinstance(lst, shared.CharList):
-                shared.chars[i] = shared.CharList(lst)
+            if not isinstance(lst, CharList):
+                shared.chars[i] = CharList(lst)
 
     def draw_all(self):
         line_width, line_height = self.line_numbers.surf.get_size()

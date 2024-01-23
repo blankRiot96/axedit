@@ -97,7 +97,7 @@ class SearchBar:
         UI.file_tree.filter_preview_files()
 
     def update(self):
-        self.accel.update(shared.events, shared.keys)
+        self.accel.update(shared.kp, shared.keys)
         for event in shared.events:
             if event.type == pygame.TEXTINPUT:
                 self.on_enter(event)
