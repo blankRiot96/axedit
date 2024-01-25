@@ -107,3 +107,10 @@ def offset_font_size(offset: int):
     if not hasattr(shared, "cursor"):
         return
     shared.cursor.gen_image()
+
+
+def center_cursor():
+    shared.scroll.y = -shared.cursor_pos.y * shared.FONT_HEIGHT
+    shared.scroll.y += shared.srect.height / 2
+    shared.scroll.y = min(shared.scroll.y, 0)
+    shared.chars_changed = True

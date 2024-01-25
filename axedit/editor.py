@@ -5,7 +5,7 @@ import pygame
 from axedit import shared
 from axedit.autocompletions import AutoCompletions
 from axedit.classes import Pos
-from axedit.funcs import get_text, save_file
+from axedit.funcs import center_cursor, get_text, save_file
 from axedit.input_queue import AcceleratedKeyPress, EventManager, InputManager
 from axedit.state_enums import FileState
 from axedit.syntax_highlighting import apply_syntax_highlighting
@@ -166,8 +166,10 @@ class NormalMode:
         self.input_manager = InputManager(
             {
                 ("g", "g"): self.on_gg,
+                ("G",): self.on_G,
+                ("z", "z"): self.on_zz,
+                ("d", "d"): self.on_dd,
                 pygame.K_i: self.on_i,
-                # (pygame.K_LSHIFT, pygame.K_g): self.on_shift_g,
                 # pygame.K_v: self.on_v,
                 # pygame.K_f: self.on_f,
             }
@@ -202,10 +204,16 @@ class NormalMode:
     def on_v(self):
         shared.mode = FileState.VISUAL
 
+    def on_dd(self):
+        shared.chars.pop(shared.cursor_pos.y)
+
+    def on_zz(self):
+        center_cursor()
+
     def on_gg(self):
         shared.cursor_pos.x, shared.cursor_pos.y = 0, 0
 
-    def on_shift_g(self):
+    def on_G(self):
         shared.cursor_pos.y = len(shared.chars) - 1
         shared.cursor_pos.x = len(shared.chars[-1])
 
@@ -246,7 +254,6 @@ class Editor:
             (shared.srect.width, len(shared.chars) * shared.FONT_HEIGHT),
             pygame.SRCALPHA,
         )
-        self.pre_rendered_lines: list[pygame.Surface] = [None for _ in shared.chars]
         shared.scroll = pygame.Vector2()
         self.gen_image()
 
@@ -260,13 +267,13 @@ class Editor:
     def on_scroll(self):
         for event in shared.events:
             if event.type == pygame.MOUSEWHEEL:
-                shared.scroll.y += event.y * 30
+                shared.scroll.y += event.y * shared.FONT_HEIGHT
                 shared.scroll.y = min(shared.scroll.y, 0)
                 shared.chars_changed = True
 
     def gen_image(self):
         if shared.file_name is not None and shared.file_name.endswith(".py"):
-            self.image = apply_syntax_highlighting(self.pre_rendered_lines)
+            self.image = apply_syntax_highlighting()
         else:
             text = get_text()
             if text.strip() == "":
@@ -279,15 +286,6 @@ class Editor:
     def handle_input(self):
         input_handler = self.input_handlers[shared.mode]
         input_handler()
-
-    def pre_render_lines(self):
-        surfs = self.pre_rendered_lines.copy()
-        self.pre_rendered_lines = []
-        for y in range(len(shared.chars)):
-            # if y < len(surfs) and surfs[y] is not None:
-            # self.pre_rendered_lines.append(surfs[y])
-            # continue
-            self.pre_rendered_lines.append(None)
 
     def mouse_placement(self):
         for event in shared.events:
@@ -312,13 +310,19 @@ class Editor:
 
                 shared.cursor_pos = Pos(x_pos, y_pos)
 
+    def clear_queue(self):
+        if shared.mode in (shared.FileState.NORMAL, shared.FileState.VISUAL):
+            return
+
+        shared.action_queue.clear()
+
     def update(self):
-        self.pre_render_lines()
+        self.clear_queue()
+        self.mouse_placement()
+        self.on_scroll()
         self.handle_input()
         self.autocompletion.update()
         self.gen_image()
-        self.on_scroll()
-        self.mouse_placement()
 
     def draw(self):
         self.surf = pygame.Surface(

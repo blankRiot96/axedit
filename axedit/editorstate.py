@@ -33,7 +33,7 @@ class EditorState:
         if shared.mode != FileState.NORMAL or shared.naming_file:
             return
 
-        if shared.action_queue == ["ctrl", "p"]:
+        if shared.keys[pygame.K_LSHIFT] and shared.kp[pygame.K_p]:
             save_file()
             self.next_state = State.FILE_SELECT
 
@@ -70,17 +70,31 @@ class EditorState:
                 elif event.key == pygame.K_MINUS:
                     offset_font_size(-self.offset)
 
+    def queue_actions(self):
+        if shared.mode not in (FileState.NORMAL, FileState.VISUAL):
+            return
+
+        for event in shared.events:
+            if event.type == pygame.TEXTINPUT:
+                shared.action_queue.append(event.text)
+            elif event.type == pygame.KEYDOWN:
+                if event.key in (pygame.K_LCTRL, pygame.K_RCTRL):
+                    shared.action_queue.append("ctrl")
+                elif event.key in (pygame.K_LALT, pygame.K_RALT):
+                    shared.action_queue.append("alt")
+
     def update(self):
-        self.char_handler()
-        self.on_ctrl_p()
-        self.on_ctrl_n()
         if self.next_state is not None:
             return
+        self.char_handler()
+        self.queue_actions()
+        self.on_ctrl_p()
+        self.on_ctrl_n()
         self.handle_font_offset()
+        shared.cursor.update()
         self.editor.update()
         self.line_numbers.update()
         self.status_bar.update()
-        shared.cursor.update()
         self.on_ctrl_s()
 
     def char_handler(self):

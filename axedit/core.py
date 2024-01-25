@@ -49,13 +49,6 @@ class Core:
             elif event.type == pygame.VIDEORESIZE:
                 shared.srect = shared.screen.get_rect()
                 set_windows_title()
-            elif event.type == pygame.TEXTINPUT:
-                shared.action_queue.append(event.text)
-            elif event.type == pygame.KEYDOWN:
-                if event.key in (pygame.K_LCTRL, pygame.K_RCTRL):
-                    shared.action_queue.append("ctrl")
-                elif event.key in (pygame.K_LALT, pygame.K_RALT):
-                    shared.action_queue.append("alt")
 
     def shared_refresh(self):
         shared.frame_cache.clear()

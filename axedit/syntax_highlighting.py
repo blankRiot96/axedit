@@ -228,9 +228,7 @@ def is_necessary_to_render(y: int, line: str) -> bool:
 prev_image = None
 
 
-def apply_syntax_highlighting(
-    pre_rendered_lines: dict[str, pygame.Surface]
-) -> pygame.Surface:
+def apply_syntax_highlighting() -> pygame.Surface:
     global prev_image
     if (
         not is_event_frame(pygame.VIDEORESIZE)
@@ -255,21 +253,15 @@ def apply_syntax_highlighting(
     scroll_offset = int(-shared.scroll.y / shared.FONT_HEIGHT)
     visible_lines = shared.chars[scroll_offset : scroll_offset + n_lines_to_render]
 
-    print(n_lines_to_render, scroll_offset)
-
     image = pygame.Surface(
-        (shared.srect.width, n_lines_to_render * shared.FONT_HEIGHT), pygame.SRCALPHA
+        (shared.srect.width, len(shared.chars) * shared.FONT_HEIGHT), pygame.SRCALPHA
     )
-    for y, item in enumerate(zip(visible_lines, pre_rendered_lines)):
+    for y, row in enumerate(visible_lines):
         y += scroll_offset
-        row, surf = item
         row = "".join(row)
-        if not is_necessary_to_render(y, row) and surf is not None:
-            image.blit(surf, (0, y * shared.FONT_HEIGHT))
-            continue
+
         color_ranges = index_colors(row)
         row_image = line_wise_stitching(row, color_ranges)
-        pre_rendered_lines[y] = row_image
         image.blit(row_image, (0, y * shared.FONT_HEIGHT))
 
     prev_image = image.copy()

@@ -3,6 +3,7 @@ from functools import partial
 import pygame
 
 from axedit import shared
+from axedit.funcs import center_cursor
 from axedit.input_queue import AcceleratedKeyPress
 from axedit.state_enums import FileState
 from axedit.utils import Time
@@ -25,6 +26,7 @@ class Cursor:
     def __init__(self) -> None:
         self.gen_image()
         self.pos = pygame.Vector2()
+        self.rect = self.image.get_rect(topleft=self.pos)
         self.alpha = 255
         self.blink_speed = 350
         self.direction = -1
@@ -110,7 +112,6 @@ class Cursor:
             cursor_shift += 1
 
         cursor_shift += len(remaining_line) - len(purified)
-        print(cursor_shift)
         return cursor_shift
 
     def handle_normals(self, key: int):
@@ -118,24 +119,40 @@ class Cursor:
         if move is None:
             return
 
-        if shared.keys[pygame.K_LSHIFT]:
-            line = shared.chars[shared.cursor_pos.y]
-            if move[0] > 0:
-                remaining = line[shared.cursor_pos.x :]
-            else:
-                remaining = line[: shared.cursor_pos.x]
-            cursor_shift = self.get_cursor_shift(remaining)
-            move = (move[0] * cursor_shift, move[1])
+        # if shared.keys[pygame.K_LSHIFT]:
+        #     line = shared.chars[shared.cursor_pos.y]
+        #     if move[0] > 0:
+        #         remaining = line[shared.cursor_pos.x :]
+        #     else:
+        #         remaining = line[: shared.cursor_pos.x]
+        #     cursor_shift = self.get_cursor_shift(remaining)
+        #     move = (move[0] * cursor_shift, move[1])
 
         self.handle_cursor_delta(move)
+
+    def register_adjust(self):
+        if not shared.action_queue:
+            return
+        if shared.action_queue[-1] in "jk":
+            shared.registered_number = min(shared.registered_number, len(shared.chars))
+        elif shared.action_queue[-1] in "hl":
+            shared.registered_number = min(
+                shared.registered_number, len(shared.chars[shared.cursor_pos.y])
+            )
 
     def handle_input(self, key):
         self.handle_arrows(key)
 
-        if shared.mode == FileState.NORMAL:
+        if shared.mode in (FileState.NORMAL, FileState.VISUAL):
+            self.register_adjust()
             for _ in range(shared.registered_number):
                 self.handle_normals(key)
 
+            visible_region = pygame.Rect(0, shared.scroll.y, *shared.srect.size)
+            # if ((shared.cursor_pos.y - 1) * shared.FONT_HEIGHT) > shared.scroll.y:
+            if not self.rect.colliderect(visible_region):
+                center_cursor()
+            shared.action_queue.clear()
             shared.registered_number = 1
 
     def update_accels(self):
@@ -154,6 +171,7 @@ class Cursor:
         self.move()
         self.blink()
         self.update_accels()
+        self.rect.topleft = self.pos
 
     def draw(self, editor_surf: pygame.Surface):
         editor_surf.blit(self.image, self.pos)

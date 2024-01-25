@@ -3,7 +3,7 @@ import typing as t
 from axedit import shared
 from axedit.utils import Time
 
-PgKey: t.TypeAlias = int
+PgKey: t.TypeAlias = int | str
 
 
 class InputManager:
