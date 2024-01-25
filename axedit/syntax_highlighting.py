@@ -249,10 +249,19 @@ def apply_syntax_highlighting(
     except SyntaxError:
         pass
 
+    # TODO: YOU CAN DO THIS!!
+    safety_padding = 2
+    n_lines_to_render = int(shared.srect.height / shared.FONT_HEIGHT) + safety_padding
+    scroll_offset = int(-shared.scroll.y / shared.FONT_HEIGHT)
+    visible_lines = shared.chars[scroll_offset : scroll_offset + n_lines_to_render]
+
+    print(n_lines_to_render, scroll_offset)
+
     image = pygame.Surface(
-        (shared.srect.width, len(shared.chars) * shared.FONT_HEIGHT), pygame.SRCALPHA
+        (shared.srect.width, n_lines_to_render * shared.FONT_HEIGHT), pygame.SRCALPHA
     )
-    for y, item in enumerate(zip(shared.chars, pre_rendered_lines)):
+    for y, item in enumerate(zip(visible_lines, pre_rendered_lines)):
+        y += scroll_offset
         row, surf = item
         row = "".join(row)
         if not is_necessary_to_render(y, row) and surf is not None:

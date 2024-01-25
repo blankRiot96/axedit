@@ -6,9 +6,10 @@ from axedit import shared
 from axedit.autocompletions import AutoCompletions
 from axedit.classes import Pos
 from axedit.funcs import get_text, save_file
+from axedit.input_queue import AcceleratedKeyPress, EventManager, InputManager
 from axedit.state_enums import FileState
 from axedit.syntax_highlighting import apply_syntax_highlighting
-from axedit.utils import AcceleratedKeyPress, EventManager, InputManager, Time
+from axedit.utils import Time
 
 
 class WriteMode:
@@ -145,20 +146,28 @@ class WriteMode:
 
     def handle_input(self):
         shared.text_writing = False
-        self.input_manager.update(shared.kp)
-        self.event_manager.update(shared.events)
-        self.accelerated_backspace.update(shared.kp, shared.keys)
-        self.accelerated_new_line.update(shared.kp, shared.keys)
+        self.input_manager.update()
+        self.event_manager.update()
+        self.accelerated_backspace.update()
+        self.accelerated_new_line.update()
         self.blink_cursor()
+
+
+"""
+input_manager -> {
+    j -> down,
+    l -> 
+}
+"""
 
 
 class NormalMode:
     def __init__(self) -> None:
         self.input_manager = InputManager(
             {
-                # (pygame.K_g, pygame.K_g): self.on_gg,
+                ("g", "g"): self.on_gg,
                 pygame.K_i: self.on_i,
-                (pygame.K_LSHIFT, pygame.K_g): self.on_shift_g,
+                # (pygame.K_LSHIFT, pygame.K_g): self.on_shift_g,
                 # pygame.K_v: self.on_v,
                 # pygame.K_f: self.on_f,
             }
@@ -227,8 +236,8 @@ class NormalMode:
         shared.cursor.alpha = 255
         if shared.naming_file:
             return
-        self.input_manager.update(shared.kp)
-        self.event_manager.update(shared.events)
+        self.input_manager.update()
+        self.event_manager.update()
 
 
 class Editor:
@@ -238,8 +247,8 @@ class Editor:
             pygame.SRCALPHA,
         )
         self.pre_rendered_lines: list[pygame.Surface] = [None for _ in shared.chars]
+        shared.scroll = pygame.Vector2()
         self.gen_image()
-        self.offset = pygame.Vector2()
 
         self.input_handlers = {
             FileState.INSERT: WriteMode().handle_input,
@@ -251,8 +260,9 @@ class Editor:
     def on_scroll(self):
         for event in shared.events:
             if event.type == pygame.MOUSEWHEEL:
-                self.offset.y += event.y * 30
-                self.offset.y = min(self.offset.y, 0)
+                shared.scroll.y += event.y * 30
+                shared.scroll.y = min(shared.scroll.y, 0)
+                shared.chars_changed = True
 
     def gen_image(self):
         if shared.file_name is not None and shared.file_name.endswith(".py"):
@@ -282,8 +292,8 @@ class Editor:
     def mouse_placement(self):
         for event in shared.events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                x_pos = shared.mouse_pos.x + self.offset.x - (shared.FONT_WIDTH * 5)
-                y_pos = shared.mouse_pos.y - self.offset.y
+                x_pos = shared.mouse_pos.x + shared.scroll.x - (shared.FONT_WIDTH * 5)
+                y_pos = shared.mouse_pos.y - shared.scroll.y
 
                 # Pixel to cursor pos
                 x_pos /= shared.FONT_WIDTH

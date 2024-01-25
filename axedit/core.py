@@ -15,6 +15,7 @@ class Core:
         self.win_init()
         self.state_manager = StateManager()
         self.frame_no = 0
+        shared.action_queue = []
 
     def win_init(self):
         shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=1)
@@ -41,7 +42,22 @@ class Core:
 
             set_windows_title()
 
-    def update(self):
+    def event_handler(self):
+        for event in shared.events:
+            if event.type == pygame.QUIT:
+                exit()
+            elif event.type == pygame.VIDEORESIZE:
+                shared.srect = shared.screen.get_rect()
+                set_windows_title()
+            elif event.type == pygame.TEXTINPUT:
+                shared.action_queue.append(event.text)
+            elif event.type == pygame.KEYDOWN:
+                if event.key in (pygame.K_LCTRL, pygame.K_RCTRL):
+                    shared.action_queue.append("ctrl")
+                elif event.key in (pygame.K_LALT, pygame.K_RALT):
+                    shared.action_queue.append("alt")
+
+    def shared_refresh(self):
         shared.frame_cache.clear()
         shared.events = pygame.event.get()
         shared.dt = self.clock.tick() / 1000
@@ -50,14 +66,11 @@ class Core:
         shared.kp = pygame.key.get_just_pressed()
         shared.mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
 
-        for event in shared.events:
-            if event.type == pygame.QUIT:
-                exit()
-            elif event.type == pygame.VIDEORESIZE:
-                shared.srect = shared.screen.get_rect()
-                set_windows_title()
+    def update(self):
+        self.shared_refresh()
+        self.event_handler()
         self.state_manager.update()
-        # pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
+        pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
 
     def draw(self):
         shared.screen.fill("black")

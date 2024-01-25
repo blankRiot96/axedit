@@ -17,14 +17,12 @@ pygame.font.init()
 # Constants
 FONT_SIZE: int = 24
 APP_NAME = "axe"
-FONT_PATH = Path(
-    Path(__file__).parent / "assets/fonts/IntoneMonoNerdFontMono-Regular.ttf"
-)
+AXE_FOLDER_PATH = Path(inspect.getfile(inspect.currentframe())).parent
+ASSETS_FOLDER = AXE_FOLDER_PATH / "assets"
+FONT_PATH = ASSETS_FOLDER / "fonts/IntoneMonoNerdFontMono-Regular.ttf"
 FONT = pygame.font.Font(FONT_PATH, FONT_SIZE)
 FONT_WIDTH = FONT.render("w", True, "white").get_width()
 FONT_HEIGHT = FONT.get_height()
-AXE_FOLDER_PATH = Path(inspect.getfile(inspect.currentframe())).parent
-ASSETS_FOLDER = AXE_FOLDER_PATH / "assets"
 
 # Core
 screen: pygame.Surface
@@ -45,10 +43,14 @@ cursor: Cursor
 # Config
 mode: FileState = FileState.NORMAL
 file_name: str | None = None
+
+# Registers
 frame_cache: dict[t.Callable, t.Any]
+registered_number: int = 1
+action_queue: list[str]
+scroll: pygame.Vector2
 
 # Flags
-registered_number: int = 1
 autocompleting = False
 text_writing = False
 naming_file: bool

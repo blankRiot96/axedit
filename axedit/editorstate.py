@@ -27,18 +27,15 @@ class EditorState:
         shared.saved = True
         shared.import_line_changed = False
         shared.cursor = Cursor()
+        shared.action_queue.clear()
 
     def on_ctrl_p(self):
         if shared.mode != FileState.NORMAL or shared.naming_file:
             return
 
-        if not shared.keys[pygame.K_LCTRL]:
-            return
-
-        for event in shared.events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                save_file()
-                self.next_state = State.FILE_SELECT
+        if shared.action_queue == ["ctrl", "p"]:
+            save_file()
+            self.next_state = State.FILE_SELECT
 
     def on_ctrl_n(self):
         if shared.mode != FileState.NORMAL:
@@ -97,12 +94,12 @@ class EditorState:
         editor_width, editor_height = self.editor.surf.get_size()
         status_width, status_height = self.status_bar.surf.get_size()
 
-        render_at(shared.screen, self.line_numbers.surf, "topleft", self.editor.offset)
+        render_at(shared.screen, self.line_numbers.surf, "topleft", shared.scroll)
         render_at(
             shared.screen,
             self.editor.surf,
             "topleft",
-            (line_width, 0) + self.editor.offset,
+            (line_width, 0) + shared.scroll,
         )
         render_at(
             shared.screen,

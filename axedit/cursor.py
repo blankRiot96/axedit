@@ -3,8 +3,9 @@ from functools import partial
 import pygame
 
 from axedit import shared
+from axedit.input_queue import AcceleratedKeyPress
 from axedit.state_enums import FileState
-from axedit.utils import AcceleratedKeyPress, Time
+from axedit.utils import Time
 
 
 class Cursor:
@@ -69,7 +70,7 @@ class Cursor:
             return
 
         if len(shared.chars) - 1 < shared.cursor_pos.y:
-            shared.cursor_pos.y -= 1 
+            shared.cursor_pos.y -= 1
         if (line_len := len(shared.chars[shared.cursor_pos.y])) < shared.cursor_pos.x:
             # diff = shared.cursor_pos.x - line_len
             # shared.chars[shared.cursor_pos.y].extend([" "] * diff)
@@ -135,17 +136,19 @@ class Cursor:
             for _ in range(shared.registered_number):
                 self.handle_normals(key)
 
+            shared.registered_number = 1
+
     def update_accels(self):
         if shared.autocompleting:
             return
         for accel in self.accels:
-            accel.update(shared.kp, shared.keys)
+            accel.update()
 
         if shared.mode != FileState.NORMAL:
             return
 
         for accel in self.normal_accels:
-            accel.update(shared.kp, shared.keys)
+            accel.update()
 
     def update(self):
         self.move()

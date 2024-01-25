@@ -19,8 +19,14 @@ class LineNumbers:
             pygame.SRCALPHA,
         )
         for i in range(len(shared.chars)):
-            text = shared.FONT.render(str(i + 1), True, "white")
-            text.set_alpha(150)
+            alpha = 150
+            num = abs(shared.cursor_pos.y - i)
             if i == shared.cursor_pos.y:
-                text.set_alpha(255)
+                alpha = 255
+                num = i + 1
+                num = " " + str(num)
+
+            text = shared.FONT.render(str(num), True, "white")
+            text.set_alpha(alpha)
+
             self.surf.blit(text, (shared.FONT_WIDTH, i * shared.FONT_HEIGHT))

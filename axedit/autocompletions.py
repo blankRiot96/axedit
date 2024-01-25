@@ -3,8 +3,8 @@ import pygame
 
 from axedit import shared
 from axedit.funcs import get_text
+from axedit.input_queue import InputManager
 from axedit.state_enums import FileState
-from axedit.utils import InputManager
 
 _POSSIBLE_COMPLETIONS = {
     "module": ("󰅩", "purple"),
@@ -161,7 +161,7 @@ class AutoCompletions:
             self.after_autocompletion()
             return
 
-        self.input_manager.update(shared.events)
+        self.input_manager.update()
 
     def get_icon_surf(self, suggestion) -> pygame.Surface:
         icon, color = _POSSIBLE_COMPLETIONS.get(suggestion.type, ("", "green"))

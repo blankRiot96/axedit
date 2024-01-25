@@ -6,8 +6,9 @@ import pygame
 
 from axedit import shared
 from axedit.funcs import open_file, set_windows_title
+from axedit.input_queue import AcceleratedKeyPress
 from axedit.state_enums import State
-from axedit.utils import AcceleratedKeyPress, Time, highlight_text, render_at
+from axedit.utils import Time, highlight_text, render_at
 
 
 class Preview:
@@ -97,7 +98,7 @@ class SearchBar:
         UI.file_tree.filter_preview_files()
 
     def update(self):
-        self.accel.update(shared.kp, shared.keys)
+        self.accel.update()
         for event in shared.events:
             if event.type == pygame.TEXTINPUT:
                 self.on_enter(event)
