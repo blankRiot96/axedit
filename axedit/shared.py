@@ -57,3 +57,4 @@ naming_file: bool
 chars_changed: bool
 saved: bool
 import_line_changed: bool
+actions_modified: bool

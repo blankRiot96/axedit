@@ -70,22 +70,27 @@ class EditorState:
                 elif event.key == pygame.K_MINUS:
                     offset_font_size(-self.offset)
 
+    def push_action(self, action: str):
+        shared.action_queue.append(action)
+        shared.actions_modified = True
+
     def queue_actions(self):
         if shared.mode not in (FileState.NORMAL, FileState.VISUAL):
             return
 
         for event in shared.events:
             if event.type == pygame.TEXTINPUT:
-                shared.action_queue.append(event.text)
+                self.push_action(event.text)
             elif event.type == pygame.KEYDOWN:
                 if event.key in (pygame.K_LCTRL, pygame.K_RCTRL):
-                    shared.action_queue.append("ctrl")
+                    self.push_action("ctrl")
                 elif event.key in (pygame.K_LALT, pygame.K_RALT):
-                    shared.action_queue.append("alt")
+                    self.push_action("alt")
 
     def update(self):
         if self.next_state is not None:
             return
+        shared.actions_modified = False
         self.char_handler()
         self.queue_actions()
         self.on_ctrl_p()

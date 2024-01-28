@@ -1,3 +1,4 @@
+import re
 import typing as t
 
 from axedit import shared
@@ -22,6 +23,21 @@ class InputManager:
         for binding, call in self.mapping.items():
             if self.scan_for_input(binding):
                 call()
+
+
+RegexPattern: t.TypeAlias = str
+
+
+class RegexManager:
+    def __init__(self, mapping: dict[RegexPattern, t.Callable]) -> None:
+        self.mapping = mapping
+
+    def update(self):
+        if not shared.actions_modified:
+            return
+
+        for pattern, call in self.mapping.items():
+            ...
 
 
 EventType: t.TypeAlias = int
