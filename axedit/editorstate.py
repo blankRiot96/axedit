@@ -4,7 +4,13 @@ from axedit import shared
 from axedit.classes import CharList, Pos
 from axedit.cursor import Cursor
 from axedit.editor import Editor
-from axedit.funcs import offset_font_size, save_file, set_windows_title, soft_save_file
+from axedit.funcs import (
+    offset_font_size,
+    open_file,
+    save_file,
+    set_windows_title,
+    soft_save_file,
+)
 from axedit.line_numbers import LineNumbers
 from axedit.state_enums import FileState, State
 from axedit.status_bar import StatusBar
@@ -23,6 +29,7 @@ class EditorState:
         self.offset = 4
 
     def shared_reset(self):
+        shared.chars_changed = True
         shared.cursor_pos = Pos(0, 0)
         shared.saved = True
         shared.import_line_changed = False
@@ -75,7 +82,7 @@ class EditorState:
         shared.actions_modified = True
 
     def queue_actions(self):
-        if shared.mode not in (FileState.NORMAL, FileState.VISUAL):
+        if shared.typing_cmd or shared.mode not in (FileState.NORMAL, FileState.VISUAL):
             return
 
         for event in shared.events:

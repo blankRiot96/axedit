@@ -127,6 +127,9 @@ class AutoCompletions:
         self.suggestions = []
 
     def is_typing_variable(self):
+        if shared.mode in (FileState.NORMAL, FileState.VISUAL):
+            return
+
         for event in shared.events:
             if event.type == pygame.TEXTINPUT:
                 if event.text.isalpha() or event.text in "._":

@@ -317,6 +317,8 @@ class Editor:
         shared.action_queue.clear()
 
     def update(self):
+        if shared.typing_cmd:
+            return
         self.clear_queue()
         self.mouse_placement()
         self.on_scroll()

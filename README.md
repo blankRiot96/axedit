@@ -35,6 +35,7 @@ Note: Writing to/Saving the file also invokes on-save hooks
 | `:w[write]`                     | Write the file                     |
 | `:wq` or `:x`                   | Write and quit the editor          |
 | `:save[as] file-name`           | Save the file as                   |
+| `:rn` or `:rename`              | Rename the file                    |
 | `:theme theme-name`             | Set the theme of the editor        |
 | `:hooks`                        | Open the on-save hooks file        |
 | `:line-numbers:relative on/off` | Set whether line no to be relative |

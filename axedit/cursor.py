@@ -168,6 +168,8 @@ class Cursor:
             accel.update()
 
     def update(self):
+        if shared.typing_cmd:
+            return
         self.move()
         self.blink()
         self.update_accels()

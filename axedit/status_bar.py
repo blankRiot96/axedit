@@ -1,6 +1,8 @@
 import pygame
 
 from axedit import shared
+from axedit.cmd_bar import CommandBar
+from axedit.state_enums import FileState
 from axedit.utils import render_at
 
 
@@ -14,6 +16,10 @@ class StatusBar:
     def __init__(self) -> None:
         self.status_str = "FILE: {file_name}{saved} | MODE: {mode} | LOC: {loc}"
         self.gen_surf()
+        self.cmd = CommandBar()
+        shared.typing_cmd = False
+        self.jargon = ""
+        self.command_bar = CommandBar()
 
     def get_saved_status(self) -> str:
         if shared.file_name is None:
@@ -95,8 +101,38 @@ class StatusBar:
             self.surf, shared.FONT.render(out_str, True, "white"), "midleft", (5, 0)
         )
 
+    def on_cmd(self) -> None:
+        if not shared.typing_cmd:
+            return
+
+        self.command_bar.update()
+
     def update(self):
-        ...
+        if shared.typing_cmd or (
+            shared.mode == FileState.NORMAL
+            and shared.action_queue
+            and shared.action_queue[-1].endswith(":")
+        ):
+            shared.typing_cmd = True
+            shared.action_queue.clear()
+        else:
+            self.command_bar.text = ""
+
+        self.on_cmd()
 
     def draw(self):
         self.gen_surf()
+
+        if shared.typing_cmd:
+            self.command_bar.draw()
+
+            size = (
+                self.surf.get_width(),
+                self.command_bar.surf.get_height() + self.surf.get_height(),
+            )
+            temp = pygame.Surface(size, pygame.SRCALPHA)
+
+            render_at(temp, self.command_bar.surf, "topleft")
+            render_at(temp, self.surf, "bottomleft")
+
+            self.surf = temp

@@ -13,9 +13,10 @@ from axedit.states import StateManager
 class Core:
     def __init__(self) -> None:
         self.win_init()
+        self.shared_refresh()
+        shared.action_queue = []
         self.state_manager = StateManager()
         self.frame_no = 0
-        shared.action_queue = []
 
     def win_init(self):
         shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=1)
@@ -57,6 +58,7 @@ class Core:
         shared.dt = min(shared.dt, 0.1)
         shared.keys = pygame.key.get_pressed()
         shared.kp = pygame.key.get_just_pressed()
+        shared.kr = pygame.key.get_just_released()
         shared.mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
 
     def update(self):

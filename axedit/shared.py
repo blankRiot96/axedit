@@ -33,6 +33,7 @@ events: list[pygame.event.Event]
 mouse_pos: pygame.Vector2
 keys: list[bool]
 kp: list[bool]
+kr: list[bool]
 dt: float
 
 # Objects
@@ -58,3 +59,4 @@ chars_changed: bool
 saved: bool
 import_line_changed: bool
 actions_modified: bool
+typing_cmd: bool
