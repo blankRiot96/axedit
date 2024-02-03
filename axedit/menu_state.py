@@ -3,6 +3,7 @@ import typing as t
 import pygame
 
 from axedit import shared
+from axedit.cmd_bar import CommandBar
 from axedit.funcs import get_icon, offset_font_size
 from axedit.state_enums import State
 from axedit.utils import render_at
@@ -16,6 +17,7 @@ class MenuTexter:
 
     def __init__(self, lines: MenuLines) -> None:
         self.lines = lines.copy()
+        self.font = pygame.Font(shared.FONT_PATH, 22)
         self.gen_surf()
 
     def gen_surf(self) -> None:
@@ -45,7 +47,7 @@ class MenuTexter:
         width = len(max(self.lines, key=lambda line: len(line[0]))[0])
         text = "".join(line[0].rjust(width) + "\n" for line in self.lines)
 
-        return shared.FONT.render(text, True, "white")
+        return self.font.render(text, True, "white")
 
     def render_commands(self) -> pygame.Surface:
         command_width = (
@@ -76,13 +78,12 @@ class MenuTexter:
                 if flagged:
                     pygame.draw.rect(command_surf, (30, 30, 30), rect, border_radius=3)
 
-                command_surf.blit(shared.FONT.render(word, True, "white"), rect)
+                command_surf.blit(self.font.render(word, True, "white"), rect)
                 acc_x += rect.width
 
         return command_surf
 
-    def update(self):
-        ...
+    def update(self): ...
 
 
 class MenuState:
@@ -96,11 +97,12 @@ class MenuState:
 
     def __init__(self) -> None:
         self.next_state = None
+        shared.typing_cmd = False
         self.logo: pygame.Surface = get_icon((60, 60, 60))
         self.logo = self.logo.subsurface(self.logo.get_bounding_rect()).copy()
         self.logo = pygame.transform.smoothscale_by(self.logo, 0.75)
 
-        offset_font_size(-2)
+        self.command_bar = CommandBar()
         self.texter = MenuTexter(MenuState.LINES)
 
     def on_ctrl_p(self):
@@ -108,19 +110,21 @@ class MenuState:
             return
 
         self.next_state = State.FILE_SELECT
-        offset_font_size(2)
 
     def on_ctrl_n(self):
         if not shared.keys[pygame.K_n]:
             return
         self.next_state = State.EDITOR
-        offset_font_size(2)
 
-    def on_ctrl_t(self):
-        ...
+    def on_ctrl_t(self): ...
 
     def update(self):
+        for event in shared.events:
+            if event.type == pygame.TEXTINPUT and event.text == ":":
+                shared.typing_cmd = True
+
         self.texter.update()
+        self.command_bar.update()
 
         if shared.keys[pygame.K_LCTRL] or shared.keys[pygame.K_RCTRL]:
             self.on_ctrl_p()
@@ -128,6 +132,7 @@ class MenuState:
             self.on_ctrl_t()
 
     def draw(self):
+        self.command_bar.draw()
         dist_between_em = 70
         render_at(
             shared.screen,
@@ -141,3 +146,5 @@ class MenuState:
             "center",
             (0, (self.logo.get_height() + dist_between_em) / 2),
         )
+        if shared.typing_cmd:
+            render_at(shared.screen, self.command_bar.surf, "bottomright")
