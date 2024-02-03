@@ -153,14 +153,6 @@ class WriteMode:
         self.blink_cursor()
 
 
-"""
-input_manager -> {
-    j -> down,
-    l -> 
-}
-"""
-
-
 class NormalMode:
     def __init__(self) -> None:
         self.input_manager = InputManager(
@@ -278,10 +270,9 @@ class Editor:
             text = get_text()
             if text.strip() == "":
                 text = ""
-            self.image = shared.FONT.render(text, True, "white")
+            self.image = shared.FONT.render(text, True, shared.theme["default-fg"])
 
-    def handle_select_input(self):
-        ...
+    def handle_select_input(self): ...
 
     def handle_input(self):
         input_handler = self.input_handlers[shared.mode]

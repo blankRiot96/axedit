@@ -60,7 +60,7 @@ class StatusBar:
         poly_botright = poly_topright[0] - angle_offset, shared.FONT_HEIGHT
 
         points = [poly_botleft, poly_topleft, poly_topright, poly_botright]
-        pygame.draw.polygon(self.surf, (24, 12, 21), points)
+        pygame.draw.polygon(self.surf, shared.theme["default-fg"], points)
         out_str += f"{file_name}"
 
         return out_str
@@ -90,7 +90,7 @@ class StatusBar:
         #     loc=f"{shared.cursor_pos.x}, {shared.cursor_pos.y}",
         # )
         self.surf = pygame.Surface((shared.srect.width, shared.FONT_HEIGHT))
-        self.surf.fill((48, 25, 52))
+        self.surf.fill(shared.theme["dark-fg"])
 
         n_chars = int(shared.srect.width / shared.FONT_WIDTH)
         out_str = f"--{shared.mode.name}--"
@@ -98,7 +98,10 @@ class StatusBar:
         # out_str = self.add_loc(n_chars, out_str)
         out_str = self.add_action_queue(n_chars, out_str)
         render_at(
-            self.surf, shared.FONT.render(out_str, True, "white"), "midleft", (5, 0)
+            self.surf,
+            shared.FONT.render(out_str, True, shared.theme["default-fg"]),
+            "midleft",
+            (5, 0),
         )
 
     def on_cmd(self) -> None:

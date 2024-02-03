@@ -10,8 +10,7 @@ class LineNumbers:
             pygame.SRCALPHA,
         )
 
-    def update(self):
-        ...
+    def update(self): ...
 
     def draw(self):
         self.surf = pygame.Surface(
@@ -26,7 +25,7 @@ class LineNumbers:
                 num = i + 1
                 num = " " + str(num)
 
-            text = shared.FONT.render(str(num), True, "white")
+            text = shared.FONT.render(str(num), True, shared.theme["default-fg"])
             text.set_alpha(alpha)
 
             self.surf.blit(text, (shared.FONT_WIDTH, i * shared.FONT_HEIGHT))

@@ -4,6 +4,7 @@ import typing as t
 import pygame
 
 from axedit import shared
+from axedit.themes import apply_theme, get_available_theme_names
 from axedit.utils import Time, render_at
 
 
@@ -18,10 +19,18 @@ def calculate_number_of_rows(
 
 
 class Command:
-    def __init__(self, patterns: str | tuple[str], callback: t.Callable) -> None:
+    def __init__(
+        self,
+        patterns: str | tuple[str],
+        callback: t.Callable,
+        subs: list[str] | None = None,
+        subsidary_cmd: bool = False,
+    ) -> None:
         self.patterns = patterns
+        self.subs = [] if subs is None else subs
         self.callback = callback
         self.beauty_text = self.get_beauty_text()
+        self.subsidary_cmd = subsidary_cmd
 
     def get_beauty_text(self) -> str:
         if isinstance(self.patterns, str):
@@ -39,7 +48,7 @@ class Command:
         pattern = self.get_beauty_text()
         search_text = text[1:]
         if not search_text:
-            return False
+            return self.subsidary_cmd
 
         text = itertools.cycle(search_text)
         current_search_char = next(text)
@@ -61,8 +70,8 @@ class Command:
             self.callback()
 
     def get_surf(self, selected: bool = False) -> pygame.Surface:
-        text_color = "black"
-        bg_color = "yellow4"
+        text_color = shared.theme["dark-fg"]
+        bg_color = shared.theme["light-fg"]
         if selected:
             text_color, bg_color = bg_color, text_color
 
@@ -82,21 +91,25 @@ class CommandBar:
 
     def __init__(self) -> None:
         self._text = ""
-        self.color = CommandBar.COLOR
+        self.color = shared.theme["light-bg"]
         self.command_invalidated = False
         self.backspace_timer = Time(0.1)
         self.blink_timer = Time(0.5)
         self.cursors = itertools.cycle(("|", "_"))
         self.current_cursor = next(self.cursors)
         self.suggestion_surf: pygame.Surface | None = None
-        self.commands: list[Command] = [
+        self.original_commands: list[Command] = [
             Command((":q", ":quit"), self.on_quit),
             Command((":w", ":write"), exit),
             Command(":wq", exit),
             Command(":x", exit),
             Command((":save", ":saveas"), exit),
-            Command(":theme", exit),
-            Command(":line-numbers", exit),
+            Command(
+                ":theme",
+                self.apply_selected_theme,
+                subs=get_available_theme_names(),
+            ),
+            Command(":rel-no", exit, subs=["on", "off"]),
             Command(":cutee1", exit),
             Command(":cutee2", exit),
             Command(":cutee3", exit),
@@ -119,11 +132,14 @@ class CommandBar:
             Command(":cutee20", exit),
             Command(":cutee21", exit),
         ]
+        self.commands = self.original_commands.copy()
+        self.selected_command: Command | None = None
         self.rows = 1
         self._selected_col = 0
         self._selected_row = 0
         self.text_changed = False
         self.executed = False
+        self.raised_subsidaries = False
         self.gen_blank_surf()
 
     @property
@@ -141,8 +157,11 @@ class CommandBar:
             val = 0
         if val < 0:
             val = max_col
+
         self._selected_col = val
         self.draw_suggestions()
+        if self.raised_subsidaries and hasattr(self.selected_command, "theme"):
+            self.apply_selected_theme()
 
     @property
     def selected_row(self) -> int:
@@ -161,6 +180,8 @@ class CommandBar:
 
         self._selected_row = val
         self.draw_suggestions()
+        if self.raised_subsidaries and hasattr(self.selected_command, "theme"):
+            self.apply_selected_theme()
 
     @property
     def text(self) -> str:
@@ -181,9 +202,10 @@ class CommandBar:
         self.surf = pygame.Surface((shared.srect.width, shared.FONT_HEIGHT))
 
     def empty_command(self):
-        self.color = CommandBar.COLOR
+        self.color = shared.theme["light-bg"]
         self.text = ""
         self.command_invalidated = False
+        self.commands = self.original_commands.copy()
 
     def on_backspace(self):
         self.current_cursor = "|"
@@ -212,9 +234,9 @@ class CommandBar:
         self.update_commands()
         if not self.executed:
             self.text = f"Invalid Command '{self.text}'"
-            self.color = "tomato"
+            self.color = shared.theme["dep"]
             self.command_invalidated = True
-        else:
+        elif not self.raised_subsidaries:
             shared.typing_cmd = False
             self.empty_command()
 
@@ -250,6 +272,24 @@ class CommandBar:
         if self.blink_timer.tick():
             self.current_cursor = next(self.cursors)
 
+    def execute_raise_subsidaries(self, command: Command):
+        self.commands = [
+            Command(":" + sub, command.callback, subsidary_cmd=True)
+            for sub in command.subs
+        ]
+        self.raised_subsidaries = True
+        self.text = f":{command.beauty_text} "
+        self.draw_suggestions()
+
+        # SPECIAL CASE !!!!
+        if command.beauty_text == "theme":
+            for command in self.commands:
+                command.theme = True
+
+    def apply_selected_theme(self):
+        apply_theme(self.selected_command.beauty_text)
+        print(f"Applied '{self.selected_command.beauty_text}'!")
+
     def update_commands(self):
         matched_commands = self.get_matched_commands()
         for i, command in enumerate(matched_commands):
@@ -258,14 +298,24 @@ class CommandBar:
 
             selected = (row, col) == (self.selected_row, self.selected_col)
             if selected:
-                command.callback()
                 self.executed = True
+                if command.subs:
+                    self.execute_raise_subsidaries(command)
+                    return
+                self.selected_command = command
+                command.callback()
+                self.raised_subsidaries = False
                 return
 
         for command in self.commands:
             if command.is_perfect_match(self.text.strip()):
                 self.executed = True
+                if command.subs:
+                    self.execute_raise_subsidaries(command)
+                    return
+                self.selected_command = command
                 command.callback()
+                self.raised_subsidaries = False
 
     def update_arrows(self):
         if not self.get_matched_commands():
@@ -280,7 +330,15 @@ class CommandBar:
             self.selected_row -= 1
 
     def get_matched_commands(self) -> list[Command]:
-        return [command for command in self.commands if command.is_match(self.text)]
+        text = self.text
+        if self.raised_subsidaries:
+            text = self.text.split()
+            if len(text) == 1:
+                text = ""
+            else:
+                text = "" if not text else text[-1]
+            text = ":" + text
+        return [command for command in self.commands if command.is_match(text)]
 
     def draw_suggestions(self):
         matched_commands = self.get_matched_commands()
@@ -311,12 +369,14 @@ class CommandBar:
         self.rows = ROWS
 
         self.suggestion_surf = pygame.Surface((COMMAND_SURF_WIDTH, COMMAND_SURF_HEIGHT))
-        self.suggestion_surf.fill("yellow4")
+        self.suggestion_surf.fill(shared.theme["light-fg"])
 
         for i, command in enumerate(matched_commands):
             row = i % ROWS
             col = i // ROWS
             selected = (row, col) == (self.selected_row, self.selected_col)
+            if selected:
+                self.selected_command = command
             self.suggestion_surf.blit(
                 command.get_surf(selected),
                 (EACH_COMMAND_WIDTH * col, EACH_COMMAND_HEIGHT * row),
@@ -342,7 +402,9 @@ class CommandBar:
         self.gen_blank_surf()
         self.surf.fill(self.color)
 
-        text_surf = shared.FONT.render(self.text + self.current_cursor, True, "white")
+        text_surf = shared.FONT.render(
+            self.text + self.current_cursor, True, shared.theme["default-fg"]
+        )
         render_at(self.surf, text_surf, "midleft", (10, 0))
 
         if self.suggestion_surf is not None:

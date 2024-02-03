@@ -21,12 +21,12 @@ _CLASSES = []
 
 
 _PRECENDENCE = {
-    "steelblue": _BUILTINS,
-    "aquamarine": _MODULES,
-    "yellow": _CLASSES,
-    "magenta": _KEYWORDS,
-    "orange": _SINGLETONS,
-    "purple": ["self"],
+    shared.theme["match"]: _BUILTINS,
+    shared.theme["select-bg"]: _MODULES,
+    shared.theme["class"]: _CLASSES,
+    shared.theme["keyword"]: _KEYWORDS,
+    shared.theme["const"]: _SINGLETONS,
+    shared.theme["light-fg"]: ["self"],
 }
 
 Color: t.TypeAlias = str
@@ -78,14 +78,14 @@ import_visitor = ImportVisitor()
 
 def apply_precedence(word: str) -> Color:
     word = word.strip()
-    final_color = "white"
+    final_color = shared.theme["default-fg"]
 
     for color, subclass in _PRECENDENCE.items():
         if word in subclass:
             final_color = color
 
     if word.isdigit():
-        final_color = "tomato"
+        final_color = shared.theme["const"]
 
     return final_color
 
@@ -114,7 +114,7 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
     # if last_string_counter > 0 and not (row.find("'") != -1 or row.find('"') != -1):
     if not concluded_doc_string and not (row.find("'") != -1 or row.find('"') != -1):
         within_line = False
-        return {range(start_index, final_index + 1): "green"}
+        return {range(start_index, final_index + 1): shared.theme["string"]}
 
     string_counter = 0
 
@@ -139,7 +139,7 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
                 current_index,
                 string_pos + 1,
             )
-            color_ranges[r] = "green"
+            color_ranges[r] = shared.theme["string"]
             string_counter = string_pos - current_index
             # last_string_counter = string_counter
 
@@ -154,7 +154,7 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
 
             comment_color = (100, 100, 100)
             color_ranges[range(current_index, finder + 1)] = comment_color
-            color_ranges[range(finder, finder + 5)] = "red"
+            color_ranges[range(finder, finder + 5)] = shared.theme["dep"]
             if finder:
                 remaining = finder + 4
             else:
@@ -174,12 +174,12 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
 
         if char in LOGICAL_PUNCTUATION:
             color = apply_precedence(acc)
-            if color == "white" and (
+            if color == shared.theme["default-fg"] and (
                 current_index > 0 and char == "(" and row[current_index - 1] != "("
             ):
-                color = "seagreen"
+                color = shared.theme["func"]
                 if is_pascal(acc):
-                    color = "yellow"
+                    color = shared.theme["class"]
 
                 color_ranges[range(start_index, current_index)] = color
                 start_index = current_index + 1
@@ -202,7 +202,7 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
 def line_wise_stitching(row: str, color_ranges: dict) -> pygame.Surface:
     image = pygame.Surface((shared.srect.width, shared.FONT_HEIGHT))
     for x, char in enumerate(row):
-        color = "white"
+        color = shared.theme["default-fg"]
         for range, ranged_color in color_ranges.items():
             if x in range:
                 color = ranged_color
@@ -230,7 +230,7 @@ prev_image = None
 
 def apply_syntax_highlighting() -> pygame.Surface:
     global prev_image
-    if (
+    if not shared.theme_changed and (
         not is_event_frame(pygame.VIDEORESIZE)
         and not shared.chars_changed
         and prev_image is not None
@@ -247,7 +247,6 @@ def apply_syntax_highlighting() -> pygame.Surface:
     except SyntaxError:
         pass
 
-    # TODO: YOU CAN DO THIS!!
     safety_padding = 2
     n_lines_to_render = int(shared.srect.height / shared.FONT_HEIGHT) + safety_padding
     scroll_offset = int(-shared.scroll.y / shared.FONT_HEIGHT)

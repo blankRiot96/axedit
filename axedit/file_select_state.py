@@ -22,7 +22,9 @@ class Preview:
         self.draw_line()
 
     def draw_line(self):
-        pygame.draw.line(self.surf, "white", (0, 0), (0, self.surf.get_height()), 2)
+        pygame.draw.line(
+            self.surf, shared.theme["default-fg"], (0, 0), (0, self.surf.get_height()), 2
+        )
 
     def get_lines(self, file: str | Path) -> list[str]:
         try:
@@ -44,7 +46,7 @@ class Preview:
 
         self.surf.fill("black")
         for y, line in enumerate(lines[:n_lines]):
-            surf = shared.FONT.render(line, True, "white")
+            surf = shared.FONT.render(line, True, shared.theme["default-fg"])
             self.surf.blit(
                 surf, (self.padding, y * shared.FONT_HEIGHT, *surf.get_size())
             )
@@ -62,8 +64,7 @@ class Preview:
 
         self.last_selected_file = file
 
-    def draw(self):
-        ...
+    def draw(self): ...
 
 
 class SearchBar:
@@ -71,8 +72,10 @@ class SearchBar:
 
     def __init__(self) -> None:
         self.surf = pygame.Surface((shared.srect.width, shared.FONT_HEIGHT))
-        self.icon_surf = shared.FONT.render("", True, "white")
-        self.search_surf = shared.FONT.render("Search...", True, "grey")
+        self.icon_surf = shared.FONT.render("", True, shared.theme["default-fg"])
+        self.search_surf = shared.FONT.render(
+            "Search...", True, shared.theme["default-fg"]
+        )
         self.text = ""
         self.cursors = itertools.cycle(("", SearchBar.BAR))
         self.cursor = next(self.cursors)
@@ -119,7 +122,9 @@ class SearchBar:
             )
             return
 
-        text_surf = shared.FONT.render(self.text + self.cursor, True, "white")
+        text_surf = shared.FONT.render(
+            self.text + self.cursor, True, shared.theme["default-fg"]
+        )
         render_at(self.surf, text_surf, "topleft", icon_offset)
 
 
@@ -237,7 +242,7 @@ class FileTree:
                 )
                 pygame.draw.rect(self.surf, (100, 100, 255), rect)
 
-            surf = shared.FONT.render(self.get_deco_name(y), True, "white")
+            surf = shared.FONT.render(self.get_deco_name(y), True, shared.theme["default-fg"])
             self.surf.blit(surf, (0, anchor_pos))
 
     def get_match_indeces(self, file_name: str) -> list[int] | None:
@@ -289,14 +294,14 @@ class FileTree:
                 shared.FONT,
                 self.get_deco_name(y),
                 True,
-                "white",
+                shared.theme["default-fg"],
                 offseted_match_indeces,
-                "tomato",
+                shared.theme["match"],
             )
             self.surf.blit(surf, (0, anchor_pos))
 
     def draw(self):
-        self.surf.fill("black")
+        self.surf.fill(shared.theme["default-bg"])
         if UI.search_bar.text:
             self.render_filtered_preview_files()
             return
@@ -337,7 +342,7 @@ class FileSelectState:
         )
         pygame.draw.line(
             self.surf,
-            "white",
+            shared.theme["default-fg"],
             (0, SB_HEIGHT + 15),
             (self.border_rect.width, SB_HEIGHT + 15),
             width=2,
@@ -345,7 +350,7 @@ class FileSelectState:
         render_at(shared.screen, self.surf, "center")
 
         self.border_rect = shared.srect.scale_by(0.8, 0.8)
-        pygame.draw.rect(shared.screen, "white", self.border_rect, 2, 20)
+        pygame.draw.rect(shared.screen, shared.theme["default-fg"], self.border_rect, 2, 20)
 
 
 class UI:

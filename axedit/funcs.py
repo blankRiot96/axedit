@@ -79,6 +79,23 @@ def _gausian_sub(char: str):
     return shared.file_name
 
 
+def set_windows_title_bar_color() -> None:
+    from ctypes import byref, c_int, sizeof, windll
+
+    info = pygame.display.get_wm_info()
+    HWND = info["window"]
+
+    # https://stackoverflow.com/questions/67444141/how-to-change-the-title-bar-in-tkinter
+    color = shared.theme["default-bg"][1:]
+    r1, r2, g1, g2, b1, b2 = color
+    windll_color = f"0x00{b1}{b2}{g1}{g2}{r1}{r2}"
+    title_bar_color = eval(windll_color)
+
+    windll.dwmapi.DwmSetWindowAttribute(
+        HWND, 35, byref(c_int(title_bar_color)), sizeof(c_int)
+    )
+
+
 def set_windows_title() -> None:
     title_bar_text = shared.APP_NAME
 

@@ -42,7 +42,7 @@ class Cursor:
 
     def gen_image(self):
         self.image = pygame.Surface((shared.FONT_WIDTH, shared.FONT_HEIGHT))
-        self.image.fill("white")
+        self.image.fill(shared.theme["default-fg"])
 
     def move(self):
         self.pos.x = shared.cursor_pos.x * shared.FONT_WIDTH

@@ -6,7 +6,7 @@ import pygame
 from pygame._sdl2 import Window
 
 from axedit import shared
-from axedit.funcs import get_icon, set_windows_title
+from axedit.funcs import get_icon, set_windows_title, set_windows_title_bar_color
 from axedit.states import StateManager
 
 
@@ -31,16 +31,7 @@ class Core:
 
         pygame.display.set_caption(shared.APP_NAME)
         if platform.system() == "Windows":
-            from ctypes import byref, c_int, sizeof, windll
-
-            info = pygame.display.get_wm_info()
-            HWND = info["window"]
-
-            title_bar_color = 0x00000000
-            windll.dwmapi.DwmSetWindowAttribute(
-                HWND, 35, byref(c_int(title_bar_color)), sizeof(c_int)
-            )
-
+            set_windows_title_bar_color()
             set_windows_title()
 
     def event_handler(self):
@@ -60,15 +51,18 @@ class Core:
         shared.kp = pygame.key.get_just_pressed()
         shared.kr = pygame.key.get_just_released()
         shared.mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+        shared.theme_changed = False
 
     def update(self):
         self.shared_refresh()
         self.event_handler()
         self.state_manager.update()
+        if shared.theme_changed:
+            set_windows_title_bar_color()
         pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
 
     def draw(self):
-        shared.screen.fill("black")
+        shared.screen.fill(shared.theme["default-bg"])
         # shared.screen.blit(self.blur_effect, (0, 0))
         self.state_manager.draw()
         pygame.display.flip()

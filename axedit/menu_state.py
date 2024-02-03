@@ -47,7 +47,7 @@ class MenuTexter:
         width = len(max(self.lines, key=lambda line: len(line[0]))[0])
         text = "".join(line[0].rjust(width) + "\n" for line in self.lines)
 
-        return self.font.render(text, True, "white")
+        return self.font.render(text, True, shared.theme["default-fg"])
 
     def render_commands(self) -> pygame.Surface:
         command_width = (
@@ -78,7 +78,9 @@ class MenuTexter:
                 if flagged:
                     pygame.draw.rect(command_surf, (30, 30, 30), rect, border_radius=3)
 
-                command_surf.blit(self.font.render(word, True, "white"), rect)
+                command_surf.blit(
+                    self.font.render(word, True, shared.theme["default-fg"]), rect
+                )
                 acc_x += rect.width
 
         return command_surf
@@ -98,7 +100,7 @@ class MenuState:
     def __init__(self) -> None:
         self.next_state = None
         shared.typing_cmd = False
-        self.logo: pygame.Surface = get_icon((60, 60, 60))
+        self.logo: pygame.Surface = get_icon(shared.theme["light-bg"])
         self.logo = self.logo.subsurface(self.logo.get_bounding_rect()).copy()
         self.logo = pygame.transform.smoothscale_by(self.logo, 0.75)
 
