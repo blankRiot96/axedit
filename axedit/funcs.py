@@ -89,7 +89,7 @@ def set_windows_title_bar_color() -> None:
     color = shared.theme["default-bg"][1:]
     r1, r2, g1, g2, b1, b2 = color
     windll_color = f"0x00{b1}{b2}{g1}{g2}{r1}{r2}"
-    title_bar_color = eval(windll_color)
+    title_bar_color = int(windll_color, base=16)
 
     windll.dwmapi.DwmSetWindowAttribute(
         HWND, 35, byref(c_int(title_bar_color)), sizeof(c_int)
