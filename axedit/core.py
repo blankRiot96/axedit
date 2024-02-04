@@ -8,10 +8,12 @@ from pygame._sdl2 import Window
 from axedit import shared
 from axedit.funcs import get_icon, set_windows_title, set_windows_title_bar_color
 from axedit.states import StateManager
+from axedit.themes import apply_theme
 
 
 class Core:
     def __init__(self) -> None:
+        apply_theme("catppuccin-mocha")
         self.win_init()
         self.shared_refresh()
         shared.action_queue = []
@@ -59,7 +61,7 @@ class Core:
         self.state_manager.update()
         if shared.theme_changed:
             set_windows_title_bar_color()
-        pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
+        # pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
 
     def draw(self):
         shared.screen.fill(shared.theme["default-bg"])

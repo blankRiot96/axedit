@@ -18,12 +18,16 @@ class Preview:
         self.padding = 5
 
     def gen_blank(self):
-        self.surf = pygame.Surface(shared.srect.size)
+        self.surf = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
         self.draw_line()
 
     def draw_line(self):
         pygame.draw.line(
-            self.surf, shared.theme["default-fg"], (0, 0), (0, self.surf.get_height()), 2
+            self.surf,
+            shared.theme["default-fg"],
+            (0, 0),
+            (0, self.surf.get_height()),
+            2,
         )
 
     def get_lines(self, file: str | Path) -> list[str]:
@@ -44,7 +48,7 @@ class Preview:
 
         lines = self.get_lines(file)
 
-        self.surf.fill("black")
+        self.surf.fill(shared.theme["default-bg"])
         for y, line in enumerate(lines[:n_lines]):
             surf = shared.FONT.render(line, True, shared.theme["default-fg"])
             self.surf.blit(
@@ -110,7 +114,7 @@ class SearchBar:
             self.cursor = next(self.cursors)
 
     def draw(self):
-        self.surf.fill("black")
+        self.surf.fill(shared.theme["default-bg"])
         render_at(self.surf, self.icon_surf, "topleft")
         icon_offset = (self.icon_surf.get_width() + 10, 0)
         if not self.text:
@@ -242,7 +246,9 @@ class FileTree:
                 )
                 pygame.draw.rect(self.surf, (100, 100, 255), rect)
 
-            surf = shared.FONT.render(self.get_deco_name(y), True, shared.theme["default-fg"])
+            surf = shared.FONT.render(
+                self.get_deco_name(y), True, shared.theme["default-fg"]
+            )
             self.surf.blit(surf, (0, anchor_pos))
 
     def get_match_indeces(self, file_name: str) -> list[int] | None:
@@ -331,7 +337,7 @@ class FileSelectState:
 
         SB_HEIGHT = UI.search_bar.surf.get_height()
 
-        self.surf = pygame.Surface(self.border_rect.size)
+        self.surf = pygame.Surface(self.border_rect.size, pygame.SRCALPHA)
         render_at(self.surf, UI.search_bar.surf, "topleft", (10, 10))
         render_at(self.surf, UI.file_tree.surf, "topleft", (10, 20 + SB_HEIGHT))
         render_at(
@@ -350,7 +356,9 @@ class FileSelectState:
         render_at(shared.screen, self.surf, "center")
 
         self.border_rect = shared.srect.scale_by(0.8, 0.8)
-        pygame.draw.rect(shared.screen, shared.theme["default-fg"], self.border_rect, 2, 20)
+        pygame.draw.rect(
+            shared.screen, shared.theme["default-fg"], self.border_rect, 2, 20
+        )
 
 
 class UI:

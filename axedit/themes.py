@@ -19,7 +19,7 @@ def _get_readable_theme(theme: dict) -> dict:
             "dark-fg",
             "default-fg",
             "light-fg",
-            "light-bg",
+            "light-fg",
             "var",
             "const",
             "class",

@@ -70,8 +70,8 @@ class Command:
             self.callback()
 
     def get_surf(self, selected: bool = False) -> pygame.Surface:
-        text_color = shared.theme["dark-fg"]
-        bg_color = shared.theme["light-fg"]
+        text_color = shared.theme["light-fg"]
+        bg_color = shared.theme["dark-fg"]
         if selected:
             text_color, bg_color = bg_color, text_color
 
@@ -234,7 +234,7 @@ class CommandBar:
         self.update_commands()
         if not self.executed:
             self.text = f"Invalid Command '{self.text}'"
-            self.color = shared.theme["dep"]
+            self.color = shared.theme["select-bg"]
             self.command_invalidated = True
         elif not self.raised_subsidaries:
             shared.typing_cmd = False
@@ -288,7 +288,7 @@ class CommandBar:
 
     def apply_selected_theme(self):
         apply_theme(self.selected_command.beauty_text)
-        print(f"Applied '{self.selected_command.beauty_text}'!")
+        self.draw_suggestions()
 
     def update_commands(self):
         matched_commands = self.get_matched_commands()
@@ -369,16 +369,18 @@ class CommandBar:
         self.rows = ROWS
 
         self.suggestion_surf = pygame.Surface((COMMAND_SURF_WIDTH, COMMAND_SURF_HEIGHT))
-        self.suggestion_surf.fill(shared.theme["light-fg"])
+        self.suggestion_surf.fill(shared.theme["dark-fg"])
 
         for i, command in enumerate(matched_commands):
             row = i % ROWS
             col = i // ROWS
+
             selected = (row, col) == (self.selected_row, self.selected_col)
             if selected:
                 self.selected_command = command
+            cmd_surf = command.get_surf(selected)
             self.suggestion_surf.blit(
-                command.get_surf(selected),
+                cmd_surf,
                 (EACH_COMMAND_WIDTH * col, EACH_COMMAND_HEIGHT * row),
             )
 
@@ -399,6 +401,11 @@ class CommandBar:
         self.update_arrows()
 
     def draw(self):
+        if shared.theme_changed:
+            self.color = shared.theme["light-bg"]
+            if self.command_invalidated:
+                self.color = shared.theme["select-bg"]
+
         self.gen_blank_surf()
         self.surf.fill(self.color)
 

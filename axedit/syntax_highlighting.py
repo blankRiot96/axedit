@@ -18,16 +18,7 @@ _BUILTINS = dir(builtins)
 
 _MODULES = []
 _CLASSES = []
-
-
-_PRECENDENCE = {
-    shared.theme["match"]: _BUILTINS,
-    shared.theme["select-bg"]: _MODULES,
-    shared.theme["class"]: _CLASSES,
-    shared.theme["keyword"]: _KEYWORDS,
-    shared.theme["const"]: _SINGLETONS,
-    shared.theme["light-fg"]: ["self"],
-}
+_PRECEDENCE = []
 
 Color: t.TypeAlias = str
 
@@ -80,7 +71,7 @@ def apply_precedence(word: str) -> Color:
     word = word.strip()
     final_color = shared.theme["default-fg"]
 
-    for color, subclass in _PRECENDENCE.items():
+    for color, subclass in _PRECEDENCE:
         if word in subclass:
             final_color = color
 
@@ -200,7 +191,7 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
 
 
 def line_wise_stitching(row: str, color_ranges: dict) -> pygame.Surface:
-    image = pygame.Surface((shared.srect.width, shared.FONT_HEIGHT))
+    image = pygame.Surface((shared.srect.width, shared.FONT_HEIGHT), pygame.SRCALPHA)
     for x, char in enumerate(row):
         color = shared.theme["default-fg"]
         for range, ranged_color in color_ranges.items():
@@ -229,6 +220,16 @@ prev_image = None
 
 
 def apply_syntax_highlighting() -> pygame.Surface:
+    global _PRECEDENCE
+    if shared.theme_changed or not _PRECEDENCE:
+        _PRECEDENCE = [
+            (shared.theme["match"], _BUILTINS),
+            (shared.theme["class"], _MODULES),
+            (shared.theme["class"], _CLASSES),
+            (shared.theme["keyword"], _KEYWORDS),
+            (shared.theme["const"], _SINGLETONS),
+            (shared.theme["var"], ["self"]),
+        ]
     global prev_image
     if not shared.theme_changed and (
         not is_event_frame(pygame.VIDEORESIZE)

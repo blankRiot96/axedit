@@ -315,9 +315,9 @@ class Editor:
         self.on_scroll()
         self.handle_input()
         self.autocompletion.update()
-        self.gen_image()
 
     def draw(self):
+        self.gen_image()
         self.surf = pygame.Surface(
             (shared.srect.width, len(shared.chars) * shared.FONT_HEIGHT),
             pygame.SRCALPHA,

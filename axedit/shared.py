@@ -45,24 +45,7 @@ cursor: Cursor
 # Config
 mode: FileState = FileState.NORMAL
 file_name: str | None = None
-# Default is catppuccin-mocha
-theme: dict = {
-    "default-bg": "#1e1e2e",
-    "light-bg": "#b4befe",
-    "select-bg": "#313244",
-    "comment": "#45475a",
-    "dark-fg": "#585b70",
-    "default-fg": "#cdd6f4",
-    "light-fg": "#f5e0dc",
-    "var": "#f38ba8",
-    "const": "#fab387",
-    "class": "#f9e2af",
-    "string": "#a6e3a1",
-    "match": "#94e2d5",
-    "func": "#89b4fa",
-    "keyword": "#cba6f7",
-    "dep": "#f2cdcd",
-}
+theme: dict
 
 # Registers
 frame_cache: dict[t.Callable, t.Any]
