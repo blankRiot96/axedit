@@ -56,7 +56,7 @@ class WriteMode:
             self.typing = False
 
         if self.typing:
-            shared.cursor.alpha = 255
+            shared.cursor.cursor_visible = True
 
     def on_write_char(self, event):
         self.write_char(event.text)
@@ -69,6 +69,9 @@ class WriteMode:
         closing_bracket = WriteMode.BRACKET_MATCHERS.get(text)
         if closing_bracket is not None:
             self.get_line().insert(shared.cursor_pos.x, closing_bracket)
+
+        if char in "\"'":
+            self.get_line().insert(shared.cursor_pos.x, char)
         self.typing = True
         shared.text_writing = True
         shared.saved = False
@@ -233,7 +236,7 @@ class NormalMode:
 
     def handle_input(self):
         self.name_file()
-        shared.cursor.alpha = 255
+        shared.cursor.cursor_visible = True
         if shared.naming_file:
             return
         self.input_manager.update()

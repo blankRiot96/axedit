@@ -100,12 +100,15 @@ class MenuState:
     def __init__(self) -> None:
         self.next_state = None
         shared.typing_cmd = False
-        self.logo: pygame.Surface = get_icon(shared.theme["light-bg"])
-        self.logo = self.logo.subsurface(self.logo.get_bounding_rect()).copy()
-        self.logo = pygame.transform.smoothscale_by(self.logo, 0.75)
+        self.gen_logo()
 
         self.command_bar = CommandBar()
         self.texter = MenuTexter(MenuState.LINES)
+
+    def gen_logo(self):
+        self.logo: pygame.Surface = get_icon(shared.theme["select-bg"])
+        self.logo = self.logo.subsurface(self.logo.get_bounding_rect()).copy()
+        self.logo = pygame.transform.smoothscale_by(self.logo, 0.75)
 
     def on_ctrl_p(self):
         if not shared.keys[pygame.K_p]:
@@ -132,6 +135,9 @@ class MenuState:
             self.on_ctrl_p()
             self.on_ctrl_n()
             self.on_ctrl_t()
+
+        if shared.theme_changed:
+            self.gen_logo()
 
     def draw(self):
         self.command_bar.draw()

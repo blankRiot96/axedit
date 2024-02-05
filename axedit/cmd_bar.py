@@ -148,10 +148,19 @@ class CommandBar:
 
     @selected_col.setter
     def selected_col(self, val: int):
-        max_col = (
-            max(range(len(self.get_matched_commands())), key=lambda i: i // self.rows)
-            / self.rows
-        )
+        # max_col = (
+        #     max(range(len(self.get_matched_commands())), key=lambda i: i // self.rows)
+        #     / self.rows
+        # )
+
+        max_col = 0
+        for i in range(len(self.get_matched_commands())):
+            row = i % self.rows
+            col = i // self.rows
+
+            if row == self.selected_row:
+                if col > max_col:
+                    max_col = col
 
         if val > max_col:
             val = 0
@@ -169,9 +178,18 @@ class CommandBar:
 
     @selected_row.setter
     def selected_row(self, val: int):
-        max_row = max(
-            range(len(self.get_matched_commands())), key=lambda i: i % self.rows
-        )
+        # max_row = max(
+        #     range(len(self.get_matched_commands())), key=lambda i: i % self.rows
+        # )
+
+        max_row = 0
+        for i in range(len(self.get_matched_commands())):
+            row = i % self.rows
+            col = i // self.rows
+
+            if col == self.selected_col:
+                if row > max_row:
+                    max_row = row
 
         if val > max_row:
             val = 0
@@ -371,6 +389,9 @@ class CommandBar:
         self.suggestion_surf = pygame.Surface((COMMAND_SURF_WIDTH, COMMAND_SURF_HEIGHT))
         self.suggestion_surf.fill(shared.theme["dark-fg"])
 
+        scroll = 0
+        if ((self.selected_col + 1) * EACH_COMMAND_WIDTH) > COMMAND_SURF_WIDTH:
+            scroll = self.selected_col + 1 - (COMMAND_SURF_WIDTH // EACH_COMMAND_WIDTH)
         for i, command in enumerate(matched_commands):
             row = i % ROWS
             col = i // ROWS
@@ -379,9 +400,10 @@ class CommandBar:
             if selected:
                 self.selected_command = command
             cmd_surf = command.get_surf(selected)
+
             self.suggestion_surf.blit(
                 cmd_surf,
-                (EACH_COMMAND_WIDTH * col, EACH_COMMAND_HEIGHT * row),
+                (EACH_COMMAND_WIDTH * (col - scroll), EACH_COMMAND_HEIGHT * row),
             )
 
     def update_suggestions(self):

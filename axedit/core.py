@@ -28,7 +28,7 @@ class Core:
         window = Window.from_display_module()
         window.opacity = 0.9
 
-        icon = get_icon()
+        icon = get_icon(shared.theme["default-fg"])
         pygame.display.set_icon(icon)
 
         pygame.display.set_caption(shared.APP_NAME)
@@ -61,6 +61,7 @@ class Core:
         self.state_manager.update()
         if shared.theme_changed:
             set_windows_title_bar_color()
+            pygame.display.set_icon(get_icon(shared.theme["default-fg"]))
         # pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
 
     def draw(self):

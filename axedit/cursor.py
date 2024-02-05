@@ -27,8 +27,8 @@ class Cursor:
         self.gen_image()
         self.pos = pygame.Vector2()
         self.rect = self.image.get_rect(topleft=self.pos)
-        self.alpha = 255
-        self.blink_speed = 350
+        self.blink_timer = Time(0.5)
+        self.cursor_visible = True
         self.direction = -1
         self.accels = [
             AcceleratedKeyPress(key, partial(self.handle_input, key))
@@ -49,15 +49,8 @@ class Cursor:
         self.pos.y = shared.cursor_pos.y * shared.FONT_HEIGHT
 
     def blink(self):
-        delta_alpha = self.blink_speed * shared.dt
-        delta_alpha *= self.direction
-
-        self.alpha += delta_alpha
-
-        if self.alpha < 0 or self.alpha > 255:
-            self.direction *= -1
-
-        self.image.set_alpha(self.alpha)
+        if self.blink_timer.tick():
+            self.cursor_visible = not self.cursor_visible
 
     def handle_cursor_delta(self, move: tuple):
         if shared.cursor_pos.x + move[0] >= 0:
@@ -176,4 +169,12 @@ class Cursor:
         self.rect.topleft = self.pos
 
     def draw(self, editor_surf: pygame.Surface):
+        if shared.mode == FileState.INSERT and not self.cursor_visible:
+            return
         editor_surf.blit(self.image, self.pos)
+        try:
+            char = shared.chars[shared.cursor_pos.y][shared.cursor_pos.x]
+        except IndexError:
+            return
+        char_surf = shared.FONT.render(char, True, shared.theme["default-bg"])
+        editor_surf.blit(char_surf, self.pos)

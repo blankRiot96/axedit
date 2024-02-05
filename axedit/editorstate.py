@@ -40,7 +40,7 @@ class EditorState:
         if shared.mode != FileState.NORMAL or shared.naming_file:
             return
 
-        if shared.keys[pygame.K_LSHIFT] and shared.kp[pygame.K_p]:
+        if shared.keys[pygame.K_LCTRL] and shared.kp[pygame.K_p]:
             save_file()
             self.next_state = State.FILE_SELECT
 

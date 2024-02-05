@@ -18,7 +18,8 @@ class Preview:
         self.padding = 5
 
     def gen_blank(self):
-        self.surf = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
+        self.surf = pygame.Surface(shared.srect.size)
+        self.surf.fill(shared.theme["default-bg"])
         self.draw_line()
 
     def draw_line(self):
@@ -58,6 +59,18 @@ class Preview:
         self.draw_line()
 
     def update(self):
+        # if not UI.file_tree.preview_files:
+        #     self.gen_blank()
+        #     return
+        # file = UI.file_tree.preview_files[UI.file_tree.selected_index]
+
+        # if file != self.last_selected_file:
+        #     self.regen_image()
+
+        # self.last_selected_file = file
+        ...
+
+    def draw(self):
         if not UI.file_tree.preview_files:
             self.gen_blank()
             return
@@ -67,8 +80,6 @@ class Preview:
             self.regen_image()
 
         self.last_selected_file = file
-
-    def draw(self): ...
 
 
 class SearchBar:
@@ -302,7 +313,7 @@ class FileTree:
                 True,
                 shared.theme["default-fg"],
                 offseted_match_indeces,
-                shared.theme["match"],
+                shared.theme["keyword"],
             )
             self.surf.blit(surf, (0, anchor_pos))
 
