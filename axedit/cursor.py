@@ -4,7 +4,8 @@ import pygame
 
 from axedit import shared
 from axedit.funcs import center_cursor
-from axedit.input_queue import AcceleratedKeyPress
+from axedit.input_queue import AcceleratedKeyPress, RegexManager
+from axedit.modal import on_dd
 from axedit.state_enums import FileState
 from axedit.utils import Time
 
@@ -39,6 +40,11 @@ class Cursor:
             for key in self.NORMAL_KEYS
         ]
         self.move_timer = Time(0.5)
+        self.regex_manager = RegexManager(
+            {
+                r"^(\d+)?(dd|d\d+d)$": on_dd,
+            }
+        )
 
     def gen_image(self):
         self.image = pygame.Surface((shared.FONT_WIDTH, shared.FONT_HEIGHT))
@@ -166,6 +172,7 @@ class Cursor:
         self.move()
         self.blink()
         self.update_accels()
+        self.regex_manager.update()
         self.rect.topleft = self.pos
 
     def draw(self, editor_surf: pygame.Surface):

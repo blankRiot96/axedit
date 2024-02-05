@@ -66,14 +66,7 @@ class StatusBar:
         return out_str
 
     def action_queue_to_str(self) -> str:
-        final = ""
-        for action in shared.action_queue:
-            if action == "ctrl":
-                final += "^"
-            else:
-                final += action
-
-        return final
+        return shared.action_str
 
     def add_action_queue(self, n_chars: int, out_str: str) -> str:
         action_str = self.action_queue_to_str()

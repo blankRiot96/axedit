@@ -160,12 +160,8 @@ class NormalMode:
     def __init__(self) -> None:
         self.input_manager = InputManager(
             {
-                ("g", "g"): self.on_gg,
-                ("G",): self.on_G,
-                ("z", "z"): self.on_zz,
-                ("d", "d"): self.on_dd,
                 pygame.K_i: self.on_i,
-                # pygame.K_v: self.on_v,
+                pygame.K_v: self.on_v,
                 # pygame.K_f: self.on_f,
             }
         )
@@ -198,19 +194,6 @@ class NormalMode:
 
     def on_v(self):
         shared.mode = FileState.VISUAL
-
-    def on_dd(self):
-        shared.chars.pop(shared.cursor_pos.y)
-
-    def on_zz(self):
-        center_cursor()
-
-    def on_gg(self):
-        shared.cursor_pos.x, shared.cursor_pos.y = 0, 0
-
-    def on_G(self):
-        shared.cursor_pos.y = len(shared.chars) - 1
-        shared.cursor_pos.x = len(shared.chars[-1])
 
     def name_file(self):
         if not shared.naming_file:

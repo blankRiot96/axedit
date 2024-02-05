@@ -51,6 +51,7 @@ theme: dict
 frame_cache: dict[t.Callable, t.Any]
 registered_number: int = 1
 action_queue: list[str]
+action_str: str
 scroll: pygame.Vector2
 
 # Flags

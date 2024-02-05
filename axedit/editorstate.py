@@ -29,6 +29,7 @@ class EditorState:
         self.offset = 4
 
     def shared_reset(self):
+        shared.action_str = ""
         shared.chars_changed = True
         shared.cursor_pos = Pos(0, 0)
         shared.saved = True
@@ -88,11 +89,8 @@ class EditorState:
         for event in shared.events:
             if event.type == pygame.TEXTINPUT:
                 self.push_action(event.text)
-            elif event.type == pygame.KEYDOWN:
-                if event.key in (pygame.K_LCTRL, pygame.K_RCTRL):
-                    self.push_action("ctrl")
-                elif event.key in (pygame.K_LALT, pygame.K_RALT):
-                    self.push_action("alt")
+
+        shared.action_str = "".join(shared.action_queue)
 
     def update(self):
         if self.next_state is not None:

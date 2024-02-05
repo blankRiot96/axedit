@@ -35,7 +35,8 @@ class Preview:
         try:
             with open(file) as f:
                 return f.readlines()
-        except UnicodeDecodeError:
+        except UnicodeDecodeError as e:
+            print(e)
             return ["THIS FILE FORMAT IS NOT SUPPORTED BY THE EDITOR"]
 
     def regen_image(self):

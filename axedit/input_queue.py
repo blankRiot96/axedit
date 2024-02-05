@@ -37,7 +37,12 @@ class RegexManager:
             return
 
         for pattern, call in self.mapping.items():
-            ...
+            if re.match(pattern, shared.action_str) is None:
+                continue
+
+            call()
+            shared.action_queue.clear()
+            break
 
 
 EventType: t.TypeAlias = int
