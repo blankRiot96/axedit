@@ -36,6 +36,7 @@ class EditorState:
         shared.import_line_changed = False
         shared.cursor = Cursor()
         shared.action_queue.clear()
+        shared.visual_mode_axis = Pos(0, 0)
 
     def on_ctrl_p(self):
         if shared.mode != FileState.NORMAL or shared.naming_file:

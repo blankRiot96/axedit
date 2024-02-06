@@ -194,6 +194,9 @@ class NormalMode:
 
     def on_v(self):
         shared.mode = FileState.VISUAL
+        shared.visual_mode_axis = Pos(shared.cursor_pos.x, shared.cursor_pos.y)
+        shared.action_queue.clear()
+        print(shared.visual_mode_axis)
 
     def name_file(self):
         if not shared.naming_file:
@@ -226,6 +229,29 @@ class NormalMode:
         self.event_manager.update()
 
 
+class VisualMode:
+    def __init__(self) -> None:
+        self.event_manager = EventManager({pygame.TEXTINPUT: self.register_number})
+        self.registering_number = False
+
+    def register_number(self, event: pygame.Event):
+        if event.text.isdigit():
+            if self.registering_number:
+                shared.registered_number = int(
+                    f"{shared.registered_number}{event.text}"
+                )
+            else:
+                shared.registered_number = int(event.text)
+            self.registering_number = True
+        else:
+            self.registering_number = False
+
+    def handle_input(self) -> None:
+        self.event_manager.update()
+        if shared.kp[pygame.K_ESCAPE]:
+            shared.mode = FileState.NORMAL
+
+
 class Editor:
     def __init__(self) -> None:
         self.surf = pygame.Surface(
@@ -238,7 +264,7 @@ class Editor:
         self.input_handlers = {
             FileState.INSERT: WriteMode().handle_input,
             FileState.NORMAL: NormalMode().handle_input,
-            FileState.VISUAL: self.handle_select_input,
+            FileState.VISUAL: VisualMode().handle_input,
         }
         self.autocompletion = AutoCompletions()
 

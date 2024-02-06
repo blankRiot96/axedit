@@ -4,6 +4,7 @@ import re
 
 from axedit import shared
 from axedit.funcs import center_cursor
+from axedit.state_enums import FileState
 
 
 def on_dd():
@@ -18,6 +19,11 @@ def on_dd():
         n_lines = int(n_lines)
     for _ in range(n_lines):
         shared.chars.pop(shared.cursor_pos.y)
+
+
+def on_d():
+    if shared.mode != FileState.VISUAL:
+        return
 
 
 def on_zz():

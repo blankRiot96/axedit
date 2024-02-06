@@ -6,6 +6,9 @@ class Pos:
         self.x = x
         self.y = y
 
+    def __repr__(self) -> str:
+        return f"Pos({self.x}, {self.y})"
+
 
 class CharList(list):
     def _on_char_change(self):

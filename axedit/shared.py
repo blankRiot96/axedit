@@ -41,6 +41,7 @@ dt: float
 chars: CharList[CharList[str]]
 cursor_pos: Pos
 cursor: Cursor
+visual_mode_axis: Pos
 
 # Config
 mode: FileState = FileState.NORMAL

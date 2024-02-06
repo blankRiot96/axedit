@@ -6,15 +6,7 @@ from axedit.funcs import get_text
 from axedit.input_queue import InputManager
 from axedit.state_enums import FileState
 
-_POSSIBLE_COMPLETIONS = {
-    "module": ("󰅩", "purple"),
-    "class": ("", "yellow"),
-    "param": ("󰭅", "cyan"),
-    "function": ("", "seagreen"),
-    "statement": ("", "green"),
-    "keyword": ("", "magenta"),
-    "instance": ("", "aquamarine"),
-}
+_POSSIBLE_COMPLETIONS = {}
 
 
 class AutoCompletions:
@@ -55,6 +47,8 @@ class AutoCompletions:
         self.suggestion_offset = 0
 
     def cycle_suggestions_up(self):
+        if not shared.autocompleting:
+            return
         self.selected_suggestion_index -= 1
 
         if self.selected_suggestion_index < 0:
@@ -63,9 +57,11 @@ class AutoCompletions:
         self.offset_cycle()
 
     def cycle_suggestions_down(self):
+        if not shared.autocompleting:
+            return
         self.selected_suggestion_index += 1
 
-        if self.selected_suggestion_index > len(self.suggestions):
+        if self.selected_suggestion_index > len(self.suggestions) - 1:
             self.selected_suggestion_index = 0
 
         self.offset_cycle()
@@ -151,7 +147,22 @@ class AutoCompletions:
     def is_non_empty_line(self) -> bool:
         return bool("".join(shared.chars[shared.cursor_pos.y]).strip())
 
+    def on_theme_change(self):
+        global _POSSIBLE_COMPLETIONS
+
+        if not _POSSIBLE_COMPLETIONS or shared.theme_changed:
+            _POSSIBLE_COMPLETIONS = {
+                "module": ("󰅩", shared.theme["class"]),
+                "class": ("", shared.theme["class"]),
+                "param": ("󰭅", shared.theme["var"]),
+                "function": ("", shared.theme["func"]),
+                "statement": ("", shared.theme["string"]),
+                "keyword": ("", shared.theme["keyword"]),
+                "instance": ("", shared.theme["const"]),
+            }
+
     def update(self):
+        self.on_theme_change()
         if (
             self.is_typing_variable()
             and self.is_python_file()
@@ -167,17 +178,23 @@ class AutoCompletions:
         self.input_manager.update()
 
     def get_icon_surf(self, suggestion) -> pygame.Surface:
-        icon, color = _POSSIBLE_COMPLETIONS.get(suggestion.type, ("", "green"))
+        icon, color = _POSSIBLE_COMPLETIONS.get(
+            suggestion.type, ("", shared.theme["default-fg"])
+        )
         icon += " "
         icon_surf = shared.FONT.render(icon, True, color)
         return icon_surf
 
     def render_selected_suggestion(self, suggestion, index):
         surf_1 = shared.FONT.render(
-            suggestion.name[: self.shared_suggestion_length], True, "white"
+            suggestion.name[: self.shared_suggestion_length],
+            True,
+            shared.theme["keyword"],
         )
         surf_2 = shared.FONT.render(
-            suggestion.name[self.shared_suggestion_length :], True, "grey"
+            suggestion.name[self.shared_suggestion_length :],
+            True,
+            shared.theme["default-fg"],
         )
         icon_surf = self.get_icon_surf(suggestion)
 
@@ -189,7 +206,7 @@ class AutoCompletions:
         )
 
     def render_generic_suggestion(self, suggestion, index):
-        surf = shared.FONT.render(suggestion.name, True, "grey")
+        surf = shared.FONT.render(suggestion.name, True, shared.theme["default-fg"])
         icon_surf = self.get_icon_surf(suggestion)
         self.image.blit(icon_surf, (0, index * shared.FONT_HEIGHT))
         self.image.blit(surf, (icon_surf.get_width(), index * shared.FONT_HEIGHT))
@@ -212,10 +229,10 @@ class AutoCompletions:
         SUGGESTION_BOX_HEIGHT = len(suggestions_to_be_rendered) * shared.FONT_HEIGHT
 
         self.image = pygame.Surface((SUGGESTION_BOX_WIDTH, SUGGESTION_BOX_HEIGHT))
-        self.image.fill(AutoCompletions.DEFAULT_COLOR)
+        self.image.fill(shared.theme["light-bg"])
 
         selected_background = pygame.Surface((SUGGESTION_BOX_WIDTH, shared.FONT_HEIGHT))
-        selected_background.fill(AutoCompletions.SELECTED_COLOR)
+        selected_background.fill(shared.theme["comment"])
 
         for index, suggestion in enumerate(suggestions_to_be_rendered):
             index += self.suggestion_offset

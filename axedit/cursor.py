@@ -5,9 +5,9 @@ import pygame
 from axedit import shared
 from axedit.funcs import center_cursor
 from axedit.input_queue import AcceleratedKeyPress, RegexManager
-from axedit.modal import on_dd
+from axedit.modal import on_d, on_dd, on_G, on_gg, on_zz
 from axedit.state_enums import FileState
-from axedit.utils import Time
+from axedit.utils import Time, render_at
 
 
 class Cursor:
@@ -43,6 +43,10 @@ class Cursor:
         self.regex_manager = RegexManager(
             {
                 r"^(\d+)?(dd|d\d+d)$": on_dd,
+                "d": on_d,
+                "zz": on_zz,
+                "gg": on_gg,
+                "G": on_G,
             }
         )
 
@@ -59,6 +63,8 @@ class Cursor:
             self.cursor_visible = not self.cursor_visible
 
     def handle_cursor_delta(self, move: tuple):
+        self.cursor_visible = True
+        self.blink_timer.reset()
         if shared.cursor_pos.x + move[0] >= 0:
             shared.cursor_pos.x += move[0]
 
@@ -160,25 +166,84 @@ class Cursor:
         for accel in self.accels:
             accel.update()
 
-        if shared.mode != FileState.NORMAL:
+        if shared.mode not in (FileState.NORMAL, FileState.VISUAL):
             return
 
         for accel in self.normal_accels:
             accel.update()
 
+    def bound_cursor(self):
+        row_len = len(shared.chars[shared.cursor_pos.y])
+        if shared.cursor_pos.x > row_len - 1:
+            shared.cursor_pos.x = row_len
+
+    def highlight_selected_text(self, editor_surf: pygame.Surface):
+        options_x = (shared.cursor_pos.x, shared.visual_mode_axis.x)
+        options_y = (shared.cursor_pos.y, shared.visual_mode_axis.y)
+
+        lower_meniscus_x = min(options_x)
+        upper_meniscus_x = max(options_x)
+
+        lower_meniscus_y = min(options_y)
+        upper_meniscus_y = max(options_y)
+
+        final_surf = pygame.Surface(
+            (
+                shared.srect.width,
+                (upper_meniscus_y - lower_meniscus_y) * shared.FONT_HEIGHT,
+            ),
+            pygame.SRCALPHA,
+        )
+        for i, row in enumerate(range(lower_meniscus_y, upper_meniscus_y + 1)):
+            if row == lower_meniscus_y:
+                if lower_meniscus_y == shared.cursor_pos.y:
+                    size = shared.cursor_pos.x
+                else:
+                    size = shared.visual_mode_axis.x
+            elif row == upper_meniscus_y:
+                if upper_meniscus_y == shared.cursor_pos.y:
+                    size = shared.cursor_pos.x
+                else:
+                    size = shared.visual_mode_axis.x
+            else:
+                size = len(shared.chars[row])
+            row_size = size * shared.FONT_WIDTH
+
+            row_image = pygame.Surface((row_size, shared.FONT_HEIGHT), pygame.SRCALPHA)
+            row_image.fill(shared.theme["default-fg"])
+            row_image.set_alpha(50)
+
+            final_surf.blit(row_image, (0, i * shared.FONT_HEIGHT))
+
+        # TODO: Work on inverted horizontal selection. And also,
+        # Single line selection too!
+        if shared.cursor_pos.y < shared.visual_mode_axis.y:
+            offset = 0
+        else:
+            offset = -final_surf.get_height()
+
+        editor_surf.blit(
+            final_surf, (0, offset + (shared.FONT_HEIGHT * shared.cursor_pos.y))
+        )
+
     def update(self):
         if shared.typing_cmd:
             return
-        self.move()
         self.blink()
         self.update_accels()
         self.regex_manager.update()
+        self.bound_cursor()
+        self.move()
         self.rect.topleft = self.pos
 
     def draw(self, editor_surf: pygame.Surface):
         if shared.mode == FileState.INSERT and not self.cursor_visible:
             return
+
+        if shared.mode == FileState.VISUAL:
+            self.highlight_selected_text(editor_surf)
         editor_surf.blit(self.image, self.pos)
+
         try:
             char = shared.chars[shared.cursor_pos.y][shared.cursor_pos.x]
         except IndexError:
