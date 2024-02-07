@@ -196,7 +196,6 @@ class NormalMode:
         shared.mode = FileState.VISUAL
         shared.visual_mode_axis = Pos(shared.cursor_pos.x, shared.cursor_pos.y)
         shared.action_queue.clear()
-        print(shared.visual_mode_axis)
 
     def name_file(self):
         if not shared.naming_file:
@@ -284,7 +283,8 @@ class Editor:
                 text = ""
             self.image = shared.FONT.render(text, True, shared.theme["default-fg"])
 
-    def handle_select_input(self): ...
+    def handle_select_input(self):
+        ...
 
     def handle_input(self):
         input_handler = self.input_handlers[shared.mode]

@@ -7,7 +7,7 @@ from axedit.funcs import center_cursor
 from axedit.input_queue import AcceleratedKeyPress, RegexManager
 from axedit.modal import on_d, on_dd, on_G, on_gg, on_zz
 from axedit.state_enums import FileState
-from axedit.utils import Time, render_at
+from axedit.utils import Time
 
 
 class Cursor:
@@ -190,37 +190,48 @@ class Cursor:
         final_surf = pygame.Surface(
             (
                 shared.srect.width,
-                (upper_meniscus_y - lower_meniscus_y) * shared.FONT_HEIGHT,
+                (upper_meniscus_y - lower_meniscus_y + 1) * shared.FONT_HEIGHT,
             ),
             pygame.SRCALPHA,
         )
         for i, row in enumerate(range(lower_meniscus_y, upper_meniscus_y + 1)):
-            if row == lower_meniscus_y:
-                if lower_meniscus_y == shared.cursor_pos.y:
-                    size = shared.cursor_pos.x
+            size = 0
+            offset = 0
+
+            if lower_meniscus_y == upper_meniscus_y:
+                size = upper_meniscus_x - lower_meniscus_x
+                offset = lower_meniscus_x
+            elif row == shared.visual_mode_axis.y:
+                if row == lower_meniscus_y:
+                    size = len(shared.chars[row]) - shared.visual_mode_axis.x
+                    offset = shared.visual_mode_axis.x
                 else:
                     size = shared.visual_mode_axis.x
-            elif row == upper_meniscus_y:
-                if upper_meniscus_y == shared.cursor_pos.y:
-                    size = shared.cursor_pos.x
+                    offset = 0
+            elif row == shared.cursor_pos.y:
+                if row == lower_meniscus_y:
+                    size = len(shared.chars[row]) - shared.cursor_pos.x
+                    offset = shared.cursor_pos.x
                 else:
-                    size = shared.visual_mode_axis.x
+                    size = shared.cursor_pos.x
             else:
                 size = len(shared.chars[row])
-            row_size = size * shared.FONT_WIDTH
 
+            row_size = size * shared.FONT_WIDTH
             row_image = pygame.Surface((row_size, shared.FONT_HEIGHT), pygame.SRCALPHA)
             row_image.fill(shared.theme["default-fg"])
             row_image.set_alpha(50)
 
-            final_surf.blit(row_image, (0, i * shared.FONT_HEIGHT))
+            final_surf.blit(
+                row_image, (offset * shared.FONT_WIDTH, i * shared.FONT_HEIGHT)
+            )
 
         # TODO: Work on inverted horizontal selection. And also,
         # Single line selection too!
         if shared.cursor_pos.y < shared.visual_mode_axis.y:
             offset = 0
         else:
-            offset = -final_surf.get_height()
+            offset = -final_surf.get_height() + shared.FONT_HEIGHT
 
         editor_surf.blit(
             final_surf, (0, offset + (shared.FONT_HEIGHT * shared.cursor_pos.y))
