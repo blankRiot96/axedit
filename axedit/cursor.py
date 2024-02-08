@@ -5,7 +5,7 @@ import pygame
 from axedit import shared
 from axedit.funcs import center_cursor
 from axedit.input_queue import AcceleratedKeyPress, RegexManager
-from axedit.modal import on_d, on_dd, on_G, on_gg, on_zz
+from axedit.modal import *
 from axedit.state_enums import FileState
 from axedit.utils import Time
 
@@ -47,6 +47,8 @@ class Cursor:
                 "zz": on_zz,
                 "gg": on_gg,
                 "G": on_G,
+                r"\$": on_dollar_sign,
+                "0": on_zero,
             }
         )
 
@@ -65,20 +67,17 @@ class Cursor:
     def handle_cursor_delta(self, move: tuple):
         self.cursor_visible = True
         self.blink_timer.reset()
-        if shared.cursor_pos.x + move[0] >= 0:
+        line_len = len(shared.chars[shared.cursor_pos.y])
+        limit = 0 if shared.mode == FileState.INSERT else -1
+        if shared.cursor_pos.x + move[0] >= 0 and shared.cursor_pos.x < line_len + limit:
             shared.cursor_pos.x += move[0]
 
         if shared.cursor_pos.y + move[1] >= 0:
             shared.cursor_pos.y += move[1]
 
-        if move[0] < 0 and shared.cursor_pos.x == 0:
-            shared.cursor_pos.y -= 1
-            shared.cursor_pos.y = max(0, shared.cursor_pos.y)
-            return
-
         if len(shared.chars) - 1 < shared.cursor_pos.y:
             shared.cursor_pos.y -= 1
-        if (line_len := len(shared.chars[shared.cursor_pos.y])) < shared.cursor_pos.x:
+        if line_len < shared.cursor_pos.x:
             # diff = shared.cursor_pos.x - line_len
             # shared.chars[shared.cursor_pos.y].extend([" "] * diff)
 
@@ -86,7 +85,6 @@ class Cursor:
                 shared.cursor_pos.y += 1
 
             shared.cursor_pos.x = line_len - 1
-
             shared.cursor_pos.x = max(0, shared.cursor_pos.x)
 
     def handle_arrows(self, key: int):
@@ -216,6 +214,8 @@ class Cursor:
                     size = shared.cursor_pos.x
             else:
                 size = len(shared.chars[row])
+                if size == 0:
+                    size = 1
 
             row_size = size * shared.FONT_WIDTH
             row_image = pygame.Surface((row_size, shared.FONT_HEIGHT), pygame.SRCALPHA)

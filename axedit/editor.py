@@ -41,6 +41,8 @@ class WriteMode:
 
     def on_esc(self):
         shared.mode = FileState.NORMAL
+        if shared.cursor_pos.x > 0:
+            shared.cursor_pos.x -= 1
 
     @property
     def typing(self) -> bool:
@@ -161,6 +163,7 @@ class NormalMode:
         self.input_manager = InputManager(
             {
                 pygame.K_i: self.on_i,
+                pygame.K_a: self.on_a,
                 pygame.K_v: self.on_v,
                 # pygame.K_f: self.on_f,
             }
@@ -188,6 +191,10 @@ class NormalMode:
     def on_f(self):
         shared.file_name = self.mini_cur
         shared.naming_file = True
+
+    def on_a(self):
+        shared.mode = FileState.INSERT
+        shared.cursor_pos.x += 1
 
     def on_i(self):
         shared.mode = FileState.INSERT

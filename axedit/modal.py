@@ -7,6 +7,14 @@ from axedit.funcs import center_cursor
 from axedit.state_enums import FileState
 
 
+def on_dollar_sign():
+    shared.cursor_pos.x = len(shared.chars[shared.cursor_pos.y]) - 1
+
+
+def on_zero():
+    shared.cursor_pos.x = 0
+
+
 def on_dd():
     match = re.match(".\d.", shared.action_str)
     if match is None:
@@ -24,6 +32,8 @@ def on_dd():
 def on_d():
     if shared.mode != FileState.VISUAL:
         return
+
+    shared.mode = FileState.NORMAL
 
 
 def on_zz():
