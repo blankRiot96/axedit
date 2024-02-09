@@ -115,7 +115,7 @@ class AutoCompletions:
 
     def at_autocompletion(self):
         self.pos_at_autocompleting = shared.cursor_pos.x - self.shared_suggestion_length
-        shared.autocompleting = bool(self.suggestions) 
+        shared.autocompleting = bool(self.suggestions)
 
     def after_autocompletion(self):
         self.suggestion_offset = 0

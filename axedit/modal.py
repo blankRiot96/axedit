@@ -7,6 +7,40 @@ from axedit.funcs import center_cursor
 from axedit.state_enums import FileState
 
 
+def on_left_brace():
+    good_line_encountered = False
+    for i, line in enumerate(shared.chars[: shared.cursor_pos.y][::-1]):
+        if line:
+            good_line_encountered = True
+        elif good_line_encountered:
+            shared.cursor_pos.y -= i + 1
+            break
+    else:
+        shared.cursor_pos.y = 0
+        shared.cursor_pos.x = 0
+
+    if (shared.cursor_pos.y * shared.FONT_HEIGHT) + shared.scroll.y < 0:
+        center_cursor()
+
+
+def on_right_brace():
+    good_line_encountered = False
+    for i, line in enumerate(shared.chars[shared.cursor_pos.y + 1 :]):
+        if line:
+            good_line_encountered = True
+        elif good_line_encountered:
+            shared.cursor_pos.y += i + 1
+            break
+    else:
+        shared.cursor_pos.y = len(shared.chars) - 1
+        shared.cursor_pos.x = len(shared.chars[shared.cursor_pos.y]) - 1
+
+    if (
+        shared.cursor_pos.y * shared.FONT_HEIGHT
+    ) + shared.scroll.y > shared.srect.height:
+        center_cursor()
+
+
 def on_dollar_sign():
     shared.cursor_pos.x = len(shared.chars[shared.cursor_pos.y]) - 1
 
