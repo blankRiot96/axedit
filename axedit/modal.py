@@ -9,11 +9,11 @@ from axedit.state_enums import FileState
 
 def on_left_brace():
     good_line_encountered = False
-    for i, line in enumerate(shared.chars[: shared.cursor_pos.y][::-1]):
+    for i, line in enumerate(shared.chars[: shared.cursor_pos.y + 1][::-1]):
         if line:
             good_line_encountered = True
         elif good_line_encountered:
-            shared.cursor_pos.y -= i + 1
+            shared.cursor_pos.y -= i
             break
     else:
         shared.cursor_pos.y = 0
@@ -25,11 +25,11 @@ def on_left_brace():
 
 def on_right_brace():
     good_line_encountered = False
-    for i, line in enumerate(shared.chars[shared.cursor_pos.y + 1 :]):
+    for i, line in enumerate(shared.chars[shared.cursor_pos.y :]):
         if line:
             good_line_encountered = True
         elif good_line_encountered:
-            shared.cursor_pos.y += i + 1
+            shared.cursor_pos.y += i
             break
     else:
         shared.cursor_pos.y = len(shared.chars) - 1
