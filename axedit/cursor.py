@@ -43,14 +43,13 @@ class Cursor:
         self.regex_manager = RegexManager(
             {
                 r"^(\d+)?(dd|d\d+d)$": on_dd,
-                "d": on_d,
                 "zz": on_zz,
                 "gg": on_gg,
                 "G": on_G,
                 r"\$": on_dollar_sign,
                 "0": on_zero,
                 r"\}": on_right_brace,
-                r"\{": on_left_brace 
+                r"\{": on_left_brace,
             }
         )
 
@@ -71,7 +70,10 @@ class Cursor:
         self.blink_timer.reset()
         line_len = len(shared.chars[shared.cursor_pos.y])
         limit = 0 if shared.mode == FileState.INSERT else -1
-        if shared.cursor_pos.x + move[0] >= 0 and shared.cursor_pos.x < line_len + limit:
+        if (
+            shared.cursor_pos.x + move[0] >= 0
+            and shared.cursor_pos.x < line_len + limit
+        ):
             shared.cursor_pos.x += move[0]
 
         if shared.cursor_pos.y + move[1] >= 0:
@@ -219,6 +221,9 @@ class Cursor:
                 if size == 0:
                     size = 1
 
+            if shared.action_str == "d":
+                del shared.chars[row][offset : size + offset]
+                continue
             row_size = size * shared.FONT_WIDTH
             row_image = pygame.Surface((row_size, shared.FONT_HEIGHT), pygame.SRCALPHA)
             row_image.fill(shared.theme["default-fg"])
@@ -238,6 +243,7 @@ class Cursor:
         editor_surf.blit(
             final_surf, (0, offset + (shared.FONT_HEIGHT * shared.cursor_pos.y))
         )
+        on_d()
 
     def update(self):
         if shared.typing_cmd:

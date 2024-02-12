@@ -64,10 +64,12 @@ def on_dd():
 
 
 def on_d():
-    if shared.mode != FileState.VISUAL:
+    if shared.action_str != "d" or shared.mode != FileState.VISUAL:
         return
 
+    shared.chars_changed = True
     shared.mode = FileState.NORMAL
+    shared.action_queue.clear()
 
 
 def on_zz():

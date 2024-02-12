@@ -231,9 +231,10 @@ def apply_syntax_highlighting() -> pygame.Surface:
             (shared.theme["var"], ["self"]),
         ]
     global prev_image
-    if not shared.theme_changed and (
-        not is_event_frame(pygame.VIDEORESIZE)
-        and not shared.chars_changed
+    if (
+        not shared.theme_changed
+        and (not is_event_frame(pygame.VIDEORESIZE))
+        and (not shared.chars_changed)
         and prev_image is not None
     ):
         return prev_image

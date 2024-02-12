@@ -96,6 +96,7 @@ class EditorState:
     def update(self):
         if self.next_state is not None:
             return
+        shared.chars_changed = False
         shared.actions_modified = False
         self.char_handler()
         self.queue_actions()
@@ -109,7 +110,6 @@ class EditorState:
         self.on_ctrl_s()
 
     def char_handler(self):
-        shared.chars_changed = False
         for i, lst in enumerate(shared.chars):
             if not isinstance(lst, CharList):
                 shared.chars[i] = CharList(lst)
@@ -134,7 +134,9 @@ class EditorState:
 
     def draw(self):
         self.editor.draw()
+        shared.cursor.draw(self.editor.surf)
+        if shared.chars_changed:
+            self.editor.draw()
         self.line_numbers.draw()
         self.status_bar.draw()
-        shared.cursor.draw(self.editor.surf)
         self.draw_all()

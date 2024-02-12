@@ -195,9 +195,11 @@ class NormalMode:
     def on_a(self):
         shared.mode = FileState.INSERT
         shared.cursor_pos.x += 1
+        shared.action_queue.clear()
 
     def on_i(self):
         shared.mode = FileState.INSERT
+        shared.action_queue.clear()
 
     def on_v(self):
         shared.mode = FileState.VISUAL
@@ -290,8 +292,7 @@ class Editor:
                 text = ""
             self.image = shared.FONT.render(text, True, shared.theme["default-fg"])
 
-    def handle_select_input(self):
-        ...
+    def handle_select_input(self): ...
 
     def handle_input(self):
         input_handler = self.input_handlers[shared.mode]
