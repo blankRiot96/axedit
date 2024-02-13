@@ -110,27 +110,7 @@ class CommandBar:
                 subs=get_available_theme_names(),
             ),
             Command(":rel-no", exit, subs=["on", "off"]),
-            Command(":cutee1", exit),
-            Command(":cutee2", exit),
-            Command(":cutee3", exit),
-            Command(":cutee4", exit),
-            Command(":cutee5", exit),
-            Command(":cutee6", lambda: print("oniichan!!")),
-            Command(":cutee7", exit),
-            Command(":cutee8", exit),
-            Command(":cutee9", exit),
-            Command(":cutee10", exit),
-            Command(":cutee11", exit),
-            Command(":cutee12", exit),
-            Command(":cutee13", exit),
-            Command(":cutee14", exit),
-            Command(":cutee15", exit),
-            Command(":cutee16", exit),
-            Command(":cutee17", exit),
-            Command(":cutee18", exit),
-            Command(":cutee19", exit),
-            Command(":cutee20", exit),
-            Command(":cutee21", exit),
+            Command((":rename", ":rn"), self.on_rename),
         ]
         self.commands = self.original_commands.copy()
         self.selected_command: Command | None = None
@@ -141,6 +121,10 @@ class CommandBar:
         self.executed = False
         self.raised_subsidaries = False
         self.gen_blank_surf()
+
+    def on_rename(self):
+        shared.naming_file = True
+        shared.file_name = "|"
 
     @property
     def selected_col(self) -> int:

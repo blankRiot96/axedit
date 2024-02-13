@@ -275,6 +275,8 @@ class Editor:
             FileState.VISUAL: VisualMode().handle_input,
         }
         self.autocompletion = AutoCompletions()
+        self.stored_drag_pos: Pos = Pos(0, 0)
+        self.first_drag = False
 
     def on_scroll(self):
         for event in shared.events:
@@ -298,34 +300,49 @@ class Editor:
         input_handler = self.input_handlers[shared.mode]
         input_handler()
 
+    def get_placement(self):
+        x_pos = shared.mouse_pos.x + shared.scroll.x - (shared.FONT_WIDTH * 5)
+        y_pos = shared.mouse_pos.y - shared.scroll.y
+
+        # Pixel to cursor pos
+        x_pos /= shared.FONT_WIDTH
+        y_pos /= shared.FONT_HEIGHT
+
+        # Inting
+        x_pos = int(x_pos)
+        y_pos = int(y_pos)
+
+        # Containing
+        if y_pos > len(shared.chars) - 1:
+            y_pos = len(shared.chars) - 1
+
+        if x_pos > len(shared.chars[y_pos]) - 1:
+            x_pos = len(shared.chars[y_pos])
+
+        return Pos(x_pos, y_pos)
+
     def mouse_placement(self):
         for event in shared.events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                x_pos = shared.mouse_pos.x + shared.scroll.x - (shared.FONT_WIDTH * 5)
-                y_pos = shared.mouse_pos.y - shared.scroll.y
-
-                # Pixel to cursor pos
-                x_pos /= shared.FONT_WIDTH
-                y_pos /= shared.FONT_HEIGHT
-
-                # Inting
-                x_pos = int(x_pos)
-                y_pos = int(y_pos)
-
-                # Containing
-                if y_pos > len(shared.chars) - 1:
-                    y_pos = len(shared.chars) - 1
-
-                if x_pos > len(shared.chars[y_pos]) - 1:
-                    x_pos = len(shared.chars[y_pos])
-
-                shared.cursor_pos = Pos(x_pos, y_pos)
+                shared.cursor_pos = self.get_placement()
 
     def clear_queue(self):
         if shared.mode in (shared.FileState.NORMAL, shared.FileState.VISUAL):
             return
 
         shared.action_queue.clear()
+
+    def on_drag(self) -> None:
+        if not shared.mouse_press[0]:
+            self.first_drag = False
+            return
+
+        if self.stored_drag_pos != shared.cursor_pos:
+            if not self.first_drag:
+                shared.visual_mode_axis = self.get_placement()
+                self.first_drag = True
+            shared.mode = FileState.VISUAL
+            shared.cursor_pos = self.get_placement()
 
     def update(self):
         if shared.typing_cmd:
@@ -334,6 +351,7 @@ class Editor:
         self.mouse_placement()
         self.on_scroll()
         self.handle_input()
+        self.on_drag()
         self.autocompletion.update()
 
     def draw(self):

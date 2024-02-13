@@ -54,6 +54,7 @@ class Core:
         shared.kr = pygame.key.get_just_released()
         shared.mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
         shared.theme_changed = False
+        shared.mouse_press = pygame.mouse.get_pressed()
 
     def update(self):
         self.shared_refresh()

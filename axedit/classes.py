@@ -1,3 +1,5 @@
+import typing as t
+
 from axedit import shared
 
 
@@ -5,6 +7,9 @@ class Pos:
     def __init__(self, x: int, y: int) -> None:
         self.x = x
         self.y = y
+
+    def __eq__(self, __value: t.Self) -> bool:
+        return __value.x == self.x and __value.y == self.y
 
     def __repr__(self) -> str:
         return f"Pos({self.x}, {self.y})"
