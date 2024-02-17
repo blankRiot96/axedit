@@ -119,6 +119,7 @@ class WriteMode:
         return shared.chars[shared.cursor_pos.y]
 
     def delete_chars(self):
+        shared.cursor.cursor_visible = True
         if shared.cursor_pos.x == 0:
             if shared.cursor_pos.y == 0:
                 return
@@ -130,12 +131,9 @@ class WriteMode:
             return
 
         line = "".join(self.get_line())
-        if not line.strip():
-            shared.chars[shared.cursor_pos.y] = []
-            shared.cursor_pos.x = 0
-            if shared.cursor_pos.y == 0:
-                return
-            self.go_prev_line()
+        if line and len(line) % 4 == 0 and not line.strip():
+            del shared.chars[shared.cursor_pos.y][-4:]
+            shared.cursor_pos.x -= 4
             return
 
         shared.saved = False
