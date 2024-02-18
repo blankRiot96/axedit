@@ -3,6 +3,7 @@
 import re
 
 from axedit import shared
+from axedit.classes import Pos
 from axedit.funcs import center_cursor
 from axedit.state_enums import FileState
 
@@ -66,6 +67,9 @@ def on_dd():
 def on_d():
     if shared.action_str != "d" or shared.mode != FileState.VISUAL:
         return
+
+    if shared.cursor_pos.x > shared.visual_mode_axis.x:
+        shared.cursor_pos.x = shared.visual_mode_axis.x
 
     shared.chars_changed = True
     shared.mode = FileState.NORMAL

@@ -3,6 +3,7 @@ from functools import partial
 import pygame
 
 from axedit import shared
+from axedit.classes import CharList
 from axedit.funcs import center_cursor
 from axedit.input_queue import AcceleratedKeyPress, RegexManager
 from axedit.modal import *
@@ -196,12 +197,13 @@ class Cursor:
             ),
             pygame.SRCALPHA,
         )
+        lines_to_delete = []
         for i, row in enumerate(range(lower_meniscus_y, upper_meniscus_y + 1)):
             size = 0
             offset = 0
 
             if lower_meniscus_y == upper_meniscus_y:
-                size = upper_meniscus_x - lower_meniscus_x
+                size = upper_meniscus_x - lower_meniscus_x + 1
                 offset = lower_meniscus_x
             elif row == shared.visual_mode_axis.y:
                 if row == lower_meniscus_y:
@@ -223,6 +225,8 @@ class Cursor:
 
             if shared.action_str == "d":
                 del shared.chars[row][offset : size + offset]
+                if not shared.chars[row]:
+                    lines_to_delete.append(row)
                 continue
             row_size = size * shared.FONT_WIDTH
             row_image = pygame.Surface((row_size, shared.FONT_HEIGHT), pygame.SRCALPHA)
@@ -232,6 +236,12 @@ class Cursor:
             final_surf.blit(
                 row_image, (offset * shared.FONT_WIDTH, i * shared.FONT_HEIGHT)
             )
+
+        for line in lines_to_delete[::-1]:
+            shared.chars.pop(line)
+            shared.cursor_pos.y = line
+            if not shared.chars:
+                shared.chars.append(CharList([]))
 
         # TODO: Work on inverted horizontal selection. And also,
         # Single line selection too!
