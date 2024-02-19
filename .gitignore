@@ -1,6 +1,8 @@
 # Custom
-*.exe
 todo.txt
+palette_tester.css
+snippets.txt
+*.exe
 *.prof
 
 # VSCode
