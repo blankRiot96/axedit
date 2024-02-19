@@ -47,6 +47,8 @@ def is_editable_module(main_module_name: str, sub_module_name: str) -> bool:
     easy_install = scripts_path / "easy-install.pth"
     mod_path = scripts_path / main_module_name
 
+    if not easy_install.exists():
+        return False
     with open(easy_install) as f:
         modules = f.readlines()
 
