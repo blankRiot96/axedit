@@ -1,6 +1,0 @@
-
-
-class SoftModule:
-    submodules: list[Self]
-    functions: list[str]
-    classes: list[str]

@@ -1,6 +1,9 @@
 import os
 import platform
 
+import logit
+from logit import log
+
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 import pygame
 from pygame._sdl2 import Window
@@ -19,6 +22,8 @@ class Core:
         shared.action_queue = []
         self.state_manager = StateManager()
         self.frame_no = 0
+        log.config(level=logit.Level.CLUTTER)
+        log.debug("CORE INITIALIZED")
 
     def win_init(self):
         shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=1)
@@ -63,7 +68,7 @@ class Core:
         if shared.theme_changed:
             set_windows_title_bar_color()
             pygame.display.set_icon(get_icon(shared.theme["default-fg"]))
-        # pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
+        pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
 
     def draw(self):
         shared.screen.fill(shared.theme["default-bg"])
