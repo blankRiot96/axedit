@@ -1,10 +1,4 @@
-from axedit.core import Core
-
-
-def main():
-    core = Core()
-    core.run()
-
+from axedit import main
 
 if __name__ == "__main__":
     main()

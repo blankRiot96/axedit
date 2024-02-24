@@ -5,6 +5,7 @@ import logit
 from logit import log
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
+
 import pygame
 from pygame._sdl2 import Window
 
@@ -22,7 +23,6 @@ class Core:
         shared.action_queue = []
         self.state_manager = StateManager()
         self.frame_no = 0
-        log.config(level=logit.Level.CLUTTER)
         log.debug("CORE INITIALIZED")
 
     def win_init(self):
