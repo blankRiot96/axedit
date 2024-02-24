@@ -1,10 +1,9 @@
 import os
 import platform
 
-import logit
-from logit import log
-
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
+
+import logging
 
 import pygame
 from pygame._sdl2 import Window
@@ -23,7 +22,7 @@ class Core:
         shared.action_queue = []
         self.state_manager = StateManager()
         self.frame_no = 0
-        log.debug("CORE INITIALIZED")
+        logging.debug("CORE INITIALIZED")
 
     def win_init(self):
         shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=1)
@@ -48,6 +47,8 @@ class Core:
             elif event.type == pygame.VIDEORESIZE:
                 shared.srect = shared.screen.get_rect()
                 set_windows_title()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                logging.info("Clicked on window")
 
     def shared_refresh(self):
         shared.frame_cache.clear()

@@ -1,18 +1,22 @@
 import inspect
-import os
+import logging
 import subprocess
 import sys
 import traceback
 from pathlib import Path
 
-from logit import Level, log
-
 FILE_PATH = Path(inspect.getfile(inspect.currentframe()))
 LOG_FILE_PATH = FILE_PATH.parent.parent / "app.log"
-
 if LOG_FILE_PATH.exists():
-    os.remove(LOG_FILE_PATH)
-log.config(log_file_path=LOG_FILE_PATH, level=Level.CLUTTER)
+    with open(LOG_FILE_PATH, "w") as f:
+        f.write("")
+
+logging.basicConfig(
+    format="%(asctime)s [ %(levelname)s ] : %(filename)s:%(lineno)d : %(message)s",
+    datefmt="%Y-%m-%d:%H:%M:%S",
+    filename=LOG_FILE_PATH,
+    level=logging.DEBUG,
+)
 
 
 def detached_main() -> None:
@@ -53,4 +57,4 @@ def main():
     try:
         potential_main()
     except Exception:
-        log.error(traceback.format_exc())
+        logging.error(traceback.format_exc())
