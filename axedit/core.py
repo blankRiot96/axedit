@@ -8,7 +8,7 @@ import logging
 import pygame
 from pygame._sdl2 import Window
 
-from axedit import shared
+from axedit import LOG_FILE_PATH, shared
 from axedit.funcs import get_icon, set_windows_title, set_windows_title_bar_color
 from axedit.states import StateManager
 from axedit.themes import apply_theme

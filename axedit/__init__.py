@@ -12,8 +12,8 @@ if LOG_FILE_PATH.exists():
         f.write("")
 
 logging.basicConfig(
-    format="%(asctime)s [ %(levelname)s ] : %(filename)s:%(lineno)d : %(message)s",
-    datefmt="%Y-%m-%d:%H:%M:%S",
+    format="%(asctime)s : [%(levelname)s] : %(filename)s:%(lineno)d : %(message)s",
+    datefmt="%H:%M:%S",
     filename=LOG_FILE_PATH,
     level=logging.DEBUG,
 )
