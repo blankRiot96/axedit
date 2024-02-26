@@ -1,9 +1,6 @@
+import logging
 import os
 import platform
-
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-
-import logging
 
 import pygame
 from pygame._sdl2 import Window
