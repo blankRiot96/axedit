@@ -1,53 +1,18 @@
 import inspect
-import logging
 import os
 import subprocess
 import sys
 import traceback
 from pathlib import Path
 
-import colorama
+from axedit.logs import logger
 
 FILE_PATH = Path(inspect.getfile(inspect.currentframe()))
 LOG_FILE_PATH = FILE_PATH.parent.parent / "app.log"
-LOGGING_DATE_FMT = "%H:%M:%S"
-
-
-class CustomFormatter(logging.Formatter):
-    colored_format = "%(asctime)s : {color}[%(levelname)s]{reset} : %(filename)s:%(lineno)d : %(message)s"
-
-    reset = colorama.Fore.RESET
-    FORMATS = {
-        logging.DEBUG: colored_format.format(color=colorama.Fore.GREEN, reset=reset),
-        logging.INFO: colored_format.format(color=colorama.Fore.WHITE, reset=reset),
-        logging.WARNING: colored_format.format(color=colorama.Fore.YELLOW, reset=reset),
-        logging.ERROR: colored_format.format(color=colorama.Fore.RED, reset=reset),
-        logging.CRITICAL: colored_format.format(
-            color=colorama.Fore.MAGENTA, reset=reset
-        ),
-    }
-
-    def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt, datefmt=LOGGING_DATE_FMT)
-        return formatter.format(record)
-
-
-stream_handler = logging.StreamHandler()
-file_handler = logging.FileHandler(LOG_FILE_PATH)
-
-stream_handler.setFormatter(CustomFormatter())
-
-logging.basicConfig(
-    format="%(asctime)s : [%(levelname)s] : %(filename)s:%(lineno)d : %(message)s",
-    datefmt=LOGGING_DATE_FMT,
-    level=logging.DEBUG,
-    handlers=[stream_handler, file_handler],
-)
 
 
 def true_exit():
-    logging.debug("EXIT CALLED")
+    logger.debug("EXIT CALLED")
     raise SystemExit
 
 
@@ -79,7 +44,7 @@ def debug_main():
     import pygame
 
     if not hasattr(pygame, "IS_CE"):
-        logging.critical("This editor requires Pygame-CE")
+        logger.critical("This editor requires Pygame-CE")
         raise ModuleNotFoundError("Pygame-CE is not being used")
 
     from axedit.core import Core
@@ -107,7 +72,7 @@ def potential_main():
         elif sys.argv[1] == "--logs":
             display_logs()
         else:
-            logging.critical(f"Invalid command '{sys.argv[1]}'")
+            logger.critical(f"Invalid command '{sys.argv[1]}'")
             raise SystemExit
         return
     detached_main()
@@ -118,4 +83,4 @@ def main():
     try:
         potential_main()
     except Exception:
-        logging.error(traceback.format_exc())
+        logger.error(traceback.format_exc())

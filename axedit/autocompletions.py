@@ -4,6 +4,7 @@ import pygame
 from axedit import shared
 from axedit.funcs import get_text
 from axedit.input_queue import InputManager
+from axedit.logs import logger
 from axedit.state_enums import FileState
 
 _POSSIBLE_COMPLETIONS = {}
@@ -107,7 +108,8 @@ class AutoCompletions:
                 shared.cursor_pos.y + 1, shared.cursor_pos.x
             )
         except ValueError as e:
-            print(e)
+            logger.warn(e)
+           
             # print(f"{shared.cursor_pos.x = }, {shared.cursor_pos.y = }")
             # print(get_text())
 

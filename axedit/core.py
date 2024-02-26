@@ -1,5 +1,3 @@
-import logging
-import os
 import platform
 
 import pygame
@@ -7,6 +5,7 @@ from pygame._sdl2 import Window
 
 from axedit import LOG_FILE_PATH, shared
 from axedit.funcs import get_icon, set_windows_title, set_windows_title_bar_color
+from axedit.logs import logger
 from axedit.states import StateManager
 from axedit.themes import apply_theme
 
@@ -19,7 +18,7 @@ class Core:
         shared.action_queue = []
         self.state_manager = StateManager()
         self.frame_no = 0
-        logging.debug("CORE INITIALIZED")
+        logger.debug("CORE INITIALIZED")
 
     def win_init(self):
         shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=1)
@@ -44,8 +43,6 @@ class Core:
             elif event.type == pygame.VIDEORESIZE:
                 shared.srect = shared.screen.get_rect()
                 set_windows_title()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                logging.info("Clicked on window")
 
     def shared_refresh(self):
         shared.frame_cache.clear()
