@@ -1,3 +1,4 @@
+import platform
 import os
 import typing as t
 from pathlib import Path
@@ -97,6 +98,8 @@ def set_windows_title_bar_color() -> None:
 
 
 def set_windows_title() -> None:
+    if platform.system != "Windows":
+        return
     title_bar_text = shared.APP_NAME
 
     if shared.file_name is not None:

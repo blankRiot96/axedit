@@ -42,7 +42,6 @@ class Core:
                 exit()
             elif event.type == pygame.VIDEORESIZE:
                 shared.srect = shared.screen.get_rect()
-                set_windows_title()
 
     def shared_refresh(self):
         shared.frame_cache.clear()
@@ -61,9 +60,10 @@ class Core:
         self.event_handler()
         self.state_manager.update()
         if shared.theme_changed:
-            set_windows_title_bar_color()
+            if platform.system == "Windows":
+                set_windows_title_bar_color()
             pygame.display.set_icon(get_icon(shared.theme["default-fg"]))
-        pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
+        # pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
 
     def draw(self):
         shared.screen.fill(shared.theme["default-bg"])
