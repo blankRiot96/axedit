@@ -176,6 +176,8 @@ class Cursor:
             accel.update()
 
     def bound_cursor(self):
+        if shared.cursor_pos.y >= len(shared.chars):
+            shared.cursor_pos.y = len(shared.chars) - 1
         row_len = len(shared.chars[shared.cursor_pos.y])
         if shared.cursor_pos.x > row_len - 1:
             shared.cursor_pos.x = row_len

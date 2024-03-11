@@ -6,6 +6,8 @@ import pygame
 from axedit import shared
 from axedit.themes import apply_theme, get_available_theme_names
 from axedit.utils import Time, render_at
+from axedit.funcs import save_file, soft_save_file
+import abc
 
 
 def calculate_number_of_rows(
@@ -100,10 +102,10 @@ class CommandBar:
         self.suggestion_surf: pygame.Surface | None = None
         self.original_commands: list[Command] = [
             Command((":q", ":quit"), self.on_quit),
-            Command((":w", ":write"), exit),
-            Command(":wq", exit),
-            Command(":x", exit),
-            Command((":save", ":saveas"), exit),
+            Command((":w", ":write"), soft_save_file),
+            Command(":wq", self.on_save_exit),
+            Command(":x", self.on_save_exit),
+            Command((":save", ":saveas"), self.on_save_as),
             Command(
                 ":theme",
                 self.apply_selected_theme,
@@ -121,6 +123,13 @@ class CommandBar:
         self.executed = False
         self.raised_subsidaries = False
         self.gen_blank_surf()
+
+    def on_save_as(self):
+        self.on_rename()
+
+    def on_save_exit(self):
+        soft_save_file()
+        exit()
 
     def on_rename(self):
         shared.naming_file = True

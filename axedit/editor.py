@@ -5,7 +5,7 @@ import pygame
 from axedit import shared
 from axedit.autocompletions import AutoCompletions
 from axedit.classes import Pos
-from axedit.funcs import center_cursor, get_text, save_file
+from axedit.funcs import get_text, save_file
 from axedit.input_queue import AcceleratedKeyPress, EventManager, InputManager
 from axedit.state_enums import FileState
 from axedit.syntax_highlighting import apply_syntax_highlighting
@@ -198,11 +198,13 @@ class NormalMode:
     def on_i(self):
         shared.mode = FileState.INSERT
         shared.action_queue.clear()
+        shared.action_str = ""
 
     def on_v(self):
         shared.mode = FileState.VISUAL
         shared.visual_mode_axis = Pos(shared.cursor_pos.x, shared.cursor_pos.y)
         shared.action_queue.clear()
+        shared.action_str = ""
 
     def name_file(self):
         if not shared.naming_file:
@@ -350,7 +352,7 @@ class Editor:
         self.on_scroll()
         self.handle_input()
         self.on_drag()
-        self.autocompletion.update()
+        # self.autocompletion.update()
 
     def draw(self):
         self.gen_image()
@@ -359,4 +361,4 @@ class Editor:
             pygame.SRCALPHA,
         )
         self.surf.blit(self.image, (0, 0))
-        self.autocompletion.draw(self.surf)
+        # self.autocompletion.draw(self.surf)
