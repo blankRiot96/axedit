@@ -137,10 +137,13 @@ class WriteMode:
             return
 
         shared.saved = False
+        self.typing = True
 
         shared.cursor_pos.x -= 1
-        self.get_line().pop(shared.cursor_pos.x)
-        self.typing = True
+        try:
+            self.get_line().pop(shared.cursor_pos.x)
+        except IndexError:
+            return            
 
     def go_prev_line(self):
         shared.chars.pop(shared.cursor_pos.y)
