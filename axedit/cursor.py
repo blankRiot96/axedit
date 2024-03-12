@@ -69,13 +69,17 @@ class Cursor:
     def handle_cursor_delta(self, move: tuple):
         self.cursor_visible = True
         self.blink_timer.reset()
+
         line_len = len(shared.chars[shared.cursor_pos.y])
         limit = 0 if shared.mode == FileState.INSERT else -1
-        if (
-            shared.cursor_pos.x + move[0] >= 0
-            and shared.cursor_pos.x < line_len + limit
-        ):
-            shared.cursor_pos.x += move[0]
+
+        # Make sure that the cursor cant be moved into unknown regions
+        if shared.cursor_pos.x + move[0] >= 0:
+            if shared.cursor_pos.x == line_len + limit and move[0] > 0:
+                # shared.cursor_pos.x += move[0]
+                ...
+            else:
+                shared.cursor_pos.x += move[0]
 
         if shared.cursor_pos.y + move[1] >= 0:
             shared.cursor_pos.y += move[1]

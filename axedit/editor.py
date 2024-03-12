@@ -197,6 +197,7 @@ class NormalMode:
         shared.mode = FileState.INSERT
         shared.cursor_pos.x += 1
         shared.action_queue.clear()
+        shared.action_str = ""
 
     def on_i(self):
         shared.mode = FileState.INSERT
