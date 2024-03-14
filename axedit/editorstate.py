@@ -124,7 +124,7 @@ class EditorState:
             shared.screen,
             self.editor.surf,
             "topleft",
-            (line_width, 0) + shared.scroll,
+            (line_width, 0),
         )
         render_at(
             shared.screen,

@@ -1,5 +1,5 @@
 from functools import partial
-
+import clipboard
 import pygame
 
 from axedit import shared
@@ -9,6 +9,11 @@ from axedit.input_queue import AcceleratedKeyPress, RegexManager
 from axedit.modal import *
 from axedit.state_enums import FileState
 from axedit.utils import Time
+
+import logging
+
+
+logger = logging.getLogger("axedit")
 
 
 class Cursor:
@@ -47,6 +52,7 @@ class Cursor:
                 "zz": on_zz,
                 "gg": on_gg,
                 "G": on_G,
+                r"p": on_p,
                 r"\$": on_dollar_sign,
                 "0": on_zero,
                 r"\}": on_right_brace,
@@ -60,7 +66,7 @@ class Cursor:
 
     def move(self):
         self.pos.x = shared.cursor_pos.x * shared.FONT_WIDTH
-        self.pos.y = shared.cursor_pos.y * shared.FONT_HEIGHT
+        self.pos.y = (shared.cursor_pos.y * shared.FONT_HEIGHT) + shared.scroll.y
 
     def blink(self):
         if self.blink_timer.tick():
@@ -182,6 +188,7 @@ class Cursor:
     def bound_cursor(self):
         if shared.cursor_pos.y >= len(shared.chars):
             shared.cursor_pos.y = len(shared.chars) - 1
+
         row_len = len(shared.chars[shared.cursor_pos.y])
         if shared.cursor_pos.x > row_len - 1:
             shared.cursor_pos.x = row_len
@@ -204,6 +211,7 @@ class Cursor:
             pygame.SRCALPHA,
         )
         lines_to_delete = []
+        copy_output = ""
         for i, row in enumerate(range(lower_meniscus_y, upper_meniscus_y + 1)):
             size = 0
             offset = 0
@@ -230,6 +238,7 @@ class Cursor:
                     size = 1
 
             if shared.action_str == "d":
+                copy_output += "".join(shared.chars[row][offset : size + offset]) + "\n"
                 del shared.chars[row][offset : size + offset]
                 if not shared.chars[row]:
                     lines_to_delete.append(row)
@@ -249,16 +258,15 @@ class Cursor:
             if not shared.chars:
                 shared.chars.append(CharList([]))
 
-        # TODO: Work on inverted horizontal selection. And also,
-        # Single line selection too!
+        if shared.action_str == "d":
+            clipboard.copy(copy_output)
+
         if shared.cursor_pos.y < shared.visual_mode_axis.y:
             offset = 0
         else:
             offset = -final_surf.get_height() + shared.FONT_HEIGHT
 
-        editor_surf.blit(
-            final_surf, (0, offset + (shared.FONT_HEIGHT * shared.cursor_pos.y))
-        )
+        editor_surf.blit(final_surf, (0, offset + self.pos.y))
         on_d()
 
     def update(self):

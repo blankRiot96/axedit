@@ -258,18 +258,14 @@ def apply_syntax_highlighting() -> pygame.Surface:
     n_lines_to_render = int(shared.srect.height / shared.FONT_HEIGHT) + safety_padding
     scroll_offset = int(-shared.scroll.y / shared.FONT_HEIGHT)
     visible_lines = shared.chars[scroll_offset : scroll_offset + n_lines_to_render]
-
-    image = pygame.Surface(
-        (shared.srect.width, len(shared.chars) * shared.FONT_HEIGHT), pygame.SRCALPHA
-    )
+    image = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
 
     colors = [index_colors("".join(row)) for row in shared.chars]
 
     for y, row in enumerate(visible_lines):
-        y += scroll_offset
         row = "".join(row)
 
-        color_ranges = colors[y]
+        color_ranges = colors[y + scroll_offset]
         row_image = line_wise_stitching(row, color_ranges)
         image.blit(row_image, (0, y * shared.FONT_HEIGHT))
 

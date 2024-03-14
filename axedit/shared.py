@@ -55,6 +55,7 @@ registered_number: int = 1
 action_queue: list[str]
 action_str: str
 scroll: pygame.Vector2
+line_number_digits: int = 5
 
 # Flags
 autocompleting = False

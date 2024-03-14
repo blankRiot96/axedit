@@ -41,6 +41,8 @@ class WriteMode:
 
     def on_esc(self):
         shared.mode = FileState.NORMAL
+        shared.action_queue.clear()
+        shared.action_str = ""
         if shared.cursor_pos.x > 0:
             shared.cursor_pos.x -= 1
 
@@ -143,7 +145,7 @@ class WriteMode:
         try:
             self.get_line().pop(shared.cursor_pos.x)
         except IndexError:
-            return            
+            return
 
     def go_prev_line(self):
         shared.chars.pop(shared.cursor_pos.y)
@@ -262,6 +264,8 @@ class VisualMode:
         self.event_manager.update()
         if shared.kp[pygame.K_ESCAPE]:
             shared.mode = FileState.NORMAL
+            shared.action_queue.clear()
+            shared.action_str = ""
 
 
 class Editor:
@@ -305,7 +309,11 @@ class Editor:
         input_handler()
 
     def get_placement(self):
-        x_pos = shared.mouse_pos.x + shared.scroll.x - (shared.FONT_WIDTH * 5)
+        x_pos = (
+            shared.mouse_pos.x
+            + shared.scroll.x
+            - (shared.FONT_WIDTH * shared.line_number_digits)
+        )
         y_pos = shared.mouse_pos.y - shared.scroll.y
 
         # Pixel to cursor pos
@@ -361,8 +369,9 @@ class Editor:
     def draw(self):
         self.gen_image()
         self.surf = pygame.Surface(
-            (shared.srect.width, len(shared.chars) * shared.FONT_HEIGHT),
+            shared.srect.size,
             pygame.SRCALPHA,
         )
+
         self.surf.blit(self.image, (0, 0))
         # self.autocompletion.draw(self.surf)
