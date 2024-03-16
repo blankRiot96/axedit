@@ -1,5 +1,5 @@
 import pygame
-
+from pathlib import Path
 from axedit import shared
 from axedit.cmd_bar import CommandBar
 from axedit.state_enums import FileState
@@ -34,7 +34,7 @@ class StatusBar:
         if shared.file_name is None:
             return
 
-        return self.get_saved_status() + shared.file_name.replace("\\", "/")
+        return self.get_saved_status() + Path(shared.file_name).name
 
     def add_loc(self, n_chars: int, out_str: str):
         loc_str = f"{shared.cursor_pos.x + 1},{shared.cursor_pos.y + 1}"

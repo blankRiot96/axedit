@@ -4,7 +4,6 @@ import subprocess
 import sys
 import traceback
 from pathlib import Path
-
 from axedit.logs import logger
 
 FILE_PATH = Path(inspect.getfile(inspect.currentframe()))

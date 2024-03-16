@@ -8,6 +8,7 @@ from axedit.funcs import get_icon, set_windows_title, set_windows_title_bar_colo
 from axedit.logs import logger
 from axedit.states import StateManager
 from axedit.themes import apply_theme
+import warnings
 
 
 class Core:
@@ -21,7 +22,13 @@ class Core:
         logger.debug("CORE INITIALIZED")
 
     def win_init(self):
-        shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=1)
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            shared.screen = pygame.display.set_mode(
+                (1100, 650), pygame.RESIZABLE, vsync=1
+            )
+            logger.warn(w[-1].message)
+
         shared.srect = shared.screen.get_rect()
         self.clock = pygame.time.Clock()
         shared.frame_cache = {}

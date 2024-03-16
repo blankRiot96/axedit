@@ -289,6 +289,10 @@ class Editor:
     def on_scroll(self):
         for event in shared.events:
             if event.type == pygame.MOUSEWHEEL:
+                if event.y < 0 and shared.scroll.y < -(
+                    (len(shared.chars) - 7) * shared.FONT_HEIGHT
+                ):
+                    return
                 shared.scroll.y += event.y * shared.FONT_HEIGHT
                 shared.scroll.y = min(shared.scroll.y, 0)
                 shared.chars_changed = True
