@@ -1,10 +1,9 @@
-import pygame
-from axedit.logs import logger
+import functools
 
+import pygame
 
 from axedit import shared
-
-import functools
+from axedit.logs import logger
 
 
 @functools.lru_cache(maxsize=512)
