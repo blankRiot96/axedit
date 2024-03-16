@@ -62,14 +62,14 @@ class LineNumbers:
             elif lno >= len(shared.chars):
                 num = "~"
 
-            # text = render_num(num, alpha, shared.theme["default-fg"])
-            text = shared.FONT.render(str(num), True, shared.theme["default-fg"])
-            text.set_alpha(alpha)
+            text = render_num(num, alpha, shared.theme["default-fg"])
 
-            self.surf.blit(
-                text,
-                (shared.FONT_WIDTH, i * shared.FONT_HEIGHT),
-            )
+            # self.surf.blit(
+            #     text,
+            #     (shared.FONT_WIDTH, i * shared.FONT_HEIGHT),
+            # )
+
+            self.surf.fblits([(text, (shared.FONT_WIDTH, i * shared.FONT_HEIGHT))])
 
     def reset_modifiers(self):
         self.last_scroll_offset = self.scroll_char_offset

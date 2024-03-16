@@ -1,4 +1,5 @@
 import platform
+import warnings
 
 import pygame
 from pygame._sdl2 import Window
@@ -8,7 +9,6 @@ from axedit.funcs import get_icon, set_windows_title, set_windows_title_bar_colo
 from axedit.logs import logger
 from axedit.states import StateManager
 from axedit.themes import apply_theme
-import warnings
 
 
 class Core:
@@ -30,7 +30,7 @@ class Core:
             logger.warn(w[-1].message)
 
         shared.srect = shared.screen.get_rect()
-        self.clock = pygame.time.Clock()
+        self.clock = pygame.Clock()
         shared.frame_cache = {}
         window = Window.from_display_module()
         window.opacity = 0.9
