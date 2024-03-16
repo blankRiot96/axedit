@@ -4,17 +4,28 @@ from axedit.logs import logger
 
 from axedit import shared
 
+import functools
+
+
+@functools.lru_cache(maxsize=512)
+def render_num(num: int, alpha: int, fg) -> pygame.Surface:
+    text = shared.FONT.render(str(num), True, fg)
+    text.set_alpha(alpha)
+    return text
+
 
 class LineNumbers:
     def __init__(self) -> None:
         self.gen_blank()
+        self.last_scroll_offset = 0
+        self.last_char_pos_y = 0
+        self.to_render = True
+        self.scroll_char_offset = 0
+        self.once = True
 
     def gen_blank(self) -> None:
         self.surf = pygame.Surface(
-            (
-                shared.FONT_WIDTH * shared.line_number_digits,
-                len(shared.chars) * shared.FONT_HEIGHT,
-            ),
+            (shared.FONT_WIDTH * shared.line_number_digits, shared.srect.height),
             pygame.SRCALPHA,
         )
 
@@ -27,17 +38,48 @@ class LineNumbers:
         #     f"{end_of_page_lno=}, {max_line_digits=}, {shared.line_number_digits=}"
         # )
 
-    def draw(self):
-        self.gen_blank()
-        for i in range(len(shared.chars)):
-            alpha = 150
-            num = abs(shared.cursor_pos.y - i)
-            if i == shared.cursor_pos.y:
-                alpha = 255
-                num = i + 1
-                num = " " + str(num)
+    def is_to_be_rendered(self):
+        if self.once:
+            self.once = False
+            return True
 
+        self.scroll_char_offset = abs(int(shared.scroll.y / shared.FONT_HEIGHT))
+        return (
+            self.scroll_char_offset != self.last_scroll_offset
+            or shared.cursor_pos.y != self.last_char_pos_y
+        )
+
+    def draw_lines(self):
+        max_lines = int(shared.srect.height / shared.FONT_HEIGHT)
+        for i in range(max_lines):
+            alpha = 150
+
+            lno = i + self.scroll_char_offset
+            num = abs(shared.cursor_pos.y - lno)
+            if lno == shared.cursor_pos.y:
+                alpha = 255
+                num = lno + 1
+                num = " " + str(num)
+            elif lno >= len(shared.chars):
+                num = "~"
+
+            # text = render_num(num, alpha, shared.theme["default-fg"])
             text = shared.FONT.render(str(num), True, shared.theme["default-fg"])
             text.set_alpha(alpha)
 
-            self.surf.blit(text, (shared.FONT_WIDTH, i * shared.FONT_HEIGHT))
+            self.surf.blit(
+                text,
+                (shared.FONT_WIDTH, i * shared.FONT_HEIGHT),
+            )
+
+    def reset_modifiers(self):
+        self.last_scroll_offset = self.scroll_char_offset
+        self.last_char_pos_y = shared.cursor_pos.y
+
+    def draw(self):
+        if not self.is_to_be_rendered():
+            return
+
+        self.gen_blank()
+        self.draw_lines()
+        self.reset_modifiers()

@@ -119,7 +119,7 @@ class EditorState:
         editor_width, editor_height = self.editor.surf.get_size()
         status_width, status_height = self.status_bar.surf.get_size()
 
-        render_at(shared.screen, self.line_numbers.surf, "topleft", shared.scroll)
+        render_at(shared.screen, self.line_numbers.surf, "topleft")
         render_at(
             shared.screen,
             self.editor.surf,

@@ -3,7 +3,7 @@ import clipboard
 import pygame
 
 from axedit import shared
-from axedit.classes import CharList
+from axedit.classes import CharList, Pos
 from axedit.funcs import center_cursor
 from axedit.input_queue import AcceleratedKeyPress, RegexManager
 from axedit.modal import *
@@ -210,6 +210,11 @@ class Cursor:
             ),
             pygame.SRCALPHA,
         )
+
+        if shared.action_str == "d":
+            lower_line = shared.chars[lower_meniscus_y]
+            upper_line = shared.chars[upper_meniscus_y]
+
         lines_to_delete = []
         copy_output = ""
         for i, row in enumerate(range(lower_meniscus_y, upper_meniscus_y + 1)):
@@ -224,7 +229,7 @@ class Cursor:
                     size = len(shared.chars[row]) - shared.visual_mode_axis.x
                     offset = shared.visual_mode_axis.x
                 else:
-                    size = shared.visual_mode_axis.x
+                    size = shared.visual_mode_axis.x + 1
                     offset = 0
             elif row == shared.cursor_pos.y:
                 if row == lower_meniscus_y:
@@ -254,11 +259,19 @@ class Cursor:
 
         for line in lines_to_delete[::-1]:
             shared.chars.pop(line)
-            shared.cursor_pos.y = line
+            # shared.cursor_pos.y = line
             if not shared.chars:
                 shared.chars.append(CharList([]))
 
         if shared.action_str == "d":
+            # Join the two half eaten lines
+            shared.chars[lower_meniscus_y] = lower_line + upper_line
+            shared.chars.pop(lower_meniscus_y + 1)
+            # shared.cursor_pos = Pos(
+            #     shared.visual_mode_axis.x, shared.visual_mode_axis.y
+            # )
+
+            # Copy the deleted content to the clipboard
             clipboard.copy(copy_output)
 
         if shared.cursor_pos.y < shared.visual_mode_axis.y:

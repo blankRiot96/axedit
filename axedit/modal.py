@@ -9,6 +9,11 @@ from axedit.funcs import center_cursor
 from axedit.state_enums import FileState
 
 
+def on_y():
+    if shared.mode != FileState.VISUAL:
+        return
+
+
 def on_p():
     paste_output = clipboard.paste()
     paste_lines = paste_output.split("\n")
