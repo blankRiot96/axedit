@@ -29,13 +29,10 @@ class Core:
         logger.debug("CORE INITIALIZED")
 
     def win_init(self):
-        # with warnings.catch_warnings(record=True) as w:
-        #     warnings.simplefilter("always")
         shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=1)
-
         shared.srect = shared.screen.get_rect()
-        self.clock = pygame.Clock()
         shared.frame_cache = {}
+        self.clock = pygame.Clock()
         window = Window.from_display_module()
         window.opacity = 0.9
 

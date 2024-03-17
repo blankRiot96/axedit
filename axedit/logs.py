@@ -8,10 +8,7 @@ FILE_PATH = Path(inspect.getfile(inspect.currentframe()))
 LOG_FILE_PATH = FILE_PATH.parent.parent / "app.log"
 LOGGING_DATE_FMT = "%H:%M:%S"
 WHITELISTED_LOGGERS = ("axedit", "py.warnings")
-# LOG_FORMAT = (
-#     "[%(levelname)s] [%(name)s] [%(asctime)s] [%(filename)s:%(lineno)d]: %(message)s"
-# )
-LOG_FORMAT = "[%(levelname)s@%(name)s] %(message)s [%(filename)s:%(lineno)d]"
+LOG_FORMAT = "[%(name)s](%(filename)s:%(lineno)d) %(message)s"
 
 
 class CustomFormatter(logging.Formatter):
@@ -26,8 +23,10 @@ class CustomFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         log_color = self.COLORS.get(record.levelno)
         reset = colorama.Fore.RESET
-        log_fmt = LOG_FORMAT.replace(
-            "%(levelname)s", f"{log_color}%(levelname)s{reset}"
+        log_fmt = LOG_FORMAT.replace("%(name)s", f"{log_color}%(name)s{reset}")
+        log_fmt = log_fmt.replace(
+            "%(filename)s:%(lineno)d",
+            f"{colorama.Fore.RED}%(filename)s:%(lineno)d{colorama.Fore.RESET}",
         )
         formatter = logging.Formatter(log_fmt, datefmt=LOGGING_DATE_FMT)
         return formatter.format(record)
@@ -41,6 +40,8 @@ stream_handler = logging.StreamHandler()
 file_handler = logging.FileHandler(LOG_FILE_PATH)
 
 stream_handler.setFormatter(CustomFormatter())
+file_handler.setFormatter(CustomFormatter())
+
 stream_handler.addFilter(axe_filter)
 file_handler.addFilter(axe_filter)
 
