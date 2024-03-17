@@ -1,4 +1,6 @@
+import logging
 from functools import partial
+
 import clipboard
 import pygame
 
@@ -9,9 +11,6 @@ from axedit.input_queue import AcceleratedKeyPress, RegexManager
 from axedit.modal import *
 from axedit.state_enums import FileState
 from axedit.utils import Time
-
-import logging
-
 
 logger = logging.getLogger("axedit")
 
@@ -266,7 +265,10 @@ class Cursor:
         if shared.action_str == "d":
             # Join the two half eaten lines
             shared.chars[lower_meniscus_y] = lower_line + upper_line
-            shared.chars.pop(lower_meniscus_y + 1)
+            try:
+                shared.chars.pop(lower_meniscus_y + 1)
+            except IndexError:
+                pass
             # shared.cursor_pos = Pos(
             #     shared.visual_mode_axis.x, shared.visual_mode_axis.y
             # )

@@ -35,6 +35,7 @@ def get_text():
 
 
 def soft_save_file():
+    shared.saved = True
     if shared.file_name is None:
         return
     with open(shared.file_name, "w") as f:

@@ -3,19 +3,13 @@ import os
 import subprocess
 import sys
 import traceback
+import warnings
 from pathlib import Path
+
 from axedit.logs import logger
 
 FILE_PATH = Path(inspect.getfile(inspect.currentframe()))
 LOG_FILE_PATH = FILE_PATH.parent.parent / "app.log"
-
-
-def true_exit():
-    logger.debug("EXIT CALLED")
-    raise SystemExit
-
-
-__builtins__["exit"] = true_exit
 
 
 def detached_main() -> None:
@@ -67,7 +61,12 @@ def potential_main():
     """What the editor is potentially supposed to be"""
     if len(sys.argv) > 1:
         if sys.argv[1] == "--debug":
-            debug_main()
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                debug_main()
+                for msg in w:
+                    logger.warning(msg.message)
+
         elif sys.argv[1] == "--logs":
             display_logs()
         else:

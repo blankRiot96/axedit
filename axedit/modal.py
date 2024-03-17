@@ -1,11 +1,13 @@
 """File that defines some modal commands"""
 
 import re
+
 import clipboard
 
 from axedit import shared
 from axedit.classes import CharList
 from axedit.funcs import center_cursor
+from axedit.logs import logger
 from axedit.state_enums import FileState
 
 
@@ -20,6 +22,8 @@ def on_p():
 
     for line in paste_lines:
         given_line = shared.chars[shared.cursor_pos.y]
+        logger.debug(f"{given_line=}")
+        logger.debug(line)
         shared.chars[shared.cursor_pos.y] = (
             given_line[: shared.cursor_pos.x]
             + list(line)
@@ -27,6 +31,7 @@ def on_p():
         )
         shared.chars.append(CharList([]))
         shared.cursor_pos.y += 1
+        shared.cursor_pos.x = 0
 
 
 def on_left_brace():

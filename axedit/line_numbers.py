@@ -21,6 +21,7 @@ class LineNumbers:
         self.to_render = True
         self.scroll_char_offset = 0
         self.once = True
+        self.last_chars_length = len(shared.chars)
 
     def gen_blank(self) -> None:
         self.surf = pygame.Surface(
@@ -46,6 +47,7 @@ class LineNumbers:
         return (
             self.scroll_char_offset != self.last_scroll_offset
             or shared.cursor_pos.y != self.last_char_pos_y
+            or len(shared.chars) != self.last_chars_length
         )
 
     def draw_lines(self):
@@ -74,6 +76,7 @@ class LineNumbers:
     def reset_modifiers(self):
         self.last_scroll_offset = self.scroll_char_offset
         self.last_char_pos_y = shared.cursor_pos.y
+        self.last_chars_length = len(shared.chars)
 
     def draw(self):
         if not self.is_to_be_rendered():

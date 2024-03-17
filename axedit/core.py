@@ -1,14 +1,21 @@
 import platform
-import warnings
 
 import pygame
 from pygame._sdl2 import Window
 
-from axedit import LOG_FILE_PATH, shared
+from axedit import shared
 from axedit.funcs import get_icon, set_windows_title, set_windows_title_bar_color
 from axedit.logs import logger
 from axedit.states import StateManager
 from axedit.themes import apply_theme
+
+
+def true_exit():
+    logger.debug("EXIT CALLED")
+    shared.running = False
+
+
+__builtins__["exit"] = true_exit
 
 
 class Core:
@@ -22,12 +29,9 @@ class Core:
         logger.debug("CORE INITIALIZED")
 
     def win_init(self):
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            shared.screen = pygame.display.set_mode(
-                (1100, 650), pygame.RESIZABLE, vsync=1
-            )
-            logger.warn(w[-1].message)
+        # with warnings.catch_warnings(record=True) as w:
+        #     warnings.simplefilter("always")
+        shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=1)
 
         shared.srect = shared.screen.get_rect()
         self.clock = pygame.Clock()
@@ -79,6 +83,6 @@ class Core:
         pygame.display.flip()
 
     def run(self):
-        while True:
+        while shared.running:
             self.update()
             self.draw()

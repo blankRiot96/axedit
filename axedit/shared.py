@@ -61,6 +61,7 @@ line_number_digits: int = 5
 autocompleting = False
 text_writing = False
 theme_changed = False
+running = True
 naming_file: bool
 chars_changed: bool
 saved: bool

@@ -66,7 +66,6 @@ class EditorState:
         for event in shared.events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
                 soft_save_file()
-                shared.saved = True
 
     def handle_font_offset(self):
         if not shared.keys[pygame.K_LCTRL]:
