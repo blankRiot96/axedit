@@ -32,6 +32,11 @@ def on_p():
         shared.cursor_pos.x = 0
     shared.chars[shared.cursor_pos.y - 2].extend(store_it)
 
+    # Totally not monkey patching!!
+    for _ in range(2):
+        shared.chars.pop()
+    shared.cursor_pos.y -= 1
+
 
 def on_left_brace():
     good_line_encountered = False

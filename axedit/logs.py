@@ -8,9 +8,10 @@ FILE_PATH = Path(inspect.getfile(inspect.currentframe()))
 LOG_FILE_PATH = FILE_PATH.parent.parent / "app.log"
 LOGGING_DATE_FMT = "%H:%M:%S"
 WHITELISTED_LOGGERS = ("axedit", "py.warnings")
-LOG_FORMAT = (
-    "[%(levelname)s] [%(name)s] [%(asctime)s] [%(filename)s:%(lineno)d]: %(message)s"
-)
+# LOG_FORMAT = (
+#     "[%(levelname)s] [%(name)s] [%(asctime)s] [%(filename)s:%(lineno)d]: %(message)s"
+# )
+LOG_FORMAT = "[%(levelname)s@%(name)s] %(message)s [%(filename)s:%(lineno)d]"
 
 
 class CustomFormatter(logging.Formatter):
