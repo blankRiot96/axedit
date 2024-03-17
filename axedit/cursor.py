@@ -274,6 +274,7 @@ class Cursor:
             # )
 
             # Copy the deleted content to the clipboard
+            logger.debug(copy_output)
             clipboard.copy(copy_output)
 
         if shared.cursor_pos.y < shared.visual_mode_axis.y:

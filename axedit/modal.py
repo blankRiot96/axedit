@@ -20,18 +20,17 @@ def on_p():
     paste_output = clipboard.paste()
     paste_lines = paste_output.split("\n")
 
+    store_it = shared.chars[shared.cursor_pos.y][shared.cursor_pos.x :]
     for line in paste_lines:
         given_line = shared.chars[shared.cursor_pos.y]
-        logger.debug(f"{given_line=}")
-        logger.debug(line)
-        shared.chars[shared.cursor_pos.y] = (
-            given_line[: shared.cursor_pos.x]
-            + list(line)
-            + given_line[shared.cursor_pos.x :]
+        shared.chars[shared.cursor_pos.y] = given_line[: shared.cursor_pos.x] + list(
+            line
         )
-        shared.chars.append(CharList([]))
+
         shared.cursor_pos.y += 1
+        shared.chars.insert(shared.cursor_pos.y, CharList([]))
         shared.cursor_pos.x = 0
+    shared.chars[shared.cursor_pos.y - 2].extend(store_it)
 
 
 def on_left_brace():
