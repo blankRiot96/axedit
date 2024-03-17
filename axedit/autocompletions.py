@@ -109,7 +109,7 @@ class AutoCompletions:
             )
         except ValueError as e:
             logger.warn(e)
-           
+
             # print(f"{shared.cursor_pos.x = }, {shared.cursor_pos.y = }")
             # print(get_text())
 

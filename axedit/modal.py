@@ -5,7 +5,7 @@ import re
 import clipboard
 
 from axedit import shared
-from axedit.classes import CharList
+from axedit.classes import CharList, Pos
 from axedit.funcs import center_cursor
 from axedit.logs import logger
 from axedit.state_enums import FileState
@@ -19,6 +19,9 @@ def on_y():
 def on_p():
     paste_output = clipboard.paste()
     paste_lines = paste_output.split("\n")
+
+    shared.cursor_pos.x += 1
+    saved_pos = Pos(shared.cursor_pos.x, shared.cursor_pos.y)
 
     store_it = shared.chars[shared.cursor_pos.y][shared.cursor_pos.x :]
     for line in paste_lines:
@@ -35,7 +38,8 @@ def on_p():
     # Totally not monkey patching!!
     for _ in range(2):
         shared.chars.pop()
-    shared.cursor_pos.y -= 1
+
+    shared.cursor_pos = Pos(saved_pos.x, saved_pos.y)
 
 
 def on_left_brace():
@@ -84,9 +88,9 @@ def on_dd():
     if len(shared.chars) == 1:
         shared.chars[0] = CharList([])
         return
-    match = re.match(".\d.", shared.action_str)
+    match = re.match(r".\d.", shared.action_str)
     if match is None:
-        match = re.match("\d", shared.action_str)
+        match = re.match(r"\d", shared.action_str)
     if match is None:
         n_lines = 1
     else:

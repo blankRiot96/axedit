@@ -1,5 +1,6 @@
 import inspect
 import logging
+import sys
 import warnings
 from pathlib import Path
 
@@ -11,7 +12,8 @@ LOGGING_DATE_FMT = "%H:%M:%S"
 WHITELISTED_LOGGERS = ("axedit", "py.warnings")
 LOG_FORMAT = "[%(name)s](%(filename)s:%(lineno)d) %(message)s"
 
-warnings.simplefilter("always")
+if len(sys.argv) > 1 and sys.argv[1] == "--debug":
+    warnings.simplefilter("always")
 
 
 class CustomFormatter(logging.Formatter):
