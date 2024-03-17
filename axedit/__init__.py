@@ -3,7 +3,6 @@ import os
 import subprocess
 import sys
 import traceback
-import warnings
 from pathlib import Path
 
 from axedit.logs import logger
@@ -61,12 +60,13 @@ def potential_main():
     """What the editor is potentially supposed to be"""
     if len(sys.argv) > 1:
         if sys.argv[1] == "--debug":
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter("always")
-                debug_main()
-                for msg in w:
-                    logger.warning(msg.message)
-
+            # with warnings.catch_warnings(record=True) as w:
+            # warnings.simplefilter("always")
+            debug_main()
+            # for msg in w:
+            #     logger.warning(
+            #         f"{msg.category.__name__}: {msg.filename}:{msg.lineno}: {msg.message}"
+            #     )
         elif sys.argv[1] == "--logs":
             display_logs()
         else:

@@ -29,8 +29,9 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-# TODO: Disable all the loggers apart from "axedit", parso logs infiltrate otherwise
+# TODO: Bind warnings to axedit logger
 axe_filter = logging.Filter("axedit")
+warnings_filter = logging.Filter("py.warnings")
 
 stream_handler = logging.StreamHandler()
 file_handler = logging.FileHandler(LOG_FILE_PATH)
@@ -38,6 +39,10 @@ file_handler = logging.FileHandler(LOG_FILE_PATH)
 stream_handler.setFormatter(CustomFormatter())
 stream_handler.addFilter(axe_filter)
 file_handler.addFilter(axe_filter)
+
+# Add warnings filters
+# stream_handler.addFilter(warnings_filter)
+# file_handler.addFilter(warnings_filter)
 
 logging.basicConfig(
     format="%(asctime)s : [%(levelname)s] : %(filename)s:%(lineno)d : %(message)s",
@@ -48,3 +53,4 @@ logging.basicConfig(
 
 # The main logger to use
 logger = logging.getLogger("axedit")
+logging.captureWarnings(True)
