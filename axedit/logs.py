@@ -7,31 +7,34 @@ import colorama
 FILE_PATH = Path(inspect.getfile(inspect.currentframe()))
 LOG_FILE_PATH = FILE_PATH.parent.parent / "app.log"
 LOGGING_DATE_FMT = "%H:%M:%S"
+WHITELISTED_LOGGERS = ("axedit", "py.warnings")
+LOG_FORMAT = (
+    "[%(levelname)s] [%(name)s] [%(asctime)s] [%(filename)s:%(lineno)d]: %(message)s"
+)
 
 
 class CustomFormatter(logging.Formatter):
-    colored_format = "%(asctime)s : {color}[%(levelname)s]{reset} : %(filename)s:%(lineno)d : %(message)s"
-
-    reset = colorama.Fore.RESET
-    FORMATS = {
-        logging.DEBUG: colored_format.format(color=colorama.Fore.GREEN, reset=reset),
-        logging.INFO: colored_format.format(color=colorama.Fore.WHITE, reset=reset),
-        logging.WARNING: colored_format.format(color=colorama.Fore.YELLOW, reset=reset),
-        logging.ERROR: colored_format.format(color=colorama.Fore.RED, reset=reset),
-        logging.CRITICAL: colored_format.format(
-            color=colorama.Fore.MAGENTA, reset=reset
-        ),
+    COLORS = {
+        logging.DEBUG: colorama.Fore.GREEN,
+        logging.INFO: colorama.Fore.WHITE,
+        logging.WARNING: colorama.Fore.YELLOW,
+        logging.ERROR: colorama.Fore.RED,
+        logging.CRITICAL: colorama.Fore.MAGENTA,
     }
 
-    def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
+    def format(self, record: logging.LogRecord) -> str:
+        log_color = self.COLORS.get(record.levelno)
+        reset = colorama.Fore.RESET
+        log_fmt = LOG_FORMAT.replace(
+            "%(levelname)s", f"{log_color}%(levelname)s{reset}"
+        )
         formatter = logging.Formatter(log_fmt, datefmt=LOGGING_DATE_FMT)
         return formatter.format(record)
 
 
-# TODO: Bind warnings to axedit logger
-axe_filter = logging.Filter("axedit")
-warnings_filter = logging.Filter("py.warnings")
+def axe_filter(logger: logging.Logger) -> bool:
+    return logger.name in WHITELISTED_LOGGERS
+
 
 stream_handler = logging.StreamHandler()
 file_handler = logging.FileHandler(LOG_FILE_PATH)
@@ -40,12 +43,8 @@ stream_handler.setFormatter(CustomFormatter())
 stream_handler.addFilter(axe_filter)
 file_handler.addFilter(axe_filter)
 
-# Add warnings filters
-# stream_handler.addFilter(warnings_filter)
-# file_handler.addFilter(warnings_filter)
-
 logging.basicConfig(
-    format="%(asctime)s : [%(levelname)s] : %(filename)s:%(lineno)d : %(message)s",
+    format=LOG_FORMAT,
     datefmt=LOGGING_DATE_FMT,
     level=logging.DEBUG,
     handlers=[stream_handler, file_handler],
