@@ -1,5 +1,6 @@
 import inspect
 import logging
+import warnings
 from pathlib import Path
 
 import colorama
@@ -9,6 +10,8 @@ LOG_FILE_PATH = FILE_PATH.parent.parent / "app.log"
 LOGGING_DATE_FMT = "%H:%M:%S"
 WHITELISTED_LOGGERS = ("axedit", "py.warnings")
 LOG_FORMAT = "[%(name)s](%(filename)s:%(lineno)d) %(message)s"
+
+warnings.simplefilter("always")
 
 
 class CustomFormatter(logging.Formatter):
