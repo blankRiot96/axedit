@@ -4,7 +4,7 @@ import pygame
 
 from axedit import shared
 from axedit.cmd_bar import CommandBar
-from axedit.funcs import get_icon, offset_font_size
+from axedit.funcs import get_icon
 from axedit.state_enums import State
 from axedit.utils import render_at
 
@@ -85,16 +85,16 @@ class MenuTexter:
 
         return command_surf
 
-    def update(self): ...
+    def update(self):
+        ...
 
 
 class MenuState:
     LINES = [
         ["Command Bar", "`:`"],
-        ["Toggle Fullscreen", "`F11`"],
+        ["Fullscreen", "`F11`"],
         ["New File", "`Ctrl` + `N`"],
         ["Open File", "`Ctrl` + `P`"],
-        ["Start Tutorial", "`Ctrl` + `T`"],
     ]
 
     def __init__(self) -> None:
@@ -121,7 +121,8 @@ class MenuState:
             return
         self.next_state = State.EDITOR
 
-    def on_ctrl_t(self): ...
+    def on_ctrl_t(self):
+        ...
 
     def update(self):
         for event in shared.events:
