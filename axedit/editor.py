@@ -338,6 +338,8 @@ class Editor:
         return Pos(x_pos, y_pos)
 
     def mouse_placement(self):
+        if shared.handling_scroll_bar:
+            return
         for event in shared.events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 shared.cursor_pos = self.get_placement()

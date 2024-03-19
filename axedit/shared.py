@@ -62,6 +62,7 @@ autocompleting = False
 text_writing = False
 theme_changed = False
 running = True
+handling_scroll_bar = False
 naming_file: bool
 chars_changed: bool
 saved: bool

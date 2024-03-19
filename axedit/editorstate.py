@@ -4,14 +4,9 @@ from axedit import shared
 from axedit.classes import CharList, Pos
 from axedit.cursor import Cursor
 from axedit.editor import Editor
-from axedit.funcs import (
-    offset_font_size,
-    open_file,
-    save_file,
-    set_windows_title,
-    soft_save_file,
-)
+from axedit.funcs import offset_font_size, save_file, set_windows_title, soft_save_file
 from axedit.line_numbers import LineNumbers
+from axedit.scrollbar import HorizontalScrollBar
 from axedit.state_enums import FileState, State
 from axedit.status_bar import StatusBar
 from axedit.utils import render_at
@@ -27,6 +22,7 @@ class EditorState:
         self.line_numbers = LineNumbers()
         self.status_bar = StatusBar()
         self.offset = 4
+        self.scrollbar = HorizontalScrollBar()
 
     def shared_reset(self):
         shared.action_str = ""
@@ -107,6 +103,7 @@ class EditorState:
         self.line_numbers.update()
         self.status_bar.update()
         self.on_ctrl_s()
+        self.scrollbar.update()
 
     def char_handler(self):
         for i, lst in enumerate(shared.chars):
@@ -117,6 +114,7 @@ class EditorState:
         line_width, line_height = self.line_numbers.surf.get_size()
         editor_width, editor_height = self.editor.surf.get_size()
         status_width, status_height = self.status_bar.surf.get_size()
+        hor_scroll_width, hor_scroll_height = self.scrollbar.surf.get_size()
 
         render_at(shared.screen, self.line_numbers.surf, "topleft")
         render_at(
@@ -124,6 +122,10 @@ class EditorState:
             self.editor.surf,
             "topleft",
             (line_width, 0),
+        )
+        self.scrollbar.rect.bottomleft = (
+            line_width,
+            shared.srect.height - status_height,
         )
         render_at(
             shared.screen,
@@ -138,4 +140,5 @@ class EditorState:
             self.editor.draw()
         self.line_numbers.draw()
         self.status_bar.draw()
+        self.scrollbar.draw()
         self.draw_all()
