@@ -379,5 +379,5 @@ class Editor:
             pygame.SRCALPHA,
         )
 
-        self.surf.blit(self.image, (0, 0))
+        self.surf.blit(self.image, (-shared.scroll.x, 0))
         # self.autocompletion.draw(self.surf)

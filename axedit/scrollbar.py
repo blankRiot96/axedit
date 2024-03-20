@@ -12,6 +12,7 @@ class HorizontalScrollBar:
         self.alpha = 0
         self.alpha_rise = False
         self.fade_speed = 300
+        self.zero_pos = 0
 
     def handle_alpha(self):
         self.alpha_rise = shared.mouse_pos.y > self.rect.y - 10
@@ -32,9 +33,24 @@ class HorizontalScrollBar:
 
         self.rect.centerx = shared.mouse_pos.x
 
+    def bound_bar(self):
+        if self.rect.x < self.zero_pos:
+            self.rect.x = self.zero_pos
+        elif self.rect.x > shared.srect.width - self.rect.width:
+            self.rect.x = shared.srect.width - self.rect.width
+
+    def apply_scroll(self):
+        max_scroll_x = len(max(shared.chars)) * shared.FONT_WIDTH
+        shared.scroll.x = max_scroll_x * (
+            (self.rect.x - self.zero_pos)
+            / (shared.srect.width - self.rect.width - self.zero_pos)
+        )
+
     def update(self):
         self.handle_alpha()
         self.handle_scroll()
+        self.bound_bar()
+        self.apply_scroll()
 
     def draw(self):
         self.surf.set_alpha(self.alpha)

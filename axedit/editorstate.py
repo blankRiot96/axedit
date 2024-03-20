@@ -116,16 +116,17 @@ class EditorState:
         status_width, status_height = self.status_bar.surf.get_size()
         hor_scroll_width, hor_scroll_height = self.scrollbar.surf.get_size()
 
+        self.scrollbar.zero_pos = line_width
+        self.scrollbar.rect.y = (
+            shared.srect.height - status_height - self.scrollbar.rect.height
+        )
+
         render_at(shared.screen, self.line_numbers.surf, "topleft")
         render_at(
             shared.screen,
             self.editor.surf,
             "topleft",
             (line_width, 0),
-        )
-        self.scrollbar.rect.bottomleft = (
-            line_width,
-            shared.srect.height - status_height,
         )
         render_at(
             shared.screen,
