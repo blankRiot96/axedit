@@ -1,18 +1,16 @@
-import logging
 from functools import partial
 
 import clipboard
 import pygame
 
 from axedit import shared
-from axedit.classes import CharList, Pos
+from axedit.classes import CharList
 from axedit.funcs import center_cursor
 from axedit.input_queue import AcceleratedKeyPress, RegexManager
+from axedit.logs import logger
 from axedit.modal import *
 from axedit.state_enums import FileState
 from axedit.utils import Time
-
-logger = logging.getLogger("axedit")
 
 
 class Cursor:
@@ -64,7 +62,7 @@ class Cursor:
         self.image.fill(shared.theme["default-fg"])
 
     def move(self):
-        self.pos.x = shared.cursor_pos.x * shared.FONT_WIDTH
+        self.pos.x = (shared.cursor_pos.x * shared.FONT_WIDTH) - shared.scroll.x
         self.pos.y = (shared.cursor_pos.y * shared.FONT_HEIGHT) + shared.scroll.y
 
     def blink(self):
@@ -281,7 +279,7 @@ class Cursor:
         else:
             offset = -final_surf.get_height() + shared.FONT_HEIGHT
 
-        editor_surf.blit(final_surf, (0, offset + self.pos.y))
+        editor_surf.blit(final_surf, (-shared.scroll.x, offset + self.pos.y))
         on_d()
 
     def update(self):

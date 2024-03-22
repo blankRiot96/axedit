@@ -15,8 +15,12 @@ class HorizontalScrollBar:
         self.zero_pos = 0
 
     def handle_alpha(self):
-        self.alpha_rise = shared.mouse_pos.y > self.rect.y - 10
-        shared.handling_scroll_bar = self.alpha_rise
+        if self.alpha_rise and shared.mouse_press[0]:
+            shared.handling_scroll_bar = True
+            self.alpha_rise = True
+        else:
+            self.alpha_rise = self.rect.bottom > shared.mouse_pos.y > self.rect.y - 10
+            shared.handling_scroll_bar = self.alpha_rise
 
         if self.alpha_rise:
             self.alpha += self.fade_speed * shared.dt
@@ -48,6 +52,8 @@ class HorizontalScrollBar:
 
     def update(self):
         self.handle_alpha()
+        if not shared.handling_scroll_bar:
+            return
         self.handle_scroll()
         self.bound_bar()
         self.apply_scroll()

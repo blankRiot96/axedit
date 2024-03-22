@@ -30,8 +30,10 @@ class LineNumbers:
         )
 
     def update(self):
-        end_of_page_lno = int(shared.srect.height / (shared.FONT_HEIGHT * 2))
-        max_line_digits = len(f"{shared.cursor_pos.y + 1 + end_of_page_lno:.0f}")
+        end_of_page_lno = int(
+            (shared.srect.height + shared.scroll.y) / shared.FONT_HEIGHT
+        )
+        max_line_digits = len(f"{shared.cursor_pos.y + end_of_page_lno:.0f}")
         shared.line_number_digits = max_line_digits + 4
 
         # logger.debug(

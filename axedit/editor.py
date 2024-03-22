@@ -5,8 +5,9 @@ import pygame
 from axedit import shared
 from axedit.autocompletions import AutoCompletions
 from axedit.classes import Pos
-from axedit.funcs import get_text, save_file
+from axedit.funcs import get_text, is_event_frame, save_file
 from axedit.input_queue import AcceleratedKeyPress, EventManager, InputManager
+from axedit.logs import logger
 from axedit.state_enums import FileState
 from axedit.syntax_highlighting import apply_syntax_highlighting
 from axedit.utils import Time
@@ -315,8 +316,8 @@ class Editor:
     def get_placement(self):
         x_pos = (
             shared.mouse_pos.x
-            + shared.scroll.x
             - (shared.FONT_WIDTH * shared.line_number_digits)
+            + shared.scroll.x
         )
         y_pos = shared.mouse_pos.y - shared.scroll.y
 
@@ -338,7 +339,10 @@ class Editor:
         return Pos(x_pos, y_pos)
 
     def mouse_placement(self):
-        if shared.handling_scroll_bar:
+        if (
+            shared.handling_scroll_bar
+            or shared.mouse_pos.y > shared.srect.height - shared.FONT_HEIGHT
+        ):
             return
         for event in shared.events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -351,11 +355,19 @@ class Editor:
         shared.action_queue.clear()
 
     def on_drag(self) -> None:
+        if (
+            shared.handling_scroll_bar
+            or shared.mouse_pos.y > shared.srect.height - shared.FONT_HEIGHT
+        ):
+            return
+
+        mouse_down = bool(shared.mouse_press[0])
+        mouse_motion = is_event_frame(pygame.MOUSEMOTION)
         if not shared.mouse_press[0]:
             self.first_drag = False
             return
 
-        if self.stored_drag_pos != shared.cursor_pos:
+        if mouse_down and mouse_motion:
             if not self.first_drag:
                 shared.visual_mode_axis = self.get_placement()
                 self.first_drag = True

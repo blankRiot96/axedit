@@ -125,6 +125,7 @@ def on_zz():
 
 
 def on_gg():
+    shared.scroll.x, shared.scroll.y = 0, 0
     shared.cursor_pos.x, shared.cursor_pos.y = 0, 0
 
 
