@@ -382,7 +382,7 @@ class Editor:
         self.on_scroll()
         self.handle_input()
         self.on_drag()
-        # self.autocompletion.update()
+        self.autocompletion.update()
 
     def draw(self):
         self.gen_image()
@@ -392,4 +392,4 @@ class Editor:
         )
 
         self.surf.blit(self.image, (-shared.scroll.x, 0))
-        # self.autocompletion.draw(self.surf)
+        self.autocompletion.draw(self.surf)

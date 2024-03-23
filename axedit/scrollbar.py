@@ -51,6 +51,8 @@ class HorizontalScrollBar:
         )
 
     def update(self):
+        if shared.typing_cmd:
+            return
         self.handle_alpha()
         if not shared.handling_scroll_bar:
             return
@@ -59,5 +61,7 @@ class HorizontalScrollBar:
         self.apply_scroll()
 
     def draw(self):
+        if shared.typing_cmd:
+            return
         self.surf.set_alpha(self.alpha)
         shared.screen.blit(self.surf, self.rect)
