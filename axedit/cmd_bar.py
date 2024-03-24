@@ -1,13 +1,13 @@
+import abc
 import itertools
 import typing as t
 
 import pygame
 
 from axedit import shared
+from axedit.funcs import save_file, soft_save_file
 from axedit.themes import apply_theme, get_available_theme_names
 from axedit.utils import Time, render_at
-from axedit.funcs import save_file, soft_save_file
-import abc
 
 
 def calculate_number_of_rows(

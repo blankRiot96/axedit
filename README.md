@@ -39,3 +39,6 @@ Note: Writing to/Saving the file also invokes on-save hooks
 | `:theme theme-name`             | Set the theme of the editor        |
 | `:hooks`                        | Open the on-save hooks file        |
 | `:line-numbers:relative on/off` | Set whether line no to be relative |
+
+### Credits
+- [kleur](https://github.com/Suyashtnt/kleur) theme by [Suyashtnt](https://github.com/Suyashtnt/) 
