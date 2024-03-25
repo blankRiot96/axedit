@@ -75,8 +75,15 @@ def main():
     """Runs the editor in a safespot"""
     try:
         potential_main()
-    except Exception:
+    except (Exception, KeyboardInterrupt):
         logger.error(traceback.format_exc())
-        if hasattr(shared, "server_process"):
+        if hasattr(shared, "client_socket"):
             shared.client_socket.close()
+        if hasattr(shared, "server_process"):
+            shared.server_process.kill()
+
+    finally:
+        if hasattr(shared, "client_socket"):
+            shared.client_socket.close()
+        if hasattr(shared, "server_process"):
             shared.server_process.kill()

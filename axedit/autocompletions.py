@@ -3,6 +3,7 @@ import random
 import socket
 import subprocess
 import sys
+import threading
 import time
 
 import pygame
@@ -16,7 +17,6 @@ from axedit.state_enums import FileState
 _POSSIBLE_COMPLETIONS = {}
 
 SERVER_HOST = "127.0.0.1"  # Loopback address
-SERVER_PORT = random.randint(1024, 65535)  # Port server is listening on
 
 
 class AutoCompletions:
@@ -26,38 +26,92 @@ class AutoCompletions:
     """
 
     def __init__(self) -> None:
-        # Start the server
-        lang_server_path = shared.AXE_FOLDER_PATH / "lang_server.py"
-        command = [sys.executable, str(lang_server_path.absolute()), str(SERVER_PORT)]
-        shared.server_process = subprocess.Popen(
-            command,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            close_fds=True,
+        self.connected = False
+        thread = threading.Thread(
+            target=lambda: [self.spawn_server(), self.connect_to_server()]
         )
+        thread.start()
 
-        # Give some time for the server to start *** Very important ***
-        time.sleep(0.1)
+    def spawn_server(self):
+        lang_server_path = shared.AXE_FOLDER_PATH / "lang_server.py"
+        while True:
+            try:
+                self.server_port = random.randint(1024, 65535)
+                logger.critical(self.server_port)
+                command = [
+                    sys.executable,
+                    str(lang_server_path.absolute()),
+                    str(self.server_port),
+                ]
+                shared.server_process = subprocess.Popen(
+                    command,
+                    stdin=subprocess.DEVNULL,
+                    stdout=sys.stdout,
+                    stderr=sys.stderr,
+                    close_fds=True,
+                )
+                shared.server_process.wait(1.0)
+            except subprocess.TimeoutExpired:
+                break
 
-        # Start the client
+    def connect_to_server(self):
         shared.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        shared.client_socket.connect((SERVER_HOST, SERVER_PORT))
+        while True:
+            try:
+                shared.client_socket.connect((SERVER_HOST, self.server_port))
+                self.connected = True
+                break
+            except socket.error:
+                continue
+
+    def to_update(self) -> bool:
+        return shared.chars_changed
 
     def update(self):
+        if not self.connected:
+            return
+        if not self.to_update():
+            return
+
         text = get_text()
-        loc = (shared.cursor_pos.x + 1, shared.cursor_pos.y + 1)
+        loc = (shared.cursor_pos.x, shared.cursor_pos.y + 1)
 
         data = {"text": text, "loc": loc}
         data = json.dumps(data)
+        # data += "@"
+        l = len(data.encode())
 
         try:
-            shared.client_socket.sendall(data.encode())
+            shared.client_socket.sendall(f"{l};{data}".encode())
         except OSError:
             exit()
+        while True:
+            try:
+                data = shared.client_socket.recv(1024)
 
-        response = shared.client_socket.recv(1024).decode()
-        logger.debug(f"Received from server: {response}")
+                if not data:
+                    continue
+
+                received_data = data.decode()
+                size, received_data = received_data.split(";", 1)
+
+                size = int(size)
+                size -= len(data) - len(str(size)) - 1
+                while size > 0:
+                    data = shared.client_socket.recv(1024)
+                    size -= 1024
+
+                    received_data += data.decode()
+
+                # ***
+                break
+            except socket.error as e:
+                logger.debug(e)
+                continue
+
+        logger.debug(f"{received_data=}")
+        received_data = json.loads(received_data)
+        logger.debug(f"{received_data=}")
 
     def draw(self, editor_surf: pygame.Surface):
         pass

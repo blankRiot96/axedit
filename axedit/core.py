@@ -14,8 +14,11 @@ from axedit.themes import apply_theme
 def true_exit():
     logger.debug("EXIT CALLED")
     shared.running = False
-    shared.client_socket.close()
-    shared.server_process.kill()
+
+    if hasattr(shared, "client_socket"):
+        shared.client_socket.close()
+    if hasattr(shared, "server_process"):
+        shared.server_process.kill()
 
 
 __builtins__["exit"] = true_exit
