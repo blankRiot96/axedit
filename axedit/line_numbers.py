@@ -3,6 +3,7 @@ import functools
 import pygame
 
 from axedit import shared
+from axedit.funcs import is_event_frame
 from axedit.logs import logger
 
 
@@ -50,6 +51,7 @@ class LineNumbers:
             self.scroll_char_offset != self.last_scroll_offset
             or shared.cursor_pos.y != self.last_char_pos_y
             or len(shared.chars) != self.last_chars_length
+            or is_event_frame(pygame.VIDEORESIZE)
         )
 
     def draw_lines(self):

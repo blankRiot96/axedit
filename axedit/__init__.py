@@ -5,6 +5,7 @@ import sys
 import traceback
 from pathlib import Path
 
+from axedit import shared
 from axedit.logs import logger
 
 FILE_PATH = Path(inspect.getfile(inspect.currentframe()))
@@ -76,3 +77,6 @@ def main():
         potential_main()
     except Exception:
         logger.error(traceback.format_exc())
+        if hasattr(shared, "server_process"):
+            shared.client_socket.close()
+            shared.server_process.kill()

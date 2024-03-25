@@ -4,6 +4,7 @@ import pygame
 from pygame._sdl2 import Window
 
 from axedit import shared
+from axedit.autocompletions import AutoCompletions
 from axedit.funcs import get_icon, set_windows_title, set_windows_title_bar_color
 from axedit.logs import logger
 from axedit.states import StateManager
@@ -13,6 +14,8 @@ from axedit.themes import apply_theme
 def true_exit():
     logger.debug("EXIT CALLED")
     shared.running = False
+    shared.client_socket.close()
+    shared.server_process.kill()
 
 
 __builtins__["exit"] = true_exit
@@ -26,6 +29,7 @@ class Core:
         shared.action_queue = []
         self.state_manager = StateManager()
         self.frame_no = 0
+        shared.autocompletion = AutoCompletions()
         logger.debug("CORE INITIALIZED")
 
     def win_init(self):

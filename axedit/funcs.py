@@ -9,13 +9,6 @@ from axedit import shared
 from axedit.classes import CharList, Pos
 
 
-def is_event_frame(event_type: int) -> bool:
-    for event in shared.events:
-        if event.type == event_type:
-            return True
-    return False
-
-
 def open_file(file: str) -> None:
     with open(file) as f:
         content = f.readlines()
@@ -135,3 +128,11 @@ def center_cursor():
     shared.scroll.y += shared.srect.height / 2
     shared.scroll.y = min(shared.scroll.y, 0)
     shared.chars_changed = True
+
+
+@cache_by_frame
+def is_event_frame(event_type: int) -> bool:
+    for event in shared.events:
+        if event.type == event_type:
+            return True
+    return False
