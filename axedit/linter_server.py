@@ -1,12 +1,12 @@
 import json
 import socket
+import subprocess
 import sys
-
-import jedi
 
 # Server configuration
 HOST = "127.0.0.1"  # Loopback address
 PORT = int(sys.argv[1])
+
 
 # Create a socket object
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
@@ -24,10 +24,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
     # Accept connections from clients
     conn, addr = server_socket.accept()
 
-    print("potato")
     with conn:
         while True:
-            print("tomato")
             # Receive data from the client
             data = conn.recv(1024)
             if not data:
@@ -48,25 +46,22 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
             if received_data.lower() == "exit":
                 break
 
-            print(received_data)
-
             # Generate a random number as response
             received_data = json.loads(received_data)
-            script = jedi.Script(received_data["text"])
 
-            x, y = received_data["loc"]
+            command_str = f"ruff check --output-format=json --stdin-filename={received_data['file']}"
+            command = command_str.split()
+
             try:
-                completions = script.complete(y, x)
-            except ValueError as e:
-                print(f"{x=},{y=}")
-                raise ValueError(e)
-            completions = [
-                {"name": comp.name, "prefix-len": comp.get_completion_prefix_length()}
-                for comp in completions
-            ]
-            response = json.dumps(completions).encode()
+                linting_info = subprocess.check_output(
+                    command, input=received_data["text"].encode()
+                )
+            except subprocess.CalledProcessError as e:
+                linting_info = e.output
+
+            response_data = json.loads(linting_info)
+            response = json.dumps(response_data).encode()
             response = f"{len(response)};{response.decode()}".encode()
-            print("SERVER RESPONSE ALSDALS=", response)
 
             # Send the random number back to the client
             conn.sendall(response)

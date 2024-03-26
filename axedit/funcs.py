@@ -9,6 +9,14 @@ from axedit import shared
 from axedit.classes import CharList, Pos
 
 
+def safe_close_connections() -> None:
+    """Safely close autocompletion and linting servers"""
+    if hasattr(shared, "autocompletion"):
+        shared.autocompletion.close_connections()
+    if hasattr(shared, "linter"):
+        shared.linter.close_connections()
+
+
 def open_file(file: str) -> None:
     with open(file) as f:
         content = f.readlines()
@@ -18,13 +26,6 @@ def open_file(file: str) -> None:
     shared.chars = CharList([list(line[:-1]) for line in content])
     if not shared.chars:
         shared.chars.append([])
-
-
-def get_text():
-    text = ""
-    for row in shared.chars:
-        text += "".join(row) + "\n"
-    return text
 
 
 def soft_save_file():
@@ -136,3 +137,11 @@ def is_event_frame(event_type: int) -> bool:
         if event.type == event_type:
             return True
     return False
+
+
+@cache_by_frame
+def get_text():
+    text = ""
+    for row in shared.chars:
+        text += "".join(row) + "\n"
+    return text

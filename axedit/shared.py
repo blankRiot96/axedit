@@ -14,6 +14,7 @@ if t.TYPE_CHECKING:
     from axedit.autocompletions import AutoCompletions
     from axedit.classes import CharList, Pos
     from axedit.cursor import Cursor
+    from axedit.linter import Linter
 
 pygame.font.init()
 
@@ -46,9 +47,8 @@ chars: CharList[CharList[str]]
 cursor_pos: Pos
 cursor: Cursor
 visual_mode_axis: Pos
-client_socket: socket.socket
-server_process: subprocess.Popen
 autocompletion: AutoCompletions
+linter: Linter
 
 # Config
 mode: FileState = FileState.NORMAL

@@ -13,12 +13,12 @@ from axedit.input_queue import InputManager
 from axedit.logs import logger
 from axedit.state_enums import FileState
 
-SERVER_HOST = "127.0.0.1"  # Loopback address
+SERVER_HOST = "127.0.0.1"
 
 
-class AutoCompletions:
+class Linter:
     """
-    Receives autocompletions from `axedit/completions_server.py`
+    Receives autocompletions from `axedit/linter_server.py`
     which is started as a separate process
     """
 
@@ -28,13 +28,14 @@ class AutoCompletions:
             target=lambda: [self.spawn_server(), self.connect_to_server()]
         )
         thread.start()
+        self.lints = {}
 
     def spawn_server(self):
-        lang_server_path = shared.AXE_FOLDER_PATH / "completions_server.py"
+        lang_server_path = shared.AXE_FOLDER_PATH / "linter_server.py"
         while True:
             try:
                 self.server_port = random.randint(1024, 65535)
-                logger.debug(f"AutoCompletion PORT={self.server_port}")
+                logger.debug(f"Linter PORT={self.server_port}")
                 command = [
                     sys.executable,
                     str(lang_server_path.absolute()),
@@ -66,15 +67,14 @@ class AutoCompletions:
 
     def receive_completions(self):
         text = get_text()
-        loc = (shared.cursor_pos.x, shared.cursor_pos.y + 1)
-
-        data = {"text": text, "loc": loc}
+        data = {"file": shared.file_name, "text": text}
         data = json.dumps(data)
         l = len(data.encode())
 
         try:
             self.client_socket.sendall(f"{l};{data}".encode())
         except OSError:
+            logger.critical("exit by linter?")
             exit()
         while True:
             try:
@@ -100,9 +100,9 @@ class AutoCompletions:
                 logger.debug(e)
                 continue
 
-        received_data = json.loads(received_data)
+        self.lints = json.loads(received_data)
         # if received_data:
-        #     logger.debug(f"autocompletion={received_data[0]["name"]}")
+        #     logger.debug(f"Received lints:\n{json.dumps(self.lints, indent=2)}")
 
     def close_connections(self):
         if hasattr(self, "client_socket"):
@@ -118,5 +118,17 @@ class AutoCompletions:
 
         self.receive_completions()
 
+    def render_lints(self, editor_surf: pygame.Surface):
+        for lint in self.lints:
+            msg = f"󰨓 {lint['message']}"
+            color = "red" if lint["code"][0] == "E" else "orange"
+            y = lint["location"]["row"] - 1
+            x = len(shared.chars[y]) + 2
+            x, y = x * shared.FONT_WIDTH, y * shared.FONT_HEIGHT
+            y -= shared.scroll.y
+
+            surf = shared.FONT.render(msg, True, color)
+            editor_surf.blit(surf, (x, y))
+
     def draw(self, editor_surf: pygame.Surface):
-        pass
+        self.render_lints(editor_surf)

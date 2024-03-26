@@ -382,6 +382,7 @@ class Editor:
         self.handle_input()
         self.on_drag()
         shared.autocompletion.update()
+        shared.linter.update()
 
     def draw(self):
         self.gen_image()
@@ -392,3 +393,4 @@ class Editor:
 
         self.surf.blit(self.image, (-shared.scroll.x, 0))
         shared.autocompletion.draw(self.surf)
+        shared.linter.draw(self.surf)

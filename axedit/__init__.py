@@ -6,6 +6,7 @@ import traceback
 from pathlib import Path
 
 from axedit import shared
+from axedit.funcs import safe_close_connections
 from axedit.logs import logger
 
 FILE_PATH = Path(inspect.getfile(inspect.currentframe()))
@@ -77,13 +78,6 @@ def main():
         potential_main()
     except (Exception, KeyboardInterrupt):
         logger.error(traceback.format_exc())
-        if hasattr(shared, "client_socket"):
-            shared.client_socket.close()
-        if hasattr(shared, "server_process"):
-            shared.server_process.kill()
-
+        safe_close_connections()
     finally:
-        if hasattr(shared, "client_socket"):
-            shared.client_socket.close()
-        if hasattr(shared, "server_process"):
-            shared.server_process.kill()
+        safe_close_connections()
