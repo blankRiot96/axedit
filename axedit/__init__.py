@@ -1,11 +1,12 @@
 import inspect
 import os
+
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 import subprocess
 import sys
 import traceback
 from pathlib import Path
 
-from axedit import shared
 from axedit.funcs import safe_close_connections
 from axedit.logs import logger
 
@@ -32,8 +33,6 @@ def detached_main() -> None:
 def debug_main():
     """Runs the editor in debug mode"""
     clear_logs()
-
-    os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
     import pygame
 

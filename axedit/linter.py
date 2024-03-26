@@ -120,12 +120,18 @@ class Linter:
 
     def render_lints(self, editor_surf: pygame.Surface):
         for lint in self.lints:
-            msg = f"󰨓 {lint['message']}"
-            color = "red" if lint["code"][0] == "E" else "orange"
             y = lint["location"]["row"] - 1
             x = len(shared.chars[y]) + 2
             x, y = x * shared.FONT_WIDTH, y * shared.FONT_HEIGHT
             y -= shared.scroll.y
+
+            # Don't render lints that can't be seen!
+            if y < 0 or y > shared.srect.height:
+                continue
+
+            msg = f"󰨓 {lint['message']}"
+            red, orange = shared.theme["var"], shared.theme["const"]
+            color = red if lint["code"][0] == "E" else orange
 
             surf = shared.FONT.render(msg, True, color)
             editor_surf.blit(surf, (x, y))
