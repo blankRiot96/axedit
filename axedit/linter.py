@@ -28,7 +28,7 @@ class Linter:
             target=lambda: [self.spawn_server(), self.connect_to_server()]
         )
         thread.start()
-        self.lints = {}
+        self.lints: list[dict] = []
         self.first_time_connected = True
         self.create_font()
 
@@ -108,7 +108,7 @@ class Linter:
                 logger.debug(e)
                 continue
 
-        self.lints = json.loads(received_data)
+        self.lints: list[dict] = json.loads(received_data)
 
     def close_connections(self):
         if hasattr(self, "client_socket"):
@@ -118,9 +118,10 @@ class Linter:
 
     def filter_lints(self):
         locs = []
-        for lint in self.lints:
+        for lint in self.lints[::-1]:
             row = lint["location"]["row"]
             if row in locs:
+                self.lints.remove(lint)
                 continue
             locs.append(row)
 

@@ -2,6 +2,8 @@
 name = "default"
 
 [font]
+# Define a font family or a font path
+# Paths will take priority
 family = "Hack NF"
 size = 12
 
@@ -9,9 +11,17 @@ size = 12
 relative = true
 
 [opacity]
+# Interval [0, 1]
 value = 0.9
 
+[linter]
+# off | basic | medium | strict
+severity = "off"
+
 [hooks]
+# Add any CLI command that runs on saving the file in the editor
+# Variables within {} will get inserted accordingly
+# {file} -> Path to file being saved
 on_save = [
     "black {file} --line-length=88",
     "isort {file} --profile=black"
