@@ -119,9 +119,10 @@ def offset_font_size(offset: int):
     shared.FONT_WIDTH = shared.FONT.render("w", True, "white").get_width()
     shared.FONT_HEIGHT = shared.FONT.get_height()
     shared.chars_changed = True
-    if not hasattr(shared, "cursor"):
-        return
-    shared.cursor.gen_image()
+    if hasattr(shared, "cursor"):
+        shared.cursor.gen_image()
+    if hasattr(shared, "linter"):
+        shared.linter.create_font()
 
 
 def center_cursor():

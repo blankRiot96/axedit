@@ -30,8 +30,12 @@ class Linter:
         thread.start()
         self.lints = {}
         self.first_time_connected = True
+        self.create_font()
+
+    def create_font(self):
         self.font = pygame.Font(
-            shared.AXE_FOLDER_PATH / "assets/fonts/IntoneMonoNerdFontMono-Regular.ttf"
+            shared.AXE_FOLDER_PATH / "assets/fonts/IntoneMonoNerdFontMono-Regular.ttf",
+            shared.FONT_SIZE,
         )
 
     def spawn_server(self):
@@ -105,8 +109,6 @@ class Linter:
                 continue
 
         self.lints = json.loads(received_data)
-        if received_data:
-            logger.debug(f"Received lints:\n{json.dumps(self.lints, indent=2)}")
 
     def close_connections(self):
         if hasattr(self, "client_socket"):
@@ -114,16 +116,26 @@ class Linter:
         if hasattr(self, "server_process"):
             self.server_process.kill()
 
+    def filter_lints(self):
+        locs = []
+        for lint in self.lints:
+            row = lint["location"]["row"]
+            if row in locs:
+                continue
+            locs.append(row)
+
     def update(self):
         if not self.connected:
             return
         if self.first_time_connected:
             self.receive_lints()
+            self.filter_lints()
         self.first_time_connected = False
         if not self.to_update():
             return
 
         self.receive_lints()
+        self.filter_lints()
 
     def render_squigline(
         self,
@@ -136,7 +148,7 @@ class Linter:
         squiggly_bum = (end_column - start_column) * shared.FONT_WIDTH
         x = 0
         squiggly_surf = pygame.Surface(
-            (squiggly_bum + 100, shared.FONT_HEIGHT), pygame.SRCALPHA
+            (shared.srect.width, shared.FONT_HEIGHT), pygame.SRCALPHA
         )
 
         squiggly_diff = squiggly.get_width() * 0.6
@@ -144,20 +156,18 @@ class Linter:
             squiggly_surf.blit(squiggly, (x, 0))
             x += squiggly_diff
 
-        # TODO
-        squiggly_rect = squiggly_surf.get_rect(
-            topleft=(
-                (start_column * shared.FONT_WIDTH),
-                ((row + 0.5) * shared.FONT_HEIGHT) + shared.scroll.y,
-            )
-        )
-        editor_surf.blit(
-            squiggly_surf,
+        squiggly_surf = squiggly_surf.subsurface(
+            squiggly_surf.get_bounding_rect()
+        ).copy()
+        squiggly_rect = pygame.Rect(
             (
-                (start_column * shared.FONT_WIDTH),
+                (start_column * shared.FONT_WIDTH) - shared.scroll.x,
                 ((row + 0.5) * shared.FONT_HEIGHT) + shared.scroll.y,
             ),
+            (squiggly_bum, shared.FONT_HEIGHT),
         )
+        squiggly_rect = squiggly_surf.get_rect(center=squiggly_rect.center)
+        editor_surf.blit(squiggly_surf, squiggly_rect)
 
     def render_squiggly(
         self,
@@ -184,6 +194,9 @@ class Linter:
             y = lint["location"]["row"] - 1
             x = len(shared.chars[y]) + 2
             x, y = x * shared.FONT_WIDTH, y * shared.FONT_HEIGHT
+
+            # Scrolllll
+            x -= shared.scroll.x
             y += shared.scroll.y
 
             # Don't render lints that can't be seen!
