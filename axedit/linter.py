@@ -29,6 +29,10 @@ class Linter:
         )
         thread.start()
         self.lints = {}
+        self.first_time_connected = True
+        self.font = pygame.Font(
+            shared.AXE_FOLDER_PATH / "assets/fonts/IntoneMonoNerdFontMono-Regular.ttf"
+        )
 
     def spawn_server(self):
         lang_server_path = shared.AXE_FOLDER_PATH / "linter_server.py"
@@ -65,7 +69,7 @@ class Linter:
     def to_update(self) -> bool:
         return shared.chars_changed
 
-    def receive_completions(self):
+    def receive_lints(self):
         text = get_text()
         data = {"file": shared.file_name, "text": text}
         data = json.dumps(data)
@@ -101,8 +105,8 @@ class Linter:
                 continue
 
         self.lints = json.loads(received_data)
-        # if received_data:
-        #     logger.debug(f"Received lints:\n{json.dumps(self.lints, indent=2)}")
+        if received_data:
+            logger.debug(f"Received lints:\n{json.dumps(self.lints, indent=2)}")
 
     def close_connections(self):
         if hasattr(self, "client_socket"):
@@ -113,17 +117,74 @@ class Linter:
     def update(self):
         if not self.connected:
             return
+        if self.first_time_connected:
+            self.receive_lints()
+        self.first_time_connected = False
         if not self.to_update():
             return
 
-        self.receive_completions()
+        self.receive_lints()
+
+    def render_squigline(
+        self,
+        row: int,
+        start_column: int,
+        end_column: int,
+        editor_surf: pygame.Surface,
+        squiggly: pygame.Surface,
+    ):
+        squiggly_bum = (end_column - start_column) * shared.FONT_WIDTH
+        x = 0
+        squiggly_surf = pygame.Surface(
+            (squiggly_bum + 100, shared.FONT_HEIGHT), pygame.SRCALPHA
+        )
+
+        squiggly_diff = squiggly.get_width() * 0.6
+        while x < squiggly_bum:
+            squiggly_surf.blit(squiggly, (x, 0))
+            x += squiggly_diff
+
+        # TODO
+        squiggly_rect = squiggly_surf.get_rect(
+            topleft=(
+                (start_column * shared.FONT_WIDTH),
+                ((row + 0.5) * shared.FONT_HEIGHT) + shared.scroll.y,
+            )
+        )
+        editor_surf.blit(
+            squiggly_surf,
+            (
+                (start_column * shared.FONT_WIDTH),
+                ((row + 0.5) * shared.FONT_HEIGHT) + shared.scroll.y,
+            ),
+        )
+
+    def render_squiggly(
+        self,
+        start,
+        end,
+        editor_surf: pygame.Surface,
+        squiggly: pygame.Surface,
+    ) -> None:
+        start = int(start["column"]) - 1, int(start["row"]) - 1
+        end = int(end["column"]) - 1, int(end["row"]) - 1
+
+        if end[1] > start[1]:
+            for i in range(start[1], end[1]):
+                self.render_squigline(i, 0, len(shared.chars[i]), editor_surf, squiggly)
+            start = 0, end[1]
+
+        self.render_squigline(end[1], start[0], end[0], editor_surf, squiggly)
 
     def render_lints(self, editor_surf: pygame.Surface):
+        wavy_dash = "~"
+        red_squiggly = self.font.render(wavy_dash, True, shared.theme["var"])
+        orange_squiggly = self.font.render(wavy_dash, True, shared.theme["const"])
         for lint in self.lints:
             y = lint["location"]["row"] - 1
             x = len(shared.chars[y]) + 2
             x, y = x * shared.FONT_WIDTH, y * shared.FONT_HEIGHT
-            y -= shared.scroll.y
+            y += shared.scroll.y
 
             # Don't render lints that can't be seen!
             if y < 0 or y > shared.srect.height:
@@ -132,7 +193,11 @@ class Linter:
             msg = f"󰨓 {lint['message']}"
             red, orange = shared.theme["var"], shared.theme["const"]
             color = red if lint["code"][0] == "E" else orange
+            squiggly = red_squiggly if lint["code"][0] == "E" else orange_squiggly
 
+            self.render_squiggly(
+                lint["location"], lint["end_location"], editor_surf, squiggly
+            )
             surf = shared.FONT.render(msg, True, color)
             editor_surf.blit(surf, (x, y))
 

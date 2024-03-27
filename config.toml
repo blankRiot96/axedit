@@ -1,0 +1,20 @@
+[theme]
+name = "default"
+
+[font]
+family = "Hack NF"
+size = 12
+
+[line_numbers]
+relative = true
+
+[opacity]
+value = 0.9
+
+[hooks]
+on_save = [
+    "black {file} --line-length=88",
+    "isort {file} --profile=black"
+]
+
+

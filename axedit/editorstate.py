@@ -25,8 +25,8 @@ class EditorState:
         self.scrollbar = HorizontalScrollBar()
 
     def shared_reset(self):
-        shared.action_str = ""
         shared.chars_changed = True
+        shared.action_str = ""
         shared.cursor_pos = Pos(0, 0)
         shared.saved = True
         shared.import_line_changed = False
@@ -138,6 +138,7 @@ class EditorState:
         self.editor.draw()
         shared.cursor.draw(self.editor.surf)
         if shared.chars_changed:
+            shared.linter.update()
             self.editor.draw()
         self.line_numbers.draw()
         self.status_bar.draw()
