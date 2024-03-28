@@ -10,17 +10,17 @@ from axedit.funcs import (
     safe_close_connections,
     set_windows_title,
     set_windows_title_bar_color,
+    write_config,
 )
 from axedit.linter import Linter
 from axedit.logs import logger
 from axedit.states import StateManager
-from axedit.themes import apply_theme
 
 
 def true_exit():
     logger.debug("EXIT CALLED")
     shared.running = False
-
+    write_config()
     safe_close_connections()
 
 
@@ -29,9 +29,8 @@ __builtins__["exit"] = true_exit
 
 class Core:
     def __init__(self) -> None:
-        apply_theme("catppuccin-mocha")
         self.win_init()
-        self.shared_refresh()
+        self.shared_frame_refresh()
         shared.action_queue = []
         self.state_manager = StateManager()
         self.frame_no = 0
@@ -45,7 +44,7 @@ class Core:
         shared.frame_cache = {}
         self.clock = pygame.Clock()
         window = Window.from_display_module()
-        window.opacity = 0.9
+        window.opacity = shared.config["opacity"]["value"]
 
         icon = get_icon(shared.theme["default-fg"])
         pygame.display.set_icon(icon)
@@ -62,7 +61,7 @@ class Core:
             elif event.type == pygame.VIDEORESIZE:
                 shared.srect = shared.screen.get_rect()
 
-    def shared_refresh(self):
+    def shared_frame_refresh(self):
         shared.frame_cache.clear()
         shared.events = pygame.event.get()
         shared.dt = self.clock.tick() / 1000
@@ -75,7 +74,7 @@ class Core:
         shared.mouse_press = pygame.mouse.get_pressed()
 
     def update(self):
-        self.shared_refresh()
+        self.shared_frame_refresh()
         self.event_handler()
         self.state_manager.update()
         if shared.theme_changed:

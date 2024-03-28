@@ -4,9 +4,44 @@ import typing as t
 from pathlib import Path
 
 import pygame
+import tomlkit
 
 from axedit import shared
 from axedit.classes import CharList, Pos
+
+
+def get_config() -> tomlkit.TOMLDocument:
+    config_path = get_config_path()
+    with open(config_path / "config.toml", "rb") as f:
+        return tomlkit.load(f)
+
+
+def write_config():
+    config_path = get_config_path()
+    with open(config_path / "config.toml", "w") as f:
+        tomlkit.dump(shared.config, f)
+
+
+def get_config_path() -> Path:
+    if platform.system() == "Linux":
+        return Path("~/.config/axedit").expanduser()
+    return Path(pygame.system.get_pref_path("Axedit", "Axedit"))
+
+
+def get_default_config() -> tomlkit.TOMLDocument:
+    default_config_path = (
+        shared.AXE_FOLDER_PATH / "assets/data/default_config/config.toml"
+    )
+    with open(default_config_path, "rb") as f:
+        return tomlkit.load(f)
+
+
+def reset_config() -> None:
+    config_path = get_config_path()
+    default_config = get_default_config()
+    shared.config = default_config
+    with open(config_path / "config.toml", "w") as f:
+        tomlkit.dump(default_config, f)
 
 
 def safe_close_connections() -> None:

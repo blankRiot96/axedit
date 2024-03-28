@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import inspect
-import socket
-import subprocess
 import typing as t
 from pathlib import Path
 
 import pygame
+import tomlkit
 
 from axedit.state_enums import FileState
 
@@ -54,6 +53,7 @@ linter: Linter
 mode: FileState = FileState.NORMAL
 file_name: str | None = None
 theme: dict
+config: tomlkit.TOMLDocument
 
 # Registers
 frame_cache: dict[t.Callable, t.Any]

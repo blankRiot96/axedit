@@ -1,11 +1,13 @@
 [theme]
-name = "default"
+name = "catppuccin-mocha"
 
 [font]
 # Define a font family or a font path
 # Paths will take priority
-family = "Hack NF"
-size = 12
+# To disable the path set it to false
+family = false
+path = "default"
+size = 24 
 
 [line_numbers]
 relative = true
@@ -23,8 +25,10 @@ severity = "off"
 # Variables within {} will get inserted accordingly
 # {file} -> Path to file being saved
 on_save = [
-    "black {file} --line-length=88",
-    "isort {file} --profile=black"
+    # "black {file} --line-length=88",
+    # "isort {file} --profile=black"
 ]
 
-
+[squiggly]  # The type of squiggly lines you want
+# cut-off | free | centered-free | separated
+type = "cut-off"

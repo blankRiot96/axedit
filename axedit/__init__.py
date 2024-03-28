@@ -1,7 +1,7 @@
+import axedit.first_run  # isort: skip
+
 import inspect
 import os
-
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 import subprocess
 import sys
 import traceback

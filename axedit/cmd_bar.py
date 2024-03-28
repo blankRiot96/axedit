@@ -5,7 +5,7 @@ import typing as t
 import pygame
 
 from axedit import shared
-from axedit.funcs import save_file, soft_save_file
+from axedit.funcs import reset_config, soft_save_file, write_config
 from axedit.themes import apply_theme, get_available_theme_names
 from axedit.utils import Time, render_at
 
@@ -113,6 +113,7 @@ class CommandBar:
             ),
             Command(":rel-no", exit, subs=["on", "off"]),
             Command((":rename", ":rn"), self.on_rename),
+            Command(":reset-config", self.on_reset_config),
         ]
         self.commands = self.original_commands.copy()
         self.selected_command: Command | None = None
@@ -123,6 +124,9 @@ class CommandBar:
         self.executed = False
         self.raised_subsidaries = False
         self.gen_blank_surf()
+
+    def on_reset_config(self):
+        reset_config()
 
     def on_save_as(self):
         self.on_rename()
@@ -298,8 +302,10 @@ class CommandBar:
                 command.theme = True
 
     def apply_selected_theme(self):
+        shared.config["theme"]["name"] = self.selected_command.beauty_text
         apply_theme(self.selected_command.beauty_text)
         self.draw_suggestions()
+        write_config()
 
     def update_commands(self):
         matched_commands = self.get_matched_commands()
