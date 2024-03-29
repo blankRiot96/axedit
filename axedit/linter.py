@@ -152,14 +152,17 @@ class Linter:
             (shared.srect.width, shared.FONT_HEIGHT), pygame.SRCALPHA
         )
 
-        squiggly_diff = squiggly.get_width() * 0.6
+        factor = 1 if shared.config["squiggly"]["type"] == "separated" else 0.6
+        squiggly_diff = squiggly.get_width() * factor
         while x < squiggly_bum:
             squiggly_surf.blit(squiggly, (x, 0))
             x += squiggly_diff
 
-        squiggly_surf = squiggly_surf.subsurface(
-            squiggly_surf.get_bounding_rect()
-        ).copy()
+        bound_rect = squiggly_surf.get_bounding_rect()
+        if shared.config["squiggly"]["type"] == "cut-off":
+            bound_rect.width = squiggly_bum
+        squiggly_surf = squiggly_surf.subsurface(bound_rect).copy()
+
         squiggly_rect = pygame.Rect(
             (
                 (start_column * shared.FONT_WIDTH) - shared.scroll.x,
@@ -167,7 +170,11 @@ class Linter:
             ),
             (squiggly_bum, shared.FONT_HEIGHT),
         )
-        squiggly_rect = squiggly_surf.get_rect(center=squiggly_rect.center)
+        if shared.config["squiggly"]["type"] == "centered-free":
+            squiggly_rect = squiggly_surf.get_rect(center=squiggly_rect.center)
+        else:
+            ...
+            squiggly_rect.y += shared.FONT_HEIGHT * 0.5
         editor_surf.blit(squiggly_surf, squiggly_rect)
 
     def render_squiggly(

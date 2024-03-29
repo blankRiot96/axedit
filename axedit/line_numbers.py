@@ -1,17 +1,8 @@
-import functools
-
 import pygame
 
 from axedit import shared
 from axedit.funcs import is_event_frame
 from axedit.logs import logger
-
-
-@functools.lru_cache(maxsize=512)
-def render_num(num: int, alpha: int, fg) -> pygame.Surface:
-    text = shared.FONT.render(str(num), True, fg)
-    text.set_alpha(alpha)
-    return text
 
 
 class LineNumbers:
@@ -52,6 +43,7 @@ class LineNumbers:
             or shared.cursor_pos.y != self.last_char_pos_y
             or len(shared.chars) != self.last_chars_length
             or is_event_frame(pygame.VIDEORESIZE)
+            or shared.font_offset
         )
 
     def draw_lines(self):
@@ -68,7 +60,8 @@ class LineNumbers:
             elif lno >= len(shared.chars):
                 num = "~"
 
-            text = render_num(num, alpha, shared.theme["default-fg"])
+            text = shared.FONT.render(str(num), True, shared.theme["default-fg"])
+            text.set_alpha(alpha)
 
             # self.surf.blit(
             #     text,

@@ -150,7 +150,7 @@ def set_windows_title() -> None:
 
 def offset_font_size(offset: int):
     shared.FONT_SIZE += offset
-    shared.FONT = pygame.font.Font(shared.FONT_PATH, shared.FONT_SIZE)
+    shared.FONT.point_size = shared.FONT_SIZE
     shared.FONT_WIDTH = shared.FONT.render("w", True, "white").get_width()
     shared.FONT_HEIGHT = shared.FONT.get_height()
     shared.chars_changed = True
@@ -158,6 +158,7 @@ def offset_font_size(offset: int):
         shared.cursor.gen_image()
     if hasattr(shared, "linter"):
         shared.linter.create_font()
+    shared.font_offset = True
 
 
 def center_cursor():

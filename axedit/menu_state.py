@@ -17,7 +17,13 @@ class MenuTexter:
 
     def __init__(self, lines: MenuLines) -> None:
         self.lines = lines.copy()
-        self.font = pygame.Font(shared.FONT_PATH, 22)
+        if isinstance(shared.config["font"]["path"], str):
+            self.font = pygame.Font(shared.FONT_PATH, 22)
+        elif shared.config["font"]["family"]:
+            self.font = pygame.sysfont.SysFont(shared.config["font"]["family"], 22)
+        self.font_width, self.font_height = self.font.render(
+            " ", True, "white"
+        ).get_size()
         self.gen_surf()
 
     def gen_surf(self) -> None:
@@ -29,16 +35,16 @@ class MenuTexter:
             if temp_big > size_big:
                 size_big = temp_big
 
-        surf_width = size_big * shared.FONT_WIDTH * 2
-        surf_height = shared.FONT_HEIGHT * len(self.lines)
+        surf_width = size_big * self.font_width * 2
+        surf_height = self.font_height * len(self.lines)
         self.surf = pygame.Surface(
-            (surf_width + shared.FONT_WIDTH, surf_height), pygame.SRCALPHA
+            (surf_width + self.font_width, surf_height), pygame.SRCALPHA
         )
 
         desc_surf = self.render_description()
         self.surf.blit(desc_surf, (0, 0))
         self.surf.blit(
-            self.render_commands(), (desc_surf.get_width() + shared.FONT_WIDTH * 3, 0)
+            self.render_commands(), (desc_surf.get_width() + self.font_width * 3, 0)
         )
 
         self.surf = self.surf.subsurface(self.surf.get_bounding_rect()).copy()
@@ -51,7 +57,7 @@ class MenuTexter:
 
     def render_commands(self) -> pygame.Surface:
         command_width = (
-            len(max(self.lines, key=lambda line: len(line[1]))[1]) * shared.FONT_WIDTH
+            len(max(self.lines, key=lambda line: len(line[1]))[1]) * self.font_width
         ) * 2
         command_height = self.surf.get_height()
 
@@ -70,9 +76,9 @@ class MenuTexter:
 
                 rect = pygame.Rect(
                     acc_x,
-                    row * shared.FONT_HEIGHT,
-                    len(word) * shared.FONT_WIDTH,
-                    shared.FONT_HEIGHT,
+                    row * self.font_height,
+                    len(word) * self.font_width,
+                    self.font_height,
                 )
 
                 if flagged:
@@ -85,8 +91,7 @@ class MenuTexter:
 
         return command_surf
 
-    def update(self):
-        ...
+    def update(self): ...
 
 
 class MenuState:
@@ -121,8 +126,7 @@ class MenuState:
             return
         self.next_state = State.EDITOR
 
-    def on_ctrl_t(self):
-        ...
+    def on_ctrl_t(self): ...
 
     def update(self):
         for event in shared.events:

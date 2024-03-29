@@ -93,6 +93,7 @@ class EditorState:
             return
         shared.chars_changed = False
         shared.actions_modified = False
+        shared.font_offset = False
         self.char_handler()
         self.queue_actions()
         self.on_ctrl_p()

@@ -69,6 +69,7 @@ text_writing = False
 theme_changed = False
 running = True
 handling_scroll_bar = False
+font_offset = False
 naming_file: bool
 chars_changed: bool
 saved: bool

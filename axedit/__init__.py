@@ -26,7 +26,6 @@ def detached_main() -> None:
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
-        close_fds=True,
     )
 
 
@@ -77,6 +76,5 @@ def main():
         potential_main()
     except (Exception, KeyboardInterrupt):
         logger.error(traceback.format_exc())
-        safe_close_connections()
     finally:
         safe_close_connections()
