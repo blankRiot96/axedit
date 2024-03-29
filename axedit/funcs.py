@@ -1,5 +1,7 @@
 import os
 import platform
+import shlex
+import subprocess
 import typing as t
 from pathlib import Path
 
@@ -53,6 +55,7 @@ def safe_close_connections() -> None:
 
 
 def sync_file(file: str) -> None:
+    print("oya oya AKLJSKJASDJJ")
     with open(file) as f:
         content = f.readlines()
     shared.file_name = file
@@ -72,6 +75,11 @@ def soft_save_file():
         return
     with open(shared.file_name, "w") as f:
         f.write(get_text())
+
+    for command in shared.config["hooks"]["on_save"]:
+        subprocess.Popen(
+            shlex.split(command.format(file=shared.file_name)), start_new_session=True
+        )
 
 
 def save_file():

@@ -1,6 +1,6 @@
+import os
+
 import pygame
-from watchdog.events import FileSystemEvent, FileSystemEventHandler
-from watchdog.observers import Observer
 
 from axedit import shared
 from axedit.classes import CharList, Pos
@@ -14,18 +14,13 @@ from axedit.funcs import (
     sync_file,
 )
 from axedit.line_numbers import LineNumbers
+from axedit.logs import logger
 from axedit.scrollbar import HorizontalScrollBar
 from axedit.state_enums import FileState, State
 from axedit.status_bar import StatusBar
 from axedit.utils import render_at
 
 shared.chars = CharList([CharList([])])
-
-
-class FileChangeHandler(FileSystemEventHandler):
-    def on_modified(self, event: FileSystemEvent) -> None:
-        super().on_modified(event)
-        sync_file(shared.file_name)
 
 
 class EditorState:
@@ -37,6 +32,7 @@ class EditorState:
         self.status_bar = StatusBar()
         self.offset = 4
         self.scrollbar = HorizontalScrollBar()
+        self.last_file_time = 0
 
     def shared_reset(self):
         shared.chars_changed = True
@@ -47,9 +43,6 @@ class EditorState:
         shared.cursor = Cursor()
         shared.action_queue.clear()
         shared.visual_mode_axis = Pos(0, 0)
-        shared.observer = Observer()
-        shared.observer.schedule(FileChangeHandler(), shared.file_name)
-        shared.observer.start()
 
     def on_ctrl_p(self):
         if shared.mode != FileState.NORMAL or shared.naming_file:
@@ -105,12 +98,18 @@ class EditorState:
 
         shared.action_str = "".join(shared.action_queue)
 
+    def on_local_file_change(self):
+        if os.stat(shared.file_name).st_mtime != self.last_file_time:
+            sync_file(shared.file_name)
+        self.last_file_time = os.stat(shared.file_name).st_mtime
+
     def update(self):
         if self.next_state is not None:
             return
         shared.chars_changed = False
         shared.actions_modified = False
         shared.font_offset = False
+        self.on_local_file_change()
         self.char_handler()
         self.queue_actions()
         self.on_ctrl_p()
