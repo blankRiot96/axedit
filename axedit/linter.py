@@ -25,7 +25,7 @@ class Linter:
     def __init__(self) -> None:
         self.connected = False
         thread = threading.Thread(
-            target=lambda: [self.spawn_server(), self.connect_to_server()]
+            target=lambda: [self.spawn_server(), self.connect_to_server()], daemon=True
         )
         thread.start()
         self.lints: list[dict] = []

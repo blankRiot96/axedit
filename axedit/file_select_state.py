@@ -97,6 +97,7 @@ class SearchBar:
         self.blink_timer = Time(0.7)
 
         self.accel = AcceleratedKeyPress(pygame.K_BACKSPACE, self.on_delete)
+        self.start_filtering = False
 
     def on_delete(self):
         self.text = self.text[:-1]
@@ -104,7 +105,9 @@ class SearchBar:
         self.cursor = SearchBar.BAR
 
         if self.text:
-            UI.file_tree.filter_preview_files()
+            UI.file_tree.matches = []
+            UI.file_tree.seq = Path(".").rglob("*")
+            self.start_filtering = True
         else:
             UI.file_tree.reset_preview_files()
 
@@ -112,10 +115,14 @@ class SearchBar:
         self.text += event.text
         self.blink_timer.reset()
         self.cursor = SearchBar.BAR
+        UI.file_tree.matches = []
+        UI.file_tree.seq = Path(".").rglob("*")
 
-        UI.file_tree.filter_preview_files()
+        self.start_filtering = True
 
     def update(self):
+        if self.text and self.start_filtering:
+            UI.file_tree.filter_preview_files()
         self.accel.update()
         for event in shared.events:
             if event.type == pygame.TEXTINPUT:
@@ -157,6 +164,7 @@ class FileTree:
         self.original_preview_files = self.preview_files.copy()
         self.selected_index = 0
         self.scroll = 0
+        self.matches = []
 
     def get_deco_name(self, index: int) -> str:
         file = self.preview_files[index]
@@ -263,7 +271,7 @@ class FileTree:
             self.surf.blit(surf, (0, anchor_pos))
 
     def get_match_indeces(self, file_name: str) -> list[int] | None:
-        UI.file_tree.selected_index = 0
+        # UI.file_tree.selected_index = 0
         search_text = UI.search_bar.text
         text = itertools.cycle(search_text)
         current_search_char = next(text)
@@ -281,8 +289,13 @@ class FileTree:
         return None
 
     def get_matches(self):
-        self.matches: list[Match] = []
-        for file in Path(".").rglob("*"):
+        for _ in range(10):
+            try:
+                file = next(self.seq)
+            except StopIteration:
+                UI.search_bar.start_filtering = False
+                self.matches.sort(key=lambda x: x.matched_indeces)
+                return
             match_indeces = self.get_match_indeces(file.__str__().replace("\\", "/"))
             if match_indeces is None:
                 continue

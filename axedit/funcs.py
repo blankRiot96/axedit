@@ -55,7 +55,6 @@ def safe_close_connections() -> None:
 
 
 def sync_file(file: str) -> None:
-    print("oya oya AKLJSKJASDJJ")
     with open(file) as f:
         content = f.readlines()
     shared.file_name = file
@@ -78,7 +77,10 @@ def soft_save_file():
 
     for command in shared.config["hooks"]["on_save"]:
         subprocess.Popen(
-            shlex.split(command.format(file=shared.file_name)), start_new_session=True
+            shlex.split(command.format(file=shared.file_name)),
+            start_new_session=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
 
 

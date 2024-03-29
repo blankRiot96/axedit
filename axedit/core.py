@@ -22,8 +22,6 @@ def true_exit():
     shared.running = False
     write_config()
     safe_close_connections()
-    # shared.observer.stop()
-    # shared.observer.join()
 
 
 __builtins__["exit"] = true_exit
