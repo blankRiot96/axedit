@@ -52,15 +52,18 @@ def safe_close_connections() -> None:
         shared.linter.close_connections()
 
 
-def open_file(file: str) -> None:
+def sync_file(file: str) -> None:
     with open(file) as f:
         content = f.readlines()
-
-    shared.cursor_pos = Pos(0, 0)
     shared.file_name = file
     shared.chars = CharList([list(line[:-1]) for line in content])
     if not shared.chars:
         shared.chars.append([])
+
+
+def open_file(file: str) -> None:
+    sync_file(file)
+    shared.cursor_pos = Pos(0, 0)
 
 
 def soft_save_file():

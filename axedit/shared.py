@@ -48,6 +48,7 @@ cursor: Cursor
 visual_mode_axis: Pos
 autocompletion: AutoCompletions
 linter: Linter
+observer: object
 
 # Config
 mode: FileState = FileState.NORMAL

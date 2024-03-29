@@ -1,10 +1,18 @@
 import pygame
+from watchdog.events import FileSystemEvent, FileSystemEventHandler
+from watchdog.observers import Observer
 
 from axedit import shared
 from axedit.classes import CharList, Pos
 from axedit.cursor import Cursor
 from axedit.editor import Editor
-from axedit.funcs import offset_font_size, save_file, set_windows_title, soft_save_file
+from axedit.funcs import (
+    offset_font_size,
+    save_file,
+    set_windows_title,
+    soft_save_file,
+    sync_file,
+)
 from axedit.line_numbers import LineNumbers
 from axedit.scrollbar import HorizontalScrollBar
 from axedit.state_enums import FileState, State
@@ -12,6 +20,12 @@ from axedit.status_bar import StatusBar
 from axedit.utils import render_at
 
 shared.chars = CharList([CharList([])])
+
+
+class FileChangeHandler(FileSystemEventHandler):
+    def on_modified(self, event: FileSystemEvent) -> None:
+        super().on_modified(event)
+        sync_file(shared.file_name)
 
 
 class EditorState:
@@ -33,6 +47,9 @@ class EditorState:
         shared.cursor = Cursor()
         shared.action_queue.clear()
         shared.visual_mode_axis = Pos(0, 0)
+        shared.observer = Observer()
+        shared.observer.schedule(FileChangeHandler(), shared.file_name)
+        shared.observer.start()
 
     def on_ctrl_p(self):
         if shared.mode != FileState.NORMAL or shared.naming_file:
