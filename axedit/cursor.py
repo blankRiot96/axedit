@@ -283,7 +283,7 @@ class Cursor:
         on_d()
 
     def update(self):
-        if shared.typing_cmd:
+        if shared.typing_cmd or shared.selecting_file:
             return
         self.blink()
         self.update_accels()

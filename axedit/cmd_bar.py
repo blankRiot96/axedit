@@ -414,6 +414,8 @@ class CommandBar:
         self.draw_suggestions()
 
     def update(self):
+        if shared.selecting_file:
+            return
         self.text_changed = False
         self.executed = False
         self.update_cursor()
@@ -422,6 +424,8 @@ class CommandBar:
         self.update_arrows()
 
     def draw(self):
+        if shared.selecting_file:
+            return
         if shared.theme_changed:
             self.color = shared.theme["light-bg"]
             if self.command_invalidated:

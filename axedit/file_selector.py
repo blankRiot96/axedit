@@ -257,7 +257,7 @@ class FileTree:
                     self.on_enter()
 
                 elif event.key == pygame.K_ESCAPE:
-                    UI.state.next_state = State.EDITOR
+                    shared.selecting_file = False
 
         self.cap_selected_index()
         self.calc_scroll()
@@ -354,7 +354,7 @@ class FileTree:
         self.render_unfiltered_preview_files()
 
 
-class FileSelectState:
+class FileSelector:
     def __init__(self) -> None:
         self.next_state: State | None = None
         self.border_rect = shared.srect.scale_by(0.8, 0.8)
@@ -369,7 +369,7 @@ class FileSelectState:
     def create_glassy(self):
         self.glassy_surf = pygame.Surface(self.border_rect.size, pygame.SRCALPHA)
         self.glassy_surf.fill(shared.theme["default-bg"])
-        self.glassy_surf.set_alpha(200)
+        self.glassy_surf.set_alpha(230)
 
     def update(self):
         if is_event_frame(pygame.VIDEORESIZE):
@@ -379,8 +379,6 @@ class FileSelectState:
         UI.file_tree.update()
 
     def draw(self):
-        if shared.eds_last_frame is not None:
-            shared.screen.blit(shared.eds_last_frame, (0, 0))
         UI.preview.draw()
         UI.file_tree.draw()
         UI.search_bar.draw()
@@ -414,4 +412,4 @@ class UI:
     preview: Preview
     search_bar: SearchBar
     file_tree: FileTree
-    state: FileSelectState
+    state: FileSelector

@@ -6,6 +6,7 @@ from axedit import shared
 from axedit.classes import CharList, Pos
 from axedit.cursor import Cursor
 from axedit.editor import Editor
+from axedit.file_selector import FileSelector
 from axedit.funcs import (
     offset_font_size,
     save_file,
@@ -33,6 +34,7 @@ class EditorState:
         self.offset = 4
         self.scrollbar = HorizontalScrollBar()
         self.last_file_time = 0
+        self.file_selector: None | FileSelector = None
 
     def shared_reset(self):
         shared.chars_changed = True
@@ -43,15 +45,15 @@ class EditorState:
         shared.cursor = Cursor()
         shared.action_queue.clear()
         shared.visual_mode_axis = Pos(0, 0)
+        shared.selecting_file = False
 
     def on_ctrl_p(self):
-        if shared.mode != FileState.NORMAL or shared.naming_file:
+        if shared.naming_file:
             return
 
         if shared.keys[pygame.K_LCTRL] and shared.kp[pygame.K_p]:
             save_file()
-            shared.eds_last_frame = shared.screen.copy()
-            self.next_state = State.FILE_SELECT
+            shared.selecting_file = True
 
     def on_ctrl_n(self):
         if shared.mode != FileState.NORMAL:
@@ -94,7 +96,7 @@ class EditorState:
             return
 
         for event in shared.events:
-            if event.type == pygame.TEXTINPUT:
+            if event.type == pygame.TEXTINPUT and not shared.selecting_file:
                 self.push_action(event.text)
 
         shared.action_str = "".join(shared.action_queue)
@@ -105,6 +107,11 @@ class EditorState:
         self.last_file_time = os.stat(shared.file_name).st_mtime
 
     def update(self):
+        if shared.selecting_file and self.file_selector is None:
+            self.file_selector = FileSelector()
+        if not shared.selecting_file and self.file_selector is not None:
+            self.file_selector = None
+
         if self.next_state is not None:
             return
         shared.chars_changed = False
@@ -122,6 +129,10 @@ class EditorState:
         self.status_bar.update()
         self.on_ctrl_s()
         self.scrollbar.update()
+
+        if self.file_selector is not None:
+            self.file_selector.update()
+            self.next_state = self.file_selector.next_state
 
     def char_handler(self):
         for i, lst in enumerate(shared.chars):
@@ -162,3 +173,6 @@ class EditorState:
         self.status_bar.draw()
         self.scrollbar.draw()
         self.draw_all()
+
+        if self.file_selector is not None:
+            self.file_selector.draw()

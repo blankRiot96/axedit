@@ -4,6 +4,7 @@ import pygame
 
 from axedit import shared
 from axedit.cmd_bar import CommandBar
+from axedit.file_selector import FileSelector
 from axedit.funcs import get_icon
 from axedit.state_enums import State
 from axedit.utils import render_at
@@ -109,6 +110,7 @@ class MenuState:
 
         self.command_bar = CommandBar()
         self.texter = MenuTexter(MenuState.LINES)
+        self.file_selector: None | FileSelector = None
 
     def gen_logo(self):
         self.logo: pygame.Surface = get_icon(shared.theme["select-bg"])
@@ -119,7 +121,7 @@ class MenuState:
         if not shared.keys[pygame.K_p]:
             return
 
-        self.next_state = State.FILE_SELECT
+        shared.selecting_file = True
 
     def on_ctrl_n(self):
         if not shared.keys[pygame.K_n]:
@@ -129,12 +131,18 @@ class MenuState:
     def on_ctrl_t(self): ...
 
     def update(self):
+        if shared.selecting_file and self.file_selector is None:
+            self.file_selector = FileSelector()
+        if not shared.selecting_file and self.file_selector is not None:
+            self.file_selector = None
+
         for event in shared.events:
             if event.type == pygame.TEXTINPUT and event.text == ":":
                 shared.typing_cmd = True
 
         self.texter.update()
-        self.command_bar.update()
+        if not shared.selecting_file:
+            self.command_bar.update()
 
         if shared.keys[pygame.K_LCTRL] or shared.keys[pygame.K_RCTRL]:
             self.on_ctrl_p()
@@ -144,8 +152,13 @@ class MenuState:
         if shared.theme_changed:
             self.gen_logo()
 
+        if self.file_selector is not None:
+            self.file_selector.update()
+            self.next_state = self.file_selector.next_state
+
     def draw(self):
-        self.command_bar.draw()
+        if not shared.selecting_file:
+            self.command_bar.draw()
         dist_between_em = 70
         render_at(
             shared.screen,
@@ -161,3 +174,6 @@ class MenuState:
         )
         if shared.typing_cmd:
             render_at(shared.screen, self.command_bar.surf, "bottomright")
+
+        if self.file_selector is not None:
+            self.file_selector.draw()

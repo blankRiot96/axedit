@@ -309,6 +309,8 @@ class Editor:
     def handle_select_input(self): ...
 
     def handle_input(self):
+        if shared.selecting_file:
+            return
         input_handler = self.input_handlers[shared.mode]
         input_handler()
 
@@ -340,6 +342,7 @@ class Editor:
     def mouse_placement(self):
         if (
             shared.handling_scroll_bar
+            or shared.selecting_file
             or shared.mouse_pos.y > shared.srect.height - shared.FONT_HEIGHT
         ):
             return
@@ -356,6 +359,7 @@ class Editor:
     def on_drag(self) -> None:
         if (
             shared.handling_scroll_bar
+            or shared.selecting_file
             or shared.mouse_pos.y > shared.srect.height - shared.FONT_HEIGHT
         ):
             return

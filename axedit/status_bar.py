@@ -156,7 +156,7 @@ class StatusBar:
     def draw(self):
         self.gen_surf()
 
-        if shared.typing_cmd:
+        if shared.typing_cmd and not shared.selecting_file:
             self.command_bar.draw()
 
             size = (
