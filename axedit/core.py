@@ -44,7 +44,7 @@ class Core:
         shared.frame_cache = {}
         self.clock = pygame.Clock()
         window = Window.from_display_module()
-        window.opacity = shared.config["opacity"]["value"]
+        window.opacity = float(shared.config["opacity"]["value"])
 
         icon = get_icon(shared.theme["default-fg"])
         pygame.display.set_icon(icon)

@@ -48,7 +48,7 @@ class EditorState:
         shared.selecting_file = False
 
     def on_ctrl_p(self):
-        if shared.naming_file:
+        if shared.naming_file and shared.mode != FileState.VISUAL:
             return
 
         if shared.keys[pygame.K_LCTRL] and shared.kp[pygame.K_p]:
@@ -84,8 +84,10 @@ class EditorState:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_EQUALS:
                     offset_font_size(self.offset)
+                    shared.action_queue.clear()
                 elif event.key == pygame.K_MINUS:
                     offset_font_size(-self.offset)
+                    shared.action_queue.clear()
 
     def push_action(self, action: str):
         shared.action_queue.append(action)

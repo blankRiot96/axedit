@@ -16,12 +16,6 @@ relative = true
 # Interval [0, 1]
 value = 0.9
 
-[linter]
-# off | basic | medium | strict | custom
-# custom -> Looks for pyproject.toml or ruff.toml in the same directory.
-# If its not found, it turns it off
-severity = "off"
-
 [hooks]
 # Add any CLI command that runs on saving the file in the editor
 # Variables within {} will get inserted accordingly

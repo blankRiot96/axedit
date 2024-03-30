@@ -17,7 +17,10 @@ def on_y():
 
 
 def on_p():
-    paste_output = clipboard.paste()
+    try:
+        paste_output = clipboard.paste()
+    except UnicodeDecodeError:
+        return
     paste_lines = paste_output.split("\n")
 
     shared.cursor_pos.x += 1

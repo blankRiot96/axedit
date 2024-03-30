@@ -112,7 +112,8 @@ class WriteMode:
         shared.chars.insert(shared.cursor_pos.y, post)
 
         # Update x pos
-        shared.cursor_pos.x = len(post)
+        shared.cursor_pos.x = 0
+        # shared.cursor_pos.x = len(post)
 
         # Cleanup
         self.typing = True
@@ -126,17 +127,20 @@ class WriteMode:
         if shared.cursor_pos.x == 0:
             if shared.cursor_pos.y == 0:
                 return
+            before_extension = len(shared.chars[shared.cursor_pos.y - 1])
             shared.chars[shared.cursor_pos.y - 1].extend(
                 shared.chars[shared.cursor_pos.y]
             )
             self.go_prev_line()
+            shared.cursor_pos.x = before_extension
 
             return
 
         line = "".join(self.get_line())
-        if line and len(line) % 4 == 0 and not line.strip():
-            del shared.chars[shared.cursor_pos.y][-4:]
-            shared.cursor_pos.x -= 4
+        if line and not line.strip():
+            amount = len(line) % 4 or 4
+            del shared.chars[shared.cursor_pos.y][-amount:]
+            shared.cursor_pos.x -= amount
             return
 
         shared.saved = False
@@ -385,8 +389,9 @@ class Editor:
         self.on_scroll()
         self.handle_input()
         self.on_drag()
-        shared.autocompletion.update()
-        shared.linter.update()
+        if shared.file_name.endswith(".py"):
+            shared.autocompletion.update()
+            shared.linter.update()
 
     def draw(self):
         self.gen_image()
@@ -396,5 +401,6 @@ class Editor:
         )
 
         self.surf.blit(self.image, (-shared.scroll.x, 0))
-        shared.autocompletion.draw(self.surf)
-        shared.linter.draw(self.surf)
+        if shared.file_name.endswith(".py"):
+            shared.autocompletion.draw(self.surf)
+            shared.linter.draw(self.surf)

@@ -1,11 +1,18 @@
 import abc
+import importlib
 import itertools
 import typing as t
 
 import pygame
 
 from axedit import shared
-from axedit.funcs import reset_config, soft_save_file, write_config
+from axedit.funcs import (
+    get_config_path,
+    open_file,
+    reset_config,
+    soft_save_file,
+    write_config,
+)
 from axedit.themes import apply_theme, get_available_theme_names
 from axedit.utils import Time, render_at
 
@@ -113,7 +120,9 @@ class CommandBar:
             ),
             Command(":rel-no", exit, subs=["on", "off"]),
             Command((":rename", ":rn"), self.on_rename),
+            Command(":config", self.go_to_config),
             Command(":reset-config", self.on_reset_config),
+            Command(":reload-config", self.on_reload_config),
         ]
         self.commands = self.original_commands.copy()
         self.selected_command: Command | None = None
@@ -123,7 +132,15 @@ class CommandBar:
         self.text_changed = False
         self.executed = False
         self.raised_subsidaries = False
+        self.next_state = None
         self.gen_blank_surf()
+
+    def go_to_config(self):
+        open_file((get_config_path() / "config.toml").__str__())
+
+    def on_reload_config(self):
+        first_run = importlib.import_module("axedit.first_run")
+        importlib.reload(first_run)
 
     def on_reset_config(self):
         reset_config()

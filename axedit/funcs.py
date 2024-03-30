@@ -172,6 +172,7 @@ def offset_font_size(offset: int):
     if hasattr(shared, "linter"):
         shared.linter.create_font()
     shared.font_offset = True
+    shared.config["font"]["size"] = shared.FONT_SIZE
 
 
 def center_cursor():
