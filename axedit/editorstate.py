@@ -50,6 +50,7 @@ class EditorState:
 
         if shared.keys[pygame.K_LCTRL] and shared.kp[pygame.K_p]:
             save_file()
+            shared.eds_last_frame = shared.screen.copy()
             self.next_state = State.FILE_SELECT
 
     def on_ctrl_n(self):

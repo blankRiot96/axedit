@@ -63,6 +63,7 @@ action_queue: list[str]
 action_str: str
 scroll: pygame.Vector2
 line_number_digits: int = 6
+eds_last_frame: pygame.Surface | None = None
 
 # Flags
 autocompleting = False

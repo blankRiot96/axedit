@@ -5,8 +5,9 @@ from pathlib import Path
 import pygame
 
 from axedit import shared
-from axedit.funcs import open_file, set_windows_title
+from axedit.funcs import is_event_frame, open_file, set_windows_title
 from axedit.input_queue import AcceleratedKeyPress
+from axedit.logs import logger
 from axedit.state_enums import State
 from axedit.utils import Time, highlight_text, render_at
 
@@ -18,8 +19,8 @@ class Preview:
         self.padding = 5
 
     def gen_blank(self):
-        self.surf = pygame.Surface(shared.srect.size)
-        self.surf.fill(shared.theme["default-bg"])
+        self.surf = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
+        # self.surf.fill(shared.theme["default-bg"])
         self.draw_line()
 
     def draw_line(self):
@@ -49,7 +50,7 @@ class Preview:
 
         lines = self.get_lines(file)
 
-        self.surf.fill(shared.theme["default-bg"])
+        self.gen_blank()
         for y, line in enumerate(lines[:n_lines]):
             surf = shared.FONT.render(line, True, shared.theme["default-fg"])
             self.surf.blit(
@@ -86,7 +87,7 @@ class SearchBar:
     BAR = "|"
 
     def __init__(self) -> None:
-        self.surf = pygame.Surface((shared.srect.width, shared.FONT_HEIGHT))
+        self.gen_blank()
         self.icon_surf = shared.FONT.render("", True, shared.theme["default-fg"])
         self.search_surf = shared.FONT.render(
             "Search...", True, shared.theme["default-fg"]
@@ -98,6 +99,11 @@ class SearchBar:
 
         self.accel = AcceleratedKeyPress(pygame.K_BACKSPACE, self.on_delete)
         self.start_filtering = False
+
+    def gen_blank(self):
+        self.surf = pygame.Surface(
+            (shared.srect.width, shared.FONT_HEIGHT), pygame.SRCALPHA
+        )
 
     def on_delete(self):
         self.text = self.text[:-1]
@@ -132,7 +138,7 @@ class SearchBar:
             self.cursor = next(self.cursors)
 
     def draw(self):
-        self.surf.fill(shared.theme["default-bg"])
+        self.gen_blank()
         render_at(self.surf, self.icon_surf, "topleft")
         icon_offset = (self.icon_surf.get_width() + 10, 0)
         if not self.text:
@@ -158,13 +164,16 @@ class Match:
 
 class FileTree:
     def __init__(self) -> None:
-        self.surf = pygame.Surface(shared.srect.size)
+        self.gen_blank()
         self.current_path = Path(".")
         self.preview_files: list[Path] = list(self.current_path.iterdir())
         self.original_preview_files = self.preview_files.copy()
         self.selected_index = 0
         self.scroll = 0
         self.matches = []
+
+    def gen_blank(self):
+        self.surf = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
 
     def get_deco_name(self, index: int) -> str:
         file = self.preview_files[index]
@@ -259,15 +268,19 @@ class FileTree:
     def render_unfiltered_preview_files(self):
         for y, toplevel in enumerate(self.preview_files):
             anchor_pos = (y * shared.FONT_HEIGHT) + self.scroll
+            rect = pygame.Rect(
+                0, anchor_pos, UI.state.border_rect.width // 2, shared.FONT_HEIGHT
+            )
+
             if y == self.selected_index:
-                rect = pygame.Rect(
-                    0, anchor_pos, shared.srect.width, shared.FONT_HEIGHT
-                )
                 pygame.draw.rect(self.surf, (100, 100, 255), rect)
 
             surf = shared.FONT.render(
                 self.get_deco_name(y), True, shared.theme["default-fg"]
             )
+            rect.y = 0
+            if rect.width < surf.get_width():
+                surf = surf.subsurface(rect).copy()
             self.surf.blit(surf, (0, anchor_pos))
 
     def get_match_indeces(self, file_name: str) -> list[int] | None:
@@ -313,10 +326,10 @@ class FileTree:
     def render_filtered_preview_files(self):
         for y, match in enumerate(self.matches):
             anchor_pos = (y * shared.FONT_HEIGHT) + self.scroll
+            rect = pygame.Rect(
+                0, anchor_pos, UI.state.border_rect.width // 2, shared.FONT_HEIGHT
+            )
             if y == self.selected_index:
-                rect = pygame.Rect(
-                    0, anchor_pos, shared.srect.width, shared.FONT_HEIGHT
-                )
                 pygame.draw.rect(self.surf, (100, 100, 255), rect)
 
             offseted_match_indeces = [index + 4 for index in match.matched_indeces]
@@ -328,10 +341,13 @@ class FileTree:
                 offseted_match_indeces,
                 shared.theme["keyword"],
             )
+            rect.y = 0
+            if rect.width < surf.get_width():
+                surf = surf.subsurface(rect).copy()
             self.surf.blit(surf, (0, anchor_pos))
 
     def draw(self):
-        self.surf.fill(shared.theme["default-bg"])
+        self.gen_blank()
         if UI.search_bar.text:
             self.render_filtered_preview_files()
             return
@@ -342,19 +358,29 @@ class FileSelectState:
     def __init__(self) -> None:
         self.next_state: State | None = None
         self.border_rect = shared.srect.scale_by(0.8, 0.8)
-        self.surf = pygame.Surface(self.border_rect.size)
+        self.surf = pygame.Surface(self.border_rect.size, pygame.SRCALPHA)
 
         UI.state = self
         UI.preview = Preview()
         UI.search_bar = SearchBar()
         UI.file_tree = FileTree()
+        self.create_glassy()
+
+    def create_glassy(self):
+        self.glassy_surf = pygame.Surface(self.border_rect.size, pygame.SRCALPHA)
+        self.glassy_surf.fill(shared.theme["default-bg"])
+        self.glassy_surf.set_alpha(200)
 
     def update(self):
+        if is_event_frame(pygame.VIDEORESIZE):
+            self.create_glassy()
         UI.preview.update()
         UI.search_bar.update()
         UI.file_tree.update()
 
     def draw(self):
+        if shared.eds_last_frame is not None:
+            shared.screen.blit(shared.eds_last_frame, (0, 0))
         UI.preview.draw()
         UI.file_tree.draw()
         UI.search_bar.draw()
@@ -362,8 +388,9 @@ class FileSelectState:
         SB_HEIGHT = UI.search_bar.surf.get_height()
 
         self.surf = pygame.Surface(self.border_rect.size, pygame.SRCALPHA)
+        self.surf.blit(self.glassy_surf, (0, 0))
         render_at(self.surf, UI.search_bar.surf, "topleft", (10, 10))
-        render_at(self.surf, UI.file_tree.surf, "topleft", (10, 20 + SB_HEIGHT))
+        render_at(self.surf, UI.file_tree.surf, "topleft", (0, 20 + SB_HEIGHT))
         render_at(
             self.surf,
             UI.preview.surf,
@@ -380,9 +407,7 @@ class FileSelectState:
         render_at(shared.screen, self.surf, "center")
 
         self.border_rect = shared.srect.scale_by(0.8, 0.8)
-        pygame.draw.rect(
-            shared.screen, shared.theme["default-fg"], self.border_rect, 2, 20
-        )
+        pygame.draw.rect(shared.screen, shared.theme["default-fg"], self.border_rect, 2)
 
 
 class UI:
