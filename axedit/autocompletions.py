@@ -9,9 +9,8 @@ import pygame
 
 from axedit import shared
 from axedit.funcs import get_text
-from axedit.input_queue import InputManager
 from axedit.logs import logger
-from axedit.state_enums import FileState
+from axedit.utils import highlight_text
 
 SERVER_HOST = "127.0.0.1"  # Loopback address
 
@@ -24,10 +23,25 @@ class AutoCompletions:
 
     def __init__(self) -> None:
         self.connected = False
+        self.selected_index = 0
         thread = threading.Thread(
             target=lambda: [self.spawn_server(), self.connect_to_server()], daemon=True
         )
         thread.start()
+        self.completions: list[dict] = []
+        self.gen_blank()
+
+    def gen_blank(self):
+        if not self.completions:
+            width, height = 0, 0
+        else:
+            width = (
+                max(len(comp["name"]) for comp in self.completions) * shared.FONT_WIDTH
+            )
+            height = len(self.completions) * shared.FONT_HEIGHT
+
+        self.surf = pygame.Surface((width, height))
+        self.surf.fill(shared.theme["light-bg"])
 
     def spawn_server(self):
         lang_server_path = shared.AXE_FOLDER_PATH / "completions_server.py"
@@ -43,8 +57,8 @@ class AutoCompletions:
                 self.server_process = subprocess.Popen(
                     command,
                     stdin=subprocess.DEVNULL,
-                    stdout=sys.stdout,
-                    stderr=sys.stderr,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                     close_fds=True,
                 )
                 self.server_process.wait(1.0)
@@ -100,15 +114,23 @@ class AutoCompletions:
                 logger.debug(e)
                 continue
 
-        received_data = json.loads(received_data)
+        self.completions = json.loads(received_data)
         # if received_data:
-        #     logger.debug(f"autocompletion={received_data[0]["name"]}")
+        #     logger.debug(f"autocompletion={received_data}")
 
     def close_connections(self):
         if hasattr(self, "client_socket"):
             self.client_socket.close()
         if hasattr(self, "server_process"):
             self.server_process.kill()
+
+    def on_enter(self):
+        if not shared.kp[pygame.K_RETURN]:
+            return
+
+        shared.chars[shared.cursor_pos.y][
+            shared.cursor_pos.x - self.get_selected_prefix_len() :
+        ] = self.get_selected_name()
 
     def update(self):
         if not self.connected:
@@ -117,6 +139,45 @@ class AutoCompletions:
             return
 
         self.receive_completions()
+        self.on_enter()
+
+    def draw_suggestions(self) -> None:
+        for index, comp in enumerate(self.completions):
+            if index == self.selected_index:
+                pygame.draw.rect(
+                    self.surf,
+                    shared.theme["select-bg"],
+                    (
+                        0,
+                        index * shared.FONT_HEIGHT,
+                        self.surf.get_width(),
+                        shared.FONT_HEIGHT,
+                    ),
+                )
+            comp_surf = highlight_text(
+                shared.FONT,
+                comp["name"],
+                True,
+                shared.theme["default-fg"],
+                list(range(comp["prefix-len"])),
+                shared.theme["keyword"],
+            )
+            self.surf.blit(comp_surf, (0, index * shared.FONT_HEIGHT))
+
+    def get_selected_name(self) -> str:
+        if self.completions:
+            return self.completions[self.selected_index]["name"]
+        return ""
+
+    def get_selected_prefix_len(self) -> int:
+        if self.completions:
+            return self.completions[self.selected_index]["prefix-len"]
+        return 0
 
     def draw(self, editor_surf: pygame.Surface):
-        pass
+        self.gen_blank()
+        self.draw_suggestions()
+
+        x = (shared.cursor_pos.x - self.get_selected_prefix_len()) * shared.FONT_WIDTH
+        y = ((shared.cursor_pos.y + 1) * shared.FONT_HEIGHT) + shared.scroll.y
+        editor_surf.blit(self.surf, (x, y))

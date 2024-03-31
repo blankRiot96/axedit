@@ -95,7 +95,7 @@ class WriteMode:
         return [" "] * count
 
     def new_line(self):
-        if shared.autocompleting:
+        if shared.autocompletion.completions:
             return
 
         line = self.get_line()

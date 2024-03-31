@@ -52,8 +52,8 @@ class Linter:
                 self.server_process = subprocess.Popen(
                     command,
                     stdin=subprocess.DEVNULL,
-                    stdout=sys.stdout,
-                    stderr=sys.stderr,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                     close_fds=True,
                 )
                 self.server_process.wait(1.0)
