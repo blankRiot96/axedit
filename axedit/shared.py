@@ -72,6 +72,8 @@ running = True
 handling_scroll_bar = False
 font_offset = False
 selecting_file = False
+cursor_x_changed = False
+cursor_y_changed = False
 naming_file: bool
 chars_changed: bool
 saved: bool

@@ -119,6 +119,8 @@ class EditorState:
         shared.chars_changed = False
         shared.actions_modified = False
         shared.font_offset = False
+        shared.cursor_x_changed = False
+        shared.cursor_y_changed = False
         self.on_local_file_change()
         self.char_handler()
         self.queue_actions()

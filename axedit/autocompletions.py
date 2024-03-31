@@ -76,7 +76,9 @@ class AutoCompletions:
                 continue
 
     def to_update(self) -> bool:
-        return shared.chars_changed
+        return (
+            shared.chars_changed or shared.cursor_x_changed or shared.cursor_y_changed
+        )
 
     def receive_completions(self):
         text = get_text()
@@ -128,18 +130,23 @@ class AutoCompletions:
         if not shared.kp[pygame.K_RETURN]:
             return
 
-        shared.chars[shared.cursor_pos.y][
-            shared.cursor_pos.x - self.get_selected_prefix_len() :
-        ] = self.get_selected_name()
+        diff = shared.cursor_pos.x - self.get_selected_prefix_len()
+        shared.chars[shared.cursor_pos.y][diff:] = (
+            list(self.get_selected_name())
+            + shared.chars[shared.cursor_pos.y][shared.cursor_pos.x :]
+        )
+        shared.cursor_pos.x += (
+            len(self.get_selected_name()) - self.get_selected_prefix_len()
+        )
 
     def update(self):
         if not self.connected:
             return
+        self.on_enter()
         if not self.to_update():
             return
 
         self.receive_completions()
-        self.on_enter()
 
     def draw_suggestions(self) -> None:
         for index, comp in enumerate(self.completions):
