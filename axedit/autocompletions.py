@@ -10,6 +10,7 @@ import pygame
 from axedit import shared
 from axedit.funcs import get_text
 from axedit.logs import logger
+from axedit.state_enums import FileState
 from axedit.utils import highlight_text
 
 SERVER_HOST = "127.0.0.1"  # Loopback address
@@ -78,7 +79,7 @@ class AutoCompletions:
     def to_update(self) -> bool:
         return (
             shared.chars_changed or shared.cursor_x_changed or shared.cursor_y_changed
-        )
+        ) and shared.mode == FileState.INSERT
 
     def receive_completions(self):
         text = get_text()
@@ -144,6 +145,7 @@ class AutoCompletions:
             return
         self.on_enter()
         if not self.to_update():
+            self.completions.clear()
             return
 
         self.receive_completions()

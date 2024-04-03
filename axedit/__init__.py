@@ -19,7 +19,7 @@ def detached_main() -> None:
     and exits the terminal!"""
 
     main_path = FILE_PATH.parent.parent / "main.py"
-    command = [sys.executable, str(main_path.absolute()), "--debug"]
+    command = [sys.executable, str(main_path.absolute()), "--hidden-debug"]
 
     subprocess.Popen(
         command,
@@ -59,7 +59,7 @@ def display_logs():
 def potential_main():
     """What the editor is potentially supposed to be"""
     if len(sys.argv) > 1:
-        if sys.argv[1] == "--debug":
+        if sys.argv[1] in ("--debug", "--hiden-debug"):
             debug_main()
         elif sys.argv[1] == "--logs":
             display_logs()

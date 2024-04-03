@@ -1,3 +1,4 @@
+import os
 import platform
 
 import pygame
@@ -73,6 +74,19 @@ class Core:
         shared.theme_changed = False
         shared.mouse_press = pygame.mouse.get_pressed()
 
+    def on_ctrl_question(self):
+        if not (
+            shared.keys[pygame.K_LCTRL]
+            and shared.keys[pygame.K_LSHIFT]
+            and shared.kp[pygame.K_SLASH]
+        ):
+            return
+
+        pygame.image.save(shared.screen, "showcase.png")
+        query = "convert showcase.png \( +clone -background black -shadow 50x10+15+15 \) +swap -background none -layers merge +repage showcase.png"
+        os.system(query)
+        logger.debug("Showcased screenshot")
+
     def update(self):
         self.shared_frame_refresh()
         self.event_handler()
@@ -81,6 +95,8 @@ class Core:
             if platform.system == "Windows":
                 set_windows_title_bar_color()
             pygame.display.set_icon(get_icon(shared.theme["default-fg"]))
+
+        self.on_ctrl_question()
         # pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
 
     def draw(self):
