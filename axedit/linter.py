@@ -105,8 +105,8 @@ class Linter:
                 # ***
                 break
             except socket.error as e:
-                logger.debug(e)
-                continue
+                logger.error(e)
+                exit()
 
         self.lints: list[dict] = json.loads(received_data)
 
@@ -200,7 +200,10 @@ class Linter:
         orange_squiggly = self.font.render(wavy_dash, True, shared.theme["const"])
         for lint in self.lints:
             y = lint["location"]["row"] - 1
-            x = len(shared.chars[y]) + 2
+            try:
+                x = len(shared.chars[y]) + 2
+            except IndexError:
+                continue
             x, y = x * shared.FONT_WIDTH, y * shared.FONT_HEIGHT
 
             # Scrolllll

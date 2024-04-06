@@ -52,5 +52,5 @@ def apply_config():
     apply_theme(shared.config["theme"]["name"])
 
 
-if len(sys.argv) > 1 and sys.argv[1] == "--debug":
+if len(sys.argv) > 1 and sys.argv[1] in ("--debug", "--hidden-debug"):
     apply_config()

@@ -1,3 +1,4 @@
+import logging
 import os
 import platform
 import shlex
@@ -10,6 +11,8 @@ import tomlkit
 
 from axedit import shared
 from axedit.classes import CharList, Pos
+
+logger = logging.getLogger("axedit")
 
 
 def get_config() -> tomlkit.TOMLDocument:
@@ -62,6 +65,9 @@ def sync_file(file: str) -> None:
     if not shared.chars:
         shared.chars.append([])
 
+    if shared.editing_config_file:
+        shared.config = get_config()
+
 
 def open_file(file: str) -> None:
     sync_file(file)
@@ -75,6 +81,8 @@ def soft_save_file():
     with open(shared.file_name, "w") as f:
         f.write(get_text())
 
+    if not shared.file_name.endswith(".py"):
+        return
     for command in shared.config["hooks"]["on_save"]:
         subprocess.Popen(
             shlex.split(command.format(file=shared.file_name)),

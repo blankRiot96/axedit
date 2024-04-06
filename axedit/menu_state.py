@@ -6,6 +6,7 @@ from axedit import shared
 from axedit.cmd_bar import CommandBar
 from axedit.file_selector import FileSelector
 from axedit.funcs import get_icon
+from axedit.logs import logger
 from axedit.state_enums import State
 from axedit.utils import render_at
 
@@ -143,6 +144,7 @@ class MenuState:
         self.texter.update()
         if not shared.selecting_file:
             self.command_bar.update()
+            self.next_state = self.command_bar.next_state
 
         if shared.keys[pygame.K_LCTRL] or shared.keys[pygame.K_RCTRL]:
             self.on_ctrl_p()

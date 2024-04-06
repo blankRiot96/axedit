@@ -104,6 +104,8 @@ class EditorState:
         shared.action_str = "".join(shared.action_queue)
 
     def on_local_file_change(self):
+        if shared.naming_file:
+            return
         if os.stat(shared.file_name).st_mtime != self.last_file_time:
             sync_file(shared.file_name)
         self.last_file_time = os.stat(shared.file_name).st_mtime

@@ -20,9 +20,10 @@ from axedit.states import StateManager
 
 def true_exit():
     logger.debug("EXIT CALLED")
-    shared.running = False
     write_config()
     safe_close_connections()
+
+    raise SystemExit
 
 
 __builtins__["exit"] = true_exit

@@ -77,9 +77,19 @@ class AutoCompletions:
                 continue
 
     def to_update(self) -> bool:
-        return (
+        changed_state = (
             shared.chars_changed or shared.cursor_x_changed or shared.cursor_y_changed
-        ) and shared.mode == FileState.INSERT
+        )
+        gatekeepers = (
+            shared.mode == FileState.INSERT
+            and "".join(shared.chars[shared.cursor_pos.y]).strip()
+            and shared.cursor_pos.x > 0
+        )
+
+        if changed_state:
+            self.completions.clear()
+
+        return changed_state and gatekeepers
 
     def receive_completions(self):
         text = get_text()
@@ -114,8 +124,8 @@ class AutoCompletions:
                 # ***
                 break
             except socket.error as e:
-                logger.debug(e)
-                continue
+                logger.error(e)
+                exit()
 
         self.completions = json.loads(received_data)
         # if received_data:
@@ -140,15 +150,30 @@ class AutoCompletions:
             len(self.get_selected_name()) - self.get_selected_prefix_len()
         )
 
+    def filter_completions(self):
+        if (
+            self.completions
+            and len(self.completions[0]["name"]) == self.completions[0]["prefix-len"]
+        ):
+            self.completions.clear()
+            return
+
+        for comp in self.completions[:]:
+            if (
+                comp["prefix-len"] == 0
+                and shared.chars[shared.cursor_pos.y][shared.cursor_pos.x - 1] != "."
+            ):
+                self.completions.remove(comp)
+
     def update(self):
         if not self.connected:
             return
         self.on_enter()
         if not self.to_update():
-            self.completions.clear()
             return
 
         self.receive_completions()
+        self.filter_completions()
 
     def draw_suggestions(self) -> None:
         for index, comp in enumerate(self.completions):
@@ -171,6 +196,7 @@ class AutoCompletions:
                 list(range(comp["prefix-len"])),
                 shared.theme["keyword"],
             )
+
             self.surf.blit(comp_surf, (0, index * shared.FONT_HEIGHT))
 
     def get_selected_name(self) -> str:
@@ -187,6 +213,6 @@ class AutoCompletions:
         self.gen_blank()
         self.draw_suggestions()
 
-        x = (shared.cursor_pos.x - self.get_selected_prefix_len()) * shared.FONT_WIDTH
+        x = shared.cursor_pos.x * shared.FONT_WIDTH
         y = ((shared.cursor_pos.y + 1) * shared.FONT_HEIGHT) + shared.scroll.y
         editor_surf.blit(self.surf, (x, y))

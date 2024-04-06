@@ -1,6 +1,6 @@
-import abc
 import importlib
 import itertools
+import os
 import typing as t
 
 import pygame
@@ -13,6 +13,7 @@ from axedit.funcs import (
     soft_save_file,
     write_config,
 )
+from axedit.state_enums import State
 from axedit.themes import apply_theme, get_available_theme_names
 from axedit.utils import Time, render_at
 
@@ -136,7 +137,9 @@ class CommandBar:
         self.gen_blank_surf()
 
     def go_to_config(self):
+        shared.editing_config_file = True
         open_file((get_config_path() / "config.toml").__str__())
+        self.next_state = State.EDITOR
 
     def on_reload_config(self):
         first_run = importlib.import_module("axedit.first_run")
@@ -146,7 +149,8 @@ class CommandBar:
         reset_config()
 
     def on_save_as(self):
-        self.on_rename()
+        shared.naming_file = True
+        shared.file_name = "|"
 
     def on_save_exit(self):
         soft_save_file()
@@ -154,6 +158,7 @@ class CommandBar:
 
     def on_rename(self):
         shared.naming_file = True
+        os.remove(shared.file_name)
         shared.file_name = "|"
 
     @property

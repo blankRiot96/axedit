@@ -5,7 +5,7 @@ from pathlib import Path
 import pygame
 
 from axedit import shared
-from axedit.funcs import is_event_frame, open_file, set_windows_title
+from axedit.funcs import get_config_path, is_event_frame, open_file, set_windows_title
 from axedit.input_queue import AcceleratedKeyPress
 from axedit.logs import logger
 from axedit.state_enums import State
@@ -230,6 +230,9 @@ class FileTree:
             open_file(self.preview_files[self.selected_index].__str__())
         except UnicodeDecodeError:
             return
+        shared.editing_config_file = (
+            self.preview_files[self.selected_index] == get_config_path()
+        )
         UI.state.next_state = State.EDITOR
         set_windows_title()
 

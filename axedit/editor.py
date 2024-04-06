@@ -3,7 +3,6 @@ from itertools import cycle
 import pygame
 
 from axedit import shared
-from axedit.autocompletions import AutoCompletions
 from axedit.classes import Pos
 from axedit.funcs import get_text, is_event_frame, save_file
 from axedit.input_queue import AcceleratedKeyPress, EventManager, InputManager
@@ -400,7 +399,10 @@ class Editor:
             pygame.SRCALPHA,
         )
 
-        self.surf.blit(self.image, (-shared.scroll.x, 0))
-        if shared.file_name.endswith(".py"):
+        is_python_file = shared.file_name.endswith(".py")
+        self.surf.blit(
+            self.image, (-shared.scroll.x, (not is_python_file) * shared.scroll.y)
+        )
+        if is_python_file:
             shared.autocompletion.draw(self.surf)
             shared.linter.draw(self.surf)
