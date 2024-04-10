@@ -2,7 +2,6 @@ import axedit.first_run  # isort: skip
 
 import cProfile
 import inspect
-import os
 import subprocess
 import sys
 import traceback
@@ -14,6 +13,7 @@ from axedit.logs import logger
 FILE_PATH = Path(inspect.getfile(inspect.currentframe()))
 LOG_FILE_PATH = FILE_PATH.parent.parent / "app.log"
 WARN_FILE_PATH = FILE_PATH.parent.parent / "warns.log"
+PROFILE_FILE_PATH = FILE_PATH.parent.parent / "main.prof"
 
 
 def detached_main() -> None:
@@ -95,6 +95,10 @@ def main():
     profiling = "--profile" in sys.argv
     debugging = "--debug" in sys.argv or "--hidden-debug" in sys.argv
     if profiling and debugging:
-        cProfile.run("from axedit import _main;_main()", filename="main.prof")
+        profiler = cProfile.Profile()
+        profiler.enable()
+        _main()
+        profiler.disable()
+        profiler.dump_stats(file=PROFILE_FILE_PATH)
     else:
         _main()

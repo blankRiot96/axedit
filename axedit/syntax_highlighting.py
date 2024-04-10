@@ -241,13 +241,13 @@ def apply_syntax_highlighting() -> pygame.Surface:
 
     if shared.import_line_changed:
         _MODULES.clear()
-    _CLASSES.clear()
+        try:
+            import_visitor.visit(ast.parse(get_text()))
+            import_visitor.first = False
+        except SyntaxError:
+            pass
 
-    try:
-        import_visitor.visit(ast.parse(get_text()))
-        import_visitor.first = False
-    except SyntaxError:
-        pass
+    _CLASSES.clear()
 
     global last_string_counter, within_line, concluded_doc_string
     last_string_counter = 0
