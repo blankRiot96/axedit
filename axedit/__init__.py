@@ -2,25 +2,26 @@ import axedit.first_run  # isort: skip
 
 import cProfile
 import inspect
+import os
 import subprocess
 import sys
 import traceback
 from pathlib import Path
 
+from axedit import shared
 from axedit.funcs import safe_close_connections
 from axedit.logs import logger
 
-FILE_PATH = Path(inspect.getfile(inspect.currentframe()))
-LOG_FILE_PATH = FILE_PATH.parent.parent / "app.log"
-WARN_FILE_PATH = FILE_PATH.parent.parent / "warns.log"
-PROFILE_FILE_PATH = FILE_PATH.parent.parent / "main.prof"
+LOG_FILE_PATH = shared.AXE_FOLDER_PATH / "app.log"
+WARN_FILE_PATH = shared.AXE_FOLDER_PATH / "warns.log"
+PROFILE_FILE_PATH = shared.AXE_FOLDER_PATH / "main.prof"
 
 
 def detached_main() -> None:
     """This function invokes the actual editor in a separate process
     and exits the terminal!"""
 
-    main_path = FILE_PATH.parent.parent / "main.py"
+    main_path = shared.AXE_FOLDER_PATH / "main.py"
     command = [sys.executable, str(main_path.absolute()), "--hidden-debug"]
 
     if "--profile" in sys.argv:
@@ -65,6 +66,15 @@ def display_logs():
         print(f.read())
 
 
+def display_profile():
+    try:
+        subprocess.run(
+            [sys.executable, "-m", "snakeviz", PROFILE_FILE_PATH.absolute().__str__()]
+        )
+    except KeyboardInterrupt:
+        return
+
+
 def potential_main():
     """What the editor is potentially supposed to be"""
     if len(sys.argv) > 1:
@@ -74,6 +84,8 @@ def potential_main():
             display_logs()
         elif sys.argv[1] == "--profile":
             detached_main()
+        elif sys.argv[1] == "--snakeviz":
+            display_profile()
         else:
             logger.critical(f"Invalid command '{sys.argv[1]}'")
             raise SystemExit
@@ -87,6 +99,8 @@ def _main():
         potential_main()
     except (Exception, KeyboardInterrupt):
         logger.error(traceback.format_exc())
+    except SystemExit:
+        pass
     finally:
         safe_close_connections()
 
@@ -95,10 +109,9 @@ def main():
     profiling = "--profile" in sys.argv
     debugging = "--debug" in sys.argv or "--hidden-debug" in sys.argv
     if profiling and debugging:
-        profiler = cProfile.Profile()
-        profiler.enable()
-        _main()
-        profiler.disable()
-        profiler.dump_stats(file=PROFILE_FILE_PATH)
+        main_path = shared.AXE_FOLDER_PATH.parent / "main.py"
+        os.system(
+            f"{sys.executable} -m cProfile -o '{PROFILE_FILE_PATH.absolute()}' '{main_path.absolute()}' --debug"
+        )
     else:
         _main()

@@ -41,7 +41,7 @@ class EditorState:
         shared.action_str = ""
         shared.cursor_pos = Pos(0, 0)
         shared.saved = True
-        shared.import_line_changed = False
+        shared.import_line_changed = True
         shared.cursor = Cursor()
         shared.action_queue.clear()
         shared.visual_mode_axis = Pos(0, 0)
@@ -118,6 +118,7 @@ class EditorState:
 
         if self.next_state is not None:
             return
+        shared.import_line_changed = False
         shared.chars_changed = False
         shared.actions_modified = False
         shared.font_offset = False
