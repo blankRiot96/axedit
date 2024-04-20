@@ -49,6 +49,7 @@ class Cursor:
                 "zz": on_zz,
                 "gg": on_gg,
                 "G": on_G,
+                r"w": on_w,
                 r"p": on_p,
                 r"\$": on_dollar_sign,
                 "0": on_zero,

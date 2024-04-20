@@ -12,9 +12,10 @@ from axedit import shared
 from axedit.funcs import safe_close_connections
 from axedit.logs import logger
 
-LOG_FILE_PATH = shared.AXE_FOLDER_PATH / "app.log"
-WARN_FILE_PATH = shared.AXE_FOLDER_PATH / "warns.log"
-PROFILE_FILE_PATH = shared.AXE_FOLDER_PATH / "main.prof"
+FOLDER_PATH = shared.AXE_FOLDER_PATH.parent
+LOG_FILE_PATH = FOLDER_PATH / "app.log"
+WARN_FILE_PATH = FOLDER_PATH / "warns.log"
+PROFILE_FILE_PATH = FOLDER_PATH / "main.prof"
 
 
 def detached_main() -> None:

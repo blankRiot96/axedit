@@ -11,6 +11,39 @@ from axedit.logs import logger
 from axedit.state_enums import FileState
 
 
+def on_w(y: int | None = None):
+    new_line = y is not None
+    if y is None:
+        y = shared.cursor_pos.y
+
+    if y >= len(shared.chars):
+        return
+
+    start_search = new_line
+    prev_char: str = shared.chars[y][shared.cursor_pos.x]
+    for extra_i, char in enumerate(shared.chars[y][shared.cursor_pos.x :]):
+        char: str
+        if char.isspace():
+            start_search = True
+            prev_char = char
+            continue
+
+        if prev_char.isalnum():
+            if not char.isalnum():
+                start_search = True
+        else:
+            if char.isalnum():
+                start_search = True
+
+        if start_search:
+            shared.cursor_pos.x += extra_i
+            break
+    else:
+        shared.cursor_pos.x = 0
+        shared.cursor_pos.y += 1
+        on_w(shared.cursor_pos.y)
+
+
 def on_y():
     if shared.mode != FileState.VISUAL:
         return
