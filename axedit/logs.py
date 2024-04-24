@@ -13,7 +13,7 @@ LOGGING_DATE_FMT = "%H:%M:%S"
 WHITELISTED_LOGGERS = ["axedit"]
 LOG_FORMAT = "[%(name)s](%(filename)s:%(lineno)d) %(message)s"
 
-if len(sys.argv) > 1 and sys.argv[1] == "--debug":
+if len(sys.argv) > 1 and sys.argv[1] in ("--debug", "--hidden-debug"):
     warnings.simplefilter("always")
 
 if len(sys.argv) > 2 and sys.argv[2] == "--warn":
@@ -47,7 +47,7 @@ def axe_filter(logger: logging.Logger) -> bool:
 
 handlers = []
 
-if len(sys.argv) > 1 and sys.argv[1] == "--debug":
+if len(sys.argv) > 1 and sys.argv[1] in ("--debug", "--hidden-debug"):
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(CustomFormatter())
     stream_handler.addFilter(axe_filter)

@@ -1,7 +1,5 @@
 import axedit.first_run  # isort: skip
 
-import cProfile
-import inspect
 import os
 import subprocess
 import sys
@@ -22,7 +20,7 @@ def detached_main() -> None:
     """This function invokes the actual editor in a separate process
     and exits the terminal!"""
 
-    main_path = shared.AXE_FOLDER_PATH / "main.py"
+    main_path = FOLDER_PATH / "main.py"
     command = [sys.executable, str(main_path.absolute()), "--hidden-debug"]
 
     if "--profile" in sys.argv:
@@ -91,6 +89,7 @@ def potential_main():
             logger.critical(f"Invalid command '{sys.argv[1]}'")
             raise SystemExit
         return
+
     detached_main()
 
 

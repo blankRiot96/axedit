@@ -55,6 +55,7 @@ class Cursor:
                 "0": on_zero,
                 r"\}": on_right_brace,
                 r"\{": on_left_brace,
+                r"%": on_percent,
             }
         )
 

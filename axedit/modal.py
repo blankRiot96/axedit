@@ -11,6 +11,74 @@ from axedit.logs import logger
 from axedit.state_enums import FileState
 
 
+def on_percent() -> None:
+    brakies = {"(": ")", "[": "]", "{": "}"}
+    invert_brakies = {closed: opened for opened, closed in brakies.items()}
+    current_char = shared.chars[shared.cursor_pos.y][shared.cursor_pos.x]
+
+    # If sitting on opening bracket
+    if current_char in brakies:
+        for y_offset, row in enumerate(shared.chars[shared.cursor_pos.y :]):
+            row: list
+            try:
+                start_find = shared.cursor_pos.x + 1 if y_offset == 0 else 0
+                # logger.debug(f"{"".join(row)=}, {brakies[current_char]=}, {start_find=}")
+
+                ignore_count = 0
+                for i, char in enumerate(row[start_find:]):
+                    if char == current_char:
+                        ignore_count += 1
+                        continue
+
+                    if char == brakies[current_char]:
+                        if ignore_count > 0:
+                            ignore_count -= 1
+                            continue
+                        found_x_pos = start_find + i
+                        break
+                else:
+                    raise ValueError
+                shared.cursor_pos.y += y_offset
+                shared.cursor_pos.x = found_x_pos
+            except ValueError:
+                continue
+        return
+
+    # If sitting on closing bracket
+    if current_char in brakies.values():
+        for y_offset, row in enumerate(
+            reversed(shared.chars[: shared.cursor_pos.y + 1])
+        ):
+            row: list
+            try:
+                # start_find = len(row) - shared.cursor_pos.x if y_offset == 0 else -1
+                start_find = shared.cursor_pos.x - 1 if y_offset == 0 else 0
+
+                ignore_count = 0
+                for i, char in enumerate(row[:start_find][::-1]):
+                    # print(char)
+                    if char == current_char:
+                        ignore_count += 1
+                        continue
+
+                    if char == invert_brakies[current_char]:
+                        if ignore_count > 0:
+                            ignore_count -= 1
+                            continue
+                        found_x_pos = start_find + i
+                        break
+                else:
+                    raise ValueError
+
+                shared.cursor_pos.y -= y_offset
+                shared.cursor_pos.x = found_x_pos
+            except ValueError:
+                continue
+        return
+    else:  # If sitting on non-bracket character
+        ...
+
+
 def on_w(y: int | None = None):
     new_line = y is not None
     if y is None:
@@ -19,6 +87,16 @@ def on_w(y: int | None = None):
     if y >= len(shared.chars):
         return
 
+    if not shared.chars[y]:
+        shared.cursor_pos.x = 0
+        if new_line:
+            return
+
+        shared.cursor_pos.y += 1
+        on_w(shared.cursor_pos.y)
+        return
+
+    is_word_constituent = lambda char: char.isalnum() or char == "_"
     start_search = new_line
     prev_char: str = shared.chars[y][shared.cursor_pos.x]
     for extra_i, char in enumerate(shared.chars[y][shared.cursor_pos.x :]):
@@ -28,20 +106,25 @@ def on_w(y: int | None = None):
             prev_char = char
             continue
 
-        if prev_char.isalnum():
-            if not char.isalnum():
+        if is_word_constituent(prev_char):
+            if not is_word_constituent(prev_char):
                 start_search = True
         else:
-            if char.isalnum():
+            if is_word_constituent(prev_char):
                 start_search = True
 
         if start_search:
             shared.cursor_pos.x += extra_i
             break
     else:
+        if shared.cursor_pos.y == len(shared.chars) - 1:
+            return
         shared.cursor_pos.x = 0
         shared.cursor_pos.y += 1
         on_w(shared.cursor_pos.y)
+
+
+def on_e(): ...
 
 
 def on_y():
