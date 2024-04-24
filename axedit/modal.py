@@ -40,6 +40,7 @@ def on_percent() -> None:
                     raise ValueError
                 shared.cursor_pos.y += y_offset
                 shared.cursor_pos.x = found_x_pos
+                break
             except ValueError:
                 continue
         return
@@ -52,11 +53,11 @@ def on_percent() -> None:
             row: list
             try:
                 # start_find = len(row) - shared.cursor_pos.x if y_offset == 0 else -1
-                start_find = shared.cursor_pos.x - 1 if y_offset == 0 else 0
+                start_find = shared.cursor_pos.x if y_offset == 0 else len(row)
 
                 ignore_count = 0
+                # logger.debug(row[:start_find][::-1])
                 for i, char in enumerate(row[:start_find][::-1]):
-                    # print(char)
                     if char == current_char:
                         ignore_count += 1
                         continue
@@ -65,18 +66,34 @@ def on_percent() -> None:
                         if ignore_count > 0:
                             ignore_count -= 1
                             continue
-                        found_x_pos = start_find + i
+                        found_x_pos = start_find - i - 1
                         break
                 else:
                     raise ValueError
 
                 shared.cursor_pos.y -= y_offset
                 shared.cursor_pos.x = found_x_pos
+                break
             except ValueError:
                 continue
         return
-    else:  # If sitting on non-bracket character
-        ...
+
+    # If sitting on non-bracket character
+    for y_offset, row in enumerate(reversed(shared.chars[: shared.cursor_pos.y + 1])):
+        row: list
+
+        start_find = shared.cursor_pos.x if y_offset == 0 else len(row)
+
+        for i_offset, char in enumerate(reversed(row[:start_find])):
+            if char in brakies:
+                found_x_pos = start_find - i_offset - 1
+                break
+        else:
+            continue
+
+        shared.cursor_pos.x = found_x_pos
+        shared.cursor_pos.y -= y_offset
+        break
 
 
 def on_w(y: int | None = None):
