@@ -141,6 +141,8 @@ class EditorState:
         if self.file_selector is not None:
             self.file_selector.update()
             self.next_state = self.file_selector.next_state
+            if self.next_state is not None:
+                shared.frame_cache.clear()
 
     def char_handler(self):
         for i, lst in enumerate(shared.chars):
