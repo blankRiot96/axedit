@@ -8,6 +8,7 @@ import pygame
 
 from axedit import shared
 from axedit.funcs import get_text, is_event_frame
+from axedit.logs import logger
 from axedit.module_checker import is_module
 
 LOGICAL_PUNCTUATION = " .(){}[],:;/\\|+=-*%\"'"
@@ -102,7 +103,6 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
     acc = ""
     start_index = 0
 
-    # if last_string_counter > 0 and not (row.find("'") != -1 or row.find('"') != -1):
     if not concluded_doc_string and not (row.find("'") != -1 or row.find('"') != -1):
         within_line = False
         return {range(start_index, final_index + 1): shared.theme["string"]}
@@ -112,7 +112,6 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
     for current_index, char in enumerate(row):
         if within_line and string_counter > 0:
             string_counter -= 1
-            # last_string_counter = string_counter
             continue
 
         if char in "\"'":
@@ -132,36 +131,22 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
             )
             color_ranges[r] = shared.theme["string"]
             string_counter = string_pos - current_index
-            # last_string_counter = string_counter
 
             start_index = string_pos + 1
             acc = ""
             continue
 
         if char == "#":
-            finder = 0
-            if "TODO" in row[current_index:]:
-                finder = row.find("TODO")
+            color_ranges[range(current_index, len(row))] = shared.theme["comment"]
 
-            comment_color = (100, 100, 100)
-            color_ranges[range(current_index, finder + 1)] = comment_color
-            color_ranges[range(finder, finder + 5)] = shared.theme["dep"]
-            if finder:
-                remaining = finder + 4
-            else:
-                remaining = current_index + finder
-            color_ranges[range(remaining, final_index + 1)] = comment_color
+            todo_index = row[current_index:].find("TODO")
+            if todo_index == -1:
+                return color_ranges
+
+            todo_index += current_index
+            color_ranges[range(todo_index, todo_index + 4)] = shared.theme["dep"]
 
             return color_ranges
-
-        # if current_index > 0 and char == "(" and row[current_index - 1] != "(":
-        #     color = "seagreen"
-        #     if is_pascal(acc):
-        #         color = "yellow"
-        #     color_ranges[range(start_index, current_index)] = color
-        #     start_index = current_index + 1
-        #     acc = ""
-        #     continue
 
         if char in LOGICAL_PUNCTUATION:
             color = apply_precedence(acc)

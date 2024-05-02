@@ -8,6 +8,7 @@ from axedit.cursor import Cursor
 from axedit.editor import Editor
 from axedit.file_selector import FileSelector
 from axedit.funcs import (
+    get_text,
     offset_font_size,
     save_file,
     set_windows_title,
