@@ -124,7 +124,7 @@ class StatusBar:
         out_str = self.add_file_name(out_str)
         # out_str = self.add_loc(n_chars, out_str)
 
-        if shared.file_name.endswith(".py"):
+        if shared.file_name is not None and shared.file_name.endswith(".py"):
             out_str = self.add_interpreter_info(n_chars, out_str)
         out_str = self.add_action_queue(n_chars, out_str)
         render_at(

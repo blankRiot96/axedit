@@ -6,6 +6,7 @@ from pygame._sdl2 import Window
 
 from axedit import shared
 from axedit.autocompletions import AutoCompletions
+from axedit.debugger import Debugger
 from axedit.funcs import (
     get_icon,
     safe_close_connections,
@@ -38,13 +39,14 @@ class Core:
         self.frame_no = 0
         shared.autocompletion = AutoCompletions()
         shared.linter = Linter()
+        self.debugger = Debugger()
         logger.debug("CORE INITIALIZED")
 
     def win_init(self):
         shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=1)
         shared.srect = shared.screen.get_rect()
         shared.frame_cache = {}
-        self.clock = pygame.Clock()
+        shared.clock = pygame.Clock()
         window = Window.from_display_module()
         window.opacity = float(shared.config["opacity"]["value"])
 
@@ -66,7 +68,7 @@ class Core:
     def shared_frame_refresh(self):
         shared.frame_cache.clear()
         shared.events = pygame.event.get()
-        shared.dt = self.clock.tick() / 1000
+        shared.dt = shared.clock.tick() / 1000
         shared.dt = min(shared.dt, 0.1)
         shared.keys = pygame.key.get_pressed()
         shared.kp = pygame.key.get_just_pressed()
@@ -98,12 +100,14 @@ class Core:
             pygame.display.set_icon(get_icon(shared.theme["default-fg"]))
 
         self.on_ctrl_question()
+        self.debugger.update()
         # pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
 
     def draw(self):
         shared.screen.fill(shared.theme["default-bg"])
         # shared.screen.blit(self.blur_effect, (0, 0))
         self.state_manager.draw()
+        self.debugger.draw()
         pygame.display.flip()
 
     def run(self):

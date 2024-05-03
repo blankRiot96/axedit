@@ -40,6 +40,7 @@ keys: list[bool]
 kp: list[bool]
 kr: list[bool]
 dt: float
+clock: pygame.Clock
 
 # Objects
 chars: CharList[CharList[str]]
@@ -53,7 +54,27 @@ linter: Linter
 # Config
 mode: FileState = FileState.NORMAL
 file_name: str | None = None
-theme: dict
+theme: dict[
+    t.Literal[
+        "default-bg",
+        "light-bg",
+        "select-bg",
+        "comment",
+        "dark-fg",
+        "default-fg",
+        "light-fg",
+        "light-fg",
+        "var",
+        "const",
+        "class",
+        "string",
+        "match",
+        "func",
+        "keyword",
+        "dep",
+    ],
+    str,
+]
 config: tomlkit.TOMLDocument
 
 # Registers

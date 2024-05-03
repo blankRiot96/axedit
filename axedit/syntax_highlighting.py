@@ -29,9 +29,6 @@ class ImportVisitor(ast.NodeVisitor):
         super().__init__()
         self.first = True
 
-    def visit_ClassDef(self, node: ast.ClassDef) -> Any:
-        _CLASSES.append(node.name)
-
     def visit_ImportFrom(self, node: ast.ImportFrom | None):
         if not self.first and not shared.import_line_changed:
             return
@@ -65,7 +62,13 @@ class ImportVisitor(ast.NodeVisitor):
                 _MODULES.append(naming_node.asname)
 
 
+class ClassVisitor(ast.NodeVisitor):
+    def visit_ClassDef(self, node: ast.ClassDef) -> Any:
+        _CLASSES.append(node.name)
+
+
 import_visitor = ImportVisitor()
+class_visitor = ClassVisitor()
 
 
 def apply_precedence(word: str) -> Color:
@@ -148,6 +151,13 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
 
             return color_ranges
 
+        if char == "@":
+            bracket_index = row.find("(")
+            end_index = len(row) if bracket_index == -1 else bracket_index
+            r = range(current_index, end_index)
+            color_ranges[r] = shared.theme["const"]
+            return color_ranges
+
         if char in LOGICAL_PUNCTUATION:
             color = apply_precedence(acc)
             if color == shared.theme["default-fg"] and (
@@ -224,15 +234,22 @@ def apply_syntax_highlighting() -> pygame.Surface:
     ):
         return prev_image
 
+    parsed_source = ast.parse(get_text())
+    # Highlight modules
     if shared.import_line_changed:
         _MODULES.clear()
         try:
-            import_visitor.visit(ast.parse(get_text()))
+            import_visitor.visit(parsed_source)
             import_visitor.first = False
         except SyntaxError:
             pass
 
     _CLASSES.clear()
+    # Highlight classes
+    try:
+        class_visitor.visit(parsed_source)
+    except SyntaxError:
+        pass
 
     global last_string_counter, within_line, concluded_doc_string
     last_string_counter = 0

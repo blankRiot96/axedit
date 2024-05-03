@@ -388,7 +388,7 @@ class Editor:
         self.on_scroll()
         self.handle_input()
         self.on_drag()
-        if shared.file_name.endswith(".py"):
+        if shared.file_name is not None and shared.file_name.endswith(".py"):
             shared.autocompletion.update()
             shared.linter.update()
 
@@ -399,7 +399,9 @@ class Editor:
             pygame.SRCALPHA,
         )
 
-        is_python_file = shared.file_name.endswith(".py")
+        is_python_file = shared.file_name is not None and shared.file_name.endswith(
+            ".py"
+        )
         self.surf.blit(
             self.image, (-shared.scroll.x, (not is_python_file) * shared.scroll.y)
         )
