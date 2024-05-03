@@ -290,6 +290,7 @@ class Editor:
         self.first_drag = False
 
     def on_scroll(self):
+        shared.scrolling = False
         for event in shared.events:
             if event.type == pygame.MOUSEWHEEL:
                 if event.y < 0 and shared.scroll.y < -(
@@ -298,7 +299,7 @@ class Editor:
                     return
                 shared.scroll.y += event.y * shared.FONT_HEIGHT
                 shared.scroll.y = min(shared.scroll.y, 0)
-                shared.chars_changed = True
+                shared.scrolling = True
 
     def gen_image(self):
         if shared.file_name is not None and shared.file_name.endswith(".py"):

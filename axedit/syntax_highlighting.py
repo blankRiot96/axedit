@@ -212,6 +212,7 @@ def is_necessary_to_render(y: int, line: str) -> bool:
 
 
 prev_image = None
+colors = []
 
 
 def apply_syntax_highlighting() -> pygame.Surface:
@@ -230,23 +231,21 @@ def apply_syntax_highlighting() -> pygame.Surface:
         not shared.theme_changed
         and (not is_event_frame(pygame.VIDEORESIZE))
         and (not shared.chars_changed)
+        and (not shared.scrolling)
         and prev_image is not None
     ):
         return prev_image
 
-    parsed_source = ast.parse(get_text())
-    # Highlight modules
-    if shared.import_line_changed:
-        _MODULES.clear()
-        try:
+    try:
+        parsed_source = ast.parse(get_text())
+        # Highlight modules
+        if shared.import_line_changed:
+            _MODULES.clear()
             import_visitor.visit(parsed_source)
             import_visitor.first = False
-        except SyntaxError:
-            pass
 
-    _CLASSES.clear()
-    # Highlight classes
-    try:
+        # Highlight classes
+        _CLASSES.clear()
         class_visitor.visit(parsed_source)
     except SyntaxError:
         pass
@@ -262,7 +261,9 @@ def apply_syntax_highlighting() -> pygame.Surface:
     visible_lines = shared.chars[scroll_offset : scroll_offset + n_lines_to_render]
     image = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
 
-    colors = [index_colors("".join(row)) for row in shared.chars]
+    if shared.chars_changed or prev_image is None:
+        global colors
+        colors = [index_colors("".join(row)) for row in shared.chars]
 
     for y, row in enumerate(visible_lines):
         row = "".join(row)

@@ -96,6 +96,7 @@ selecting_file = False
 cursor_x_changed = False
 cursor_y_changed = False
 editing_config_file = False
+scrolling = False
 naming_file: bool
 chars_changed: bool
 saved: bool

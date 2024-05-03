@@ -43,7 +43,7 @@ class Core:
         logger.debug("CORE INITIALIZED")
 
     def win_init(self):
-        shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=1)
+        shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=0)
         shared.srect = shared.screen.get_rect()
         shared.frame_cache = {}
         shared.clock = pygame.Clock()
