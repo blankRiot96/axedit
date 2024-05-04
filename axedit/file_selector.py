@@ -269,7 +269,12 @@ class FileTree:
         self.preview_files = self.original_preview_files.copy()
 
     def render_unfiltered_preview_files(self):
-        for y, toplevel in enumerate(self.preview_files):
+        limit = (
+            int(UI.state.border_rect.height / shared.FONT_HEIGHT) + 2
+        )  # +2 just in case
+        scroll = int(-self.scroll / shared.FONT_HEIGHT)
+        for y, toplevel in enumerate(self.preview_files[scroll : scroll + limit]):
+            y += scroll
             anchor_pos = (y * shared.FONT_HEIGHT) + self.scroll
             rect = pygame.Rect(
                 0, anchor_pos, UI.state.border_rect.width // 2, shared.FONT_HEIGHT
@@ -327,7 +332,13 @@ class FileTree:
         self.preview_files = [match.file for match in self.matches]
 
     def render_filtered_preview_files(self):
-        for y, match in enumerate(self.matches):
+        limit = (
+            int(UI.state.border_rect.height / shared.FONT_HEIGHT) + 2
+        )  # +2 just in case
+
+        scroll = int(-self.scroll / shared.FONT_HEIGHT)
+        for y, match in enumerate(self.matches[scroll : scroll + limit]):
+            y += scroll
             anchor_pos = (y * shared.FONT_HEIGHT) + self.scroll
             rect = pygame.Rect(
                 0, anchor_pos, UI.state.border_rect.width // 2, shared.FONT_HEIGHT
