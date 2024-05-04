@@ -17,8 +17,8 @@ _KEYWORDS = keyword.kwlist[3:]
 _SINGLETONS = keyword.kwlist[:3]
 _BUILTINS = dir(builtins)
 
-_MODULES = []
-_CLASSES = []
+_MODULES = set()
+_CLASSES = set()
 _PRECEDENCE = []
 
 Color: t.TypeAlias = str
@@ -37,7 +37,7 @@ class ImportVisitor(ast.NodeVisitor):
         if node.module is None:
             mod_name = "."
 
-        _MODULES.extend(mod_name.split("."))
+        _MODULES.update(mod_name.split("."))
 
         imports = []
         for naming_node in node.names:
@@ -47,24 +47,24 @@ class ImportVisitor(ast.NodeVisitor):
 
         for imp in imports:
             if is_module(mod_name, imp):
-                _MODULES.append(imp)
+                _MODULES.add(imp)
             elif is_pascal(imp):
-                _CLASSES.append(imp)
+                _CLASSES.add(imp)
 
     def visit_Import(self, node: ast.Import):
         if not self.first and not shared.import_line_changed:
             return
 
         for naming_node in node.names:
-            _MODULES.append(naming_node.name)
+            _MODULES.add(naming_node.name)
 
             if hasattr(naming_node, "asname"):
-                _MODULES.append(naming_node.asname)
+                _MODULES.add(naming_node.asname)
 
 
 class ClassVisitor(ast.NodeVisitor):
     def visit_ClassDef(self, node: ast.ClassDef) -> Any:
-        _CLASSES.append(node.name)
+        _CLASSES.add(node.name)
 
 
 import_visitor = ImportVisitor()
@@ -98,6 +98,57 @@ within_line = True
 concluded_doc_string = True
 
 
+def set_string_status(index: int) -> None:
+    global last_string_counter, within_line, concluded_doc_string
+
+    last_string_counter = 0
+    within_line = True
+    concluded_doc_string = True
+
+    for row in shared.chars[:index]:
+        row = "".join(row)
+        final_index = len(row) - 1
+
+        if not concluded_doc_string and not (
+            row.find("'") != -1 or row.find('"') != -1
+        ):
+            within_line = False
+            # return {range(start_index, final_index + 1): shared.theme["string"]}
+            continue
+
+        string_counter = 0
+
+        for current_index, char in enumerate(row):
+            if within_line and string_counter > 0:
+                string_counter -= 1
+                continue
+
+            if char in "\"'":
+                within_line = True
+                starter = None
+                if row.count(char * 3) % 2 != 0:
+                    concluded_doc_string = not concluded_doc_string
+                    if concluded_doc_string:
+                        starter = 0
+                    string_pos = final_index
+                else:
+                    string_pos = row.find(char, current_index + 1)
+                incomplete_string = string_pos < 0
+                if incomplete_string:
+                    string_pos = int(10e6)
+
+                if starter is None:
+                    r = range(
+                        current_index,
+                        string_pos + 1,
+                    )
+                else:
+                    r = range(starter, string_pos + 1)
+
+                string_counter = string_pos - current_index
+                continue
+
+
 def index_colors(row: str) -> dict[t.Generator, Color]:
     global last_string_counter, within_line, concluded_doc_string
     color_ranges = {}
@@ -106,9 +157,16 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
     acc = ""
     start_index = 0
 
-    if not concluded_doc_string and not (row.find("'") != -1 or row.find('"') != -1):
+    if not concluded_doc_string and not ("'" in row or '"' in row):
         within_line = False
         return {range(start_index, final_index + 1): shared.theme["string"]}
+
+    # if concluded_doc_string:
+    #     if (single := row.find("'''")) != -1:
+    #         end_index = single
+    #     elif (double := row.find('"""')) != -1:
+    #         end_index = double
+    #     return {range(start_index, end_index): shared.theme["string"]}
 
     string_counter = 0
 
@@ -119,8 +177,11 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
 
         if char in "\"'":
             within_line = True
+            starter = None
             if row.count(char * 3) % 2 != 0:
                 concluded_doc_string = not concluded_doc_string
+                if concluded_doc_string:
+                    starter = 0
                 string_pos = final_index
             else:
                 string_pos = row.find(char, current_index + 1)
@@ -128,10 +189,13 @@ def index_colors(row: str) -> dict[t.Generator, Color]:
             if incomplete_string:
                 string_pos = int(10e6)
 
-            r = range(
-                current_index,
-                string_pos + 1,
-            )
+            if starter is None:
+                r = range(
+                    current_index,
+                    string_pos + 1,
+                )
+            else:
+                r = range(starter, string_pos + 1)
             color_ranges[r] = shared.theme["string"]
             string_counter = string_pos - current_index
 
@@ -213,6 +277,7 @@ def is_necessary_to_render(y: int, line: str) -> bool:
 
 prev_image = None
 colors = []
+should_index_colors = False
 
 
 def apply_syntax_highlighting() -> pygame.Surface:
@@ -236,24 +301,25 @@ def apply_syntax_highlighting() -> pygame.Surface:
     ):
         return prev_image
 
+    global should_index_colors
+    should_index_colors = False
     try:
         parsed_source = ast.parse(get_text())
         # Highlight modules
+        temp_mod = _MODULES.copy()
         if shared.import_line_changed:
             _MODULES.clear()
             import_visitor.visit(parsed_source)
             import_visitor.first = False
 
         # Highlight classes
+        temp_class = _CLASSES.copy()
         _CLASSES.clear()
         class_visitor.visit(parsed_source)
+
+        should_index_colors = temp_class != _CLASSES or temp_mod != _MODULES
     except SyntaxError:
         pass
-
-    global last_string_counter, within_line, concluded_doc_string
-    last_string_counter = 0
-    within_line = True
-    concluded_doc_string = True
 
     safety_padding = 2
     n_lines_to_render = int(shared.srect.height / shared.FONT_HEIGHT) + safety_padding
@@ -261,13 +327,29 @@ def apply_syntax_highlighting() -> pygame.Surface:
     visible_lines = shared.chars[scroll_offset : scroll_offset + n_lines_to_render]
     image = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
 
-    if shared.chars_changed or prev_image is None:
-        global colors
+    global colors
+    if prev_image is None or shared.saved or should_index_colors:
+        global last_string_counter, within_line, concluded_doc_string
+        last_string_counter = 0
+        within_line = True
+        concluded_doc_string = True
+
+        # print(f"{prev_image is None=}, {shared.saved=}, {should_index_colors=}")
         colors = [index_colors("".join(row)) for row in shared.chars]
+
+    if shared.chars_changed:
+        if len(colors) < len(shared.chars):
+            colors.insert(shared.cursor_pos.y, {})
+        elif len(colors) > len(shared.chars):
+            colors.pop(shared.cursor_pos.y)
+
+        set_string_status(shared.cursor_pos.y)
+        colors[shared.cursor_pos.y] = index_colors(
+            "".join(shared.chars[shared.cursor_pos.y])
+        )
 
     for y, row in enumerate(visible_lines):
         row = "".join(row)
-
         color_ranges = colors[y + scroll_offset]
         row_image = line_wise_stitching(row, color_ranges)
         image.blit(row_image, (0, y * shared.FONT_HEIGHT))
