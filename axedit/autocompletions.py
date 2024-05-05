@@ -31,6 +31,7 @@ class AutoCompletions:
         thread.start()
         self.completions: list[dict] = []
         self.gen_blank()
+        self.receiving = False
 
     def gen_blank(self):
         if not self.completions:
@@ -104,6 +105,7 @@ class AutoCompletions:
         except OSError:
             exit()
         while True:
+            self.receiving = True
             try:
                 data = self.client_socket.recv(1024)
 
@@ -127,9 +129,9 @@ class AutoCompletions:
                 logger.error(e)
                 exit()
 
+        self.receiving = False
         self.completions = json.loads(received_data)
-        # if received_data:
-        #     logger.debug(f"autocompletion={received_data}")
+        self.filter_completions()
 
     def close_connections(self):
         if hasattr(self, "client_socket"):
@@ -172,8 +174,15 @@ class AutoCompletions:
         if not self.to_update():
             return
 
-        self.receive_completions()
-        self.filter_completions()
+        if self.receiving:
+            return
+
+        # self.receive_completions()
+        thread = threading.Thread(
+            target=lambda: [self.receive_completions()],
+            daemon=True,
+        )
+        thread.start()
 
     def draw_suggestions(self) -> None:
         for index, comp in enumerate(self.completions):

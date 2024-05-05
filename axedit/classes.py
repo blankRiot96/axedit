@@ -5,26 +5,8 @@ from axedit import shared
 
 class Pos:
     def __init__(self, x: int, y: int) -> None:
-        self._x = x
-        self._y = y
-
-    @property
-    def x(self) -> int:
-        return self._x
-
-    @x.setter
-    def x(self, val: int) -> int:
-        self._x = val
-        shared.cursor_x_changed = True
-
-    @property
-    def y(self) -> int:
-        return self._y
-
-    @y.setter
-    def y(self, val: int) -> int:
-        self._y = val
-        shared.cursor_y_changed = True
+        self.x = x
+        self.y = y
 
     def __eq__(self, __value: t.Self) -> bool:
         return __value.x == self.x and __value.y == self.y

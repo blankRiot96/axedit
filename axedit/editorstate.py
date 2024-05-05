@@ -36,6 +36,11 @@ class EditorState:
         self.scrollbar = HorizontalScrollBar()
         self.last_file_time = 0
         self.file_selector: None | FileSelector = None
+        self.reset_xy()
+
+    def reset_xy(self):
+        self.previous_x = shared.cursor_pos.x
+        self.previous_y = shared.cursor_pos.y
 
     def shared_reset(self):
         shared.chars_changed = True
@@ -123,8 +128,6 @@ class EditorState:
         shared.chars_changed = False
         shared.actions_modified = False
         shared.font_offset = False
-        shared.cursor_x_changed = False
-        shared.cursor_y_changed = False
         self.on_local_file_change()
         self.char_handler()
         self.queue_actions()
@@ -132,11 +135,17 @@ class EditorState:
         self.on_ctrl_n()
         self.handle_font_offset()
         shared.cursor.update()
+
+        shared.cursor_x_changed = shared.cursor_pos.x != self.previous_x
+        shared.cursor_y_changed = shared.cursor_pos.y != self.previous_y
+
         self.editor.update()
         self.line_numbers.update()
         self.status_bar.update()
         self.on_ctrl_s()
         self.scrollbar.update()
+
+        self.reset_xy()
 
         if self.file_selector is not None:
             self.file_selector.update()
