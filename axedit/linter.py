@@ -31,6 +31,7 @@ class Linter:
         self.lints: list[dict] = []
         self.first_time_connected = True
         self.create_font()
+        self.receiving = False
 
     def create_font(self):
         self.font = pygame.Font(
@@ -85,6 +86,7 @@ class Linter:
             logger.critical("exit by linter?")
             exit()
         while True:
+            self.receiving = True
             try:
                 data = self.client_socket.recv(1024)
 
@@ -108,7 +110,9 @@ class Linter:
                 logger.error(e)
                 exit()
 
+        self.receiving = False
         self.lints: list[dict] = json.loads(received_data)
+        self.filter_lints()
 
     def close_connections(self):
         if hasattr(self, "client_socket"):
@@ -135,8 +139,15 @@ class Linter:
         if not self.to_update():
             return
 
+        if self.receiving:
+            return
+
         self.receive_lints()
-        self.filter_lints()
+        # thread = threading.Thread(
+        #     target=lambda: [self.receive_lints()],
+        #     daemon=True,
+        # )
+        # thread.start()
 
     def render_squigline(
         self,
