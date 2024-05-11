@@ -141,7 +141,50 @@ def on_w(y: int | None = None):
         on_w(shared.cursor_pos.y)
 
 
-def on_e(): ...
+# TODO
+def on_e(y: int | None = None):
+    new_line = y is not None
+    if y is None:
+        y = shared.cursor_pos.y
+
+    if y >= len(shared.chars):
+        return
+
+    if not shared.chars[y]:
+        shared.cursor_pos.x = 0
+        if new_line:
+            return
+
+        shared.cursor_pos.y += 1
+        on_e(shared.cursor_pos.y)
+        return
+
+    is_word_constituent = lambda char: char.isalnum() or char == "_"
+    start_search = new_line
+    prev_char: str = shared.chars[y][shared.cursor_pos.x]
+    for extra_i, char in enumerate(shared.chars[y][shared.cursor_pos.x :]):
+        char: str
+        if char.isspace():
+            start_search = True
+            prev_char = char
+            continue
+
+        if is_word_constituent(prev_char):
+            if not is_word_constituent(prev_char):
+                start_search = True
+        else:
+            if is_word_constituent(prev_char):
+                start_search = True
+
+        if start_search:
+            shared.cursor_pos.x += extra_i - 1
+            break
+    else:
+        if shared.cursor_pos.y == len(shared.chars) - 1:
+            return
+        shared.cursor_pos.x = 0
+        shared.cursor_pos.y += 1
+        on_e(shared.cursor_pos.y)
 
 
 def on_y():

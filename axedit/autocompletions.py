@@ -26,12 +26,19 @@ class AutoCompletions:
         self.connected = False
         self.selected_index = 0
         thread = threading.Thread(
-            target=lambda: [self.spawn_server(), self.connect_to_server()], daemon=True
+            target=lambda: [
+                self.spawn_server(),
+                self.connect_to_server(),
+                self.threaded_completions_receiver(),
+            ],
+            daemon=True,
         )
         thread.start()
         self.completions: list[dict] = []
         self.gen_blank()
         self.receiving = False
+        self.post_receive_clarity = False
+        self.entered_editor = False
 
     def gen_blank(self):
         if not self.completions:
@@ -88,6 +95,8 @@ class AutoCompletions:
         )
 
         if changed_state:
+            if self.receiving:
+                self.post_receive_clarity = True
             self.completions.clear()
 
         return changed_state and gatekeepers
@@ -129,6 +138,10 @@ class AutoCompletions:
                 logger.error(e)
                 exit()
 
+        if self.post_receive_clarity:
+            self.post_receive_clarity = False
+            return self.receive_completions()
+
         self.receiving = False
         self.completions = json.loads(received_data)
         self.filter_completions()
@@ -167,22 +180,19 @@ class AutoCompletions:
             ):
                 self.completions.remove(comp)
 
+    def threaded_completions_receiver(self) -> None:
+        while True:
+            if not self.connected or not self.entered_editor or not self.to_update():
+                continue
+
+            self.receive_completions()
+
     def update(self):
+        self.entered_editor = True
         if not self.connected:
             return
+
         self.on_enter()
-        if not self.to_update():
-            return
-
-        if self.receiving:
-            return
-
-        # self.receive_completions()
-        thread = threading.Thread(
-            target=lambda: [self.receive_completions()],
-            daemon=True,
-        )
-        thread.start()
 
     def draw_suggestions(self) -> None:
         for index, comp in enumerate(self.completions):

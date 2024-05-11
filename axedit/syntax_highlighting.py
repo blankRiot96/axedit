@@ -344,9 +344,12 @@ def apply_syntax_highlighting() -> pygame.Surface:
             colors.pop(shared.cursor_pos.y)
 
         set_string_status(shared.cursor_pos.y)
-        colors[shared.cursor_pos.y] = index_colors(
-            "".join(shared.chars[shared.cursor_pos.y])
-        )
+        try:
+            colors[shared.cursor_pos.y] = index_colors(
+                "".join(shared.chars[shared.cursor_pos.y])
+            )
+        except IndexError:
+            pass
 
     for y, row in enumerate(visible_lines):
         row = "".join(row)
