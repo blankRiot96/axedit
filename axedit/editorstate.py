@@ -186,7 +186,6 @@ class EditorState:
         self.editor.draw()
         shared.cursor.draw(self.editor.surf)
         if shared.chars_changed:
-            shared.linter.update()
             self.editor.draw()
         self.line_numbers.draw()
         self.status_bar.draw()

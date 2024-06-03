@@ -38,7 +38,7 @@ class Core:
         self.state_manager = StateManager()
         self.frame_no = 0
         shared.autocompletion = AutoCompletions()
-        shared.linter = Linter()
+        # shared.linter = Linter()
         self.debugger = Debugger()
         logger.debug("CORE INITIALIZED")
 

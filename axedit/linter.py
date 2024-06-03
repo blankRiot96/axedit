@@ -9,9 +9,7 @@ import pygame
 
 from axedit import shared
 from axedit.funcs import get_text
-from axedit.input_queue import InputManager
 from axedit.logs import logger
-from axedit.state_enums import FileState
 
 SERVER_HOST = "127.0.0.1"
 
@@ -25,13 +23,19 @@ class Linter:
     def __init__(self) -> None:
         self.connected = False
         thread = threading.Thread(
-            target=lambda: [self.spawn_server(), self.connect_to_server()], daemon=True
+            target=lambda: [
+                self.spawn_server(),
+                self.connect_to_server(),
+                self.threaded_lints_receiver(),
+            ],
+            daemon=True,
         )
         thread.start()
         self.lints: list[dict] = []
         self.first_time_connected = True
         self.create_font()
         self.receiving = False
+        self.entered_editor = False
 
     def create_font(self):
         self.font = pygame.Font(
@@ -129,25 +133,22 @@ class Linter:
                 continue
             locs.append(row)
 
-    def update(self):
-        if not self.connected:
-            return
-        if self.first_time_connected:
+    def threaded_lints_receiver(self) -> None:
+        while True:
+            if not self.connected:
+                continue
+
+            if self.first_time_connected:
+                self.receive_lints()
+            self.first_time_connected = False
+
+            if not self.entered_editor or not self.to_update():
+                continue
+
             self.receive_lints()
-            self.filter_lints()
-        self.first_time_connected = False
-        if not self.to_update():
-            return
 
-        if self.receiving:
-            return
-
-        self.receive_lints()
-        # thread = threading.Thread(
-        #     target=lambda: [self.receive_lints()],
-        #     daemon=True,
-        # )
-        # thread.start()
+    def update(self):
+        self.entered_editor = True
 
     def render_squigline(
         self,
