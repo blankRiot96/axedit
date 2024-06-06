@@ -11,7 +11,7 @@ from axedit import shared
 from axedit.funcs import get_text
 from axedit.logs import logger
 from axedit.state_enums import FileState
-from axedit.utils import highlight_text
+from axedit.utils import Time, highlight_text
 
 SERVER_HOST = "127.0.0.1"  # Loopback address
 
@@ -140,11 +140,13 @@ class AutoCompletions:
 
         if self.post_receive_clarity:
             self.post_receive_clarity = False
+            self.selected_index = 0
             return self.receive_completions()
 
         self.receiving = False
         self.completions = json.loads(received_data)
         self.filter_completions()
+        self.selected_index = 0
 
     def close_connections(self):
         if hasattr(self, "client_socket"):
@@ -187,11 +189,26 @@ class AutoCompletions:
 
             self.receive_completions()
 
+    def shuffle_suggestions(self):
+        if shared.kp[pygame.K_DOWN]:
+            self.selected_index += 1
+        elif shared.kp[pygame.K_UP]:
+            self.selected_index -= 1
+        else:
+            return
+
+        if self.selected_index >= len(self.completions):
+            self.selected_index = 0
+        if self.selected_index < 0:
+            self.selected_index = len(self.completions) - 1
+
     def update(self):
+        shared.autocompleting = bool(self.completions)
         self.entered_editor = True
         if not self.connected:
             return
 
+        self.shuffle_suggestions()
         self.on_enter()
 
     def draw_suggestions(self) -> None:

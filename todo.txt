@@ -1,5 +1,6 @@
 # Things pending
 - Autocompletion symbols
+- Autocomplete suggestion shuffling
 - Remaining modal commands (e, b, /, ?, f, F)
 - Remaining editor commands 
 

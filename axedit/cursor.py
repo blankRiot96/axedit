@@ -288,8 +288,10 @@ class Cursor:
         if shared.typing_cmd or shared.selecting_file:
             return
         self.blink()
-        self.update_accels()
         self.regex_manager.update()
+        if shared.autocompleting:
+            return
+        self.update_accels()
         self.bound_cursor()
         self.move()
         self.rect.topleft = self.pos

@@ -391,7 +391,7 @@ class Editor:
         self.on_drag()
         if shared.file_name is not None and shared.file_name.endswith(".py"):
             shared.autocompletion.update()
-            # shared.linter.update()
+            shared.linter.update()
 
     def draw(self):
         self.gen_image()
@@ -408,4 +408,4 @@ class Editor:
         )
         if is_python_file:
             shared.autocompletion.draw(self.surf)
-            # shared.linter.draw(self.surf)
+            shared.linter.draw(self.surf)
