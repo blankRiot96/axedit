@@ -107,7 +107,7 @@ class Core:
         shared.screen.fill(shared.theme["default-bg"])
         # shared.screen.blit(self.blur_effect, (0, 0))
         self.state_manager.draw()
-        self.debugger.draw()
+        # self.debugger.draw()
         pygame.display.flip()
 
     def run(self):

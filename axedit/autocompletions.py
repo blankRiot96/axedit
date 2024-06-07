@@ -4,6 +4,8 @@ import socket
 import subprocess
 import sys
 import threading
+import typing as t
+from dataclasses import dataclass
 
 import pygame
 
@@ -14,6 +16,27 @@ from axedit.state_enums import FileState
 from axedit.utils import Time, highlight_text
 
 SERVER_HOST = "127.0.0.1"  # Loopback address
+
+_POSSIBLE_COMPLETIONS = {
+    "module": ("󰅩", "class"),
+    "class": ("", "class"),
+    "param": ("󰭅", "var"),
+    "function": ("", "func"),
+    "statement": ("", "string"),
+    "keyword": ("", "keyword"),
+    "instance": ("", "const"),
+}
+
+
+@dataclass
+class Symbol:
+    icon: str
+    color: str
+
+    @classmethod
+    def get_from_comp_type(cls, comp_type: str) -> t.Self:
+        icon, key = _POSSIBLE_COMPLETIONS.get(comp_type, ("", "default-fg"))
+        return Symbol(icon=icon, color=shared.theme[key])
 
 
 class AutoCompletions:
@@ -45,8 +68,8 @@ class AutoCompletions:
             width, height = 0, 0
         else:
             width = (
-                max(len(comp["name"]) for comp in self.completions) * shared.FONT_WIDTH
-            )
+                max(len(comp["name"]) for comp in self.completions) + 2
+            ) * shared.FONT_WIDTH
             height = len(self.completions) * shared.FONT_HEIGHT
 
         self.surf = pygame.Surface((width, height))
@@ -213,6 +236,9 @@ class AutoCompletions:
 
     def draw_suggestions(self) -> None:
         for index, comp in enumerate(self.completions):
+            symbol: Symbol = Symbol.get_from_comp_type(comp["type"])
+            symbol_surf = shared.FONT.render(symbol.icon, True, symbol.color)
+
             if index == self.selected_index:
                 pygame.draw.rect(
                     self.surf,
@@ -233,7 +259,10 @@ class AutoCompletions:
                 shared.theme["keyword"],
             )
 
-            self.surf.blit(comp_surf, (0, index * shared.FONT_HEIGHT))
+            self.surf.blit(symbol_surf, (0, index * shared.FONT_HEIGHT))
+            self.surf.blit(
+                comp_surf, (symbol_surf.get_width() * 2, index * shared.FONT_HEIGHT)
+            )
 
     def get_selected_name(self) -> str:
         if self.completions:

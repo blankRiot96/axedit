@@ -8,7 +8,6 @@ import jedi
 HOST = "127.0.0.1"  # Loopback address
 PORT = int(sys.argv[1])
 
-
 # Create a socket object
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
     # Bind the socket to the address and port
@@ -57,7 +56,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
             except ValueError as e:
                 raise ValueError(e)
             completions = [
-                {"name": comp.name, "prefix-len": comp.get_completion_prefix_length()}
+                {
+                    "name": comp.name,
+                    "prefix-len": comp.get_completion_prefix_length(),
+                    "type": comp.type,
+                }
                 for comp in completions
             ]
             response = json.dumps(completions).encode()
