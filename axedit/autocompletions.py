@@ -191,6 +191,7 @@ class AutoCompletions:
         )
 
     def filter_completions(self):
+        # TODO: PREFIX-LEN AND STUFF
         if (
             self.completions
             and len(self.completions[0]["name"]) == self.completions[0]["prefix-len"]
