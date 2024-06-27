@@ -108,10 +108,13 @@ class AutoCompletions:
                 continue
 
     def to_update(self) -> bool:
+        if self.entered_editor:
+            self.post_receive_clarity = True
+
         changed_state = (
             shared.chars_changed or shared.cursor_x_changed or shared.cursor_y_changed
         )
-        gatekeepers = (
+        gatekeepers = bool(
             shared.mode == FileState.INSERT
             and "".join(shared.chars[shared.cursor_pos.y]).strip()
             and shared.cursor_pos.x > 0
@@ -164,7 +167,8 @@ class AutoCompletions:
         if self.post_receive_clarity:
             self.post_receive_clarity = False
             self.selected_index = 0
-            return self.receive_completions()
+            self.receive_completions()
+            return
 
         self.receiving = False
         self.completions = json.loads(received_data)
@@ -209,7 +213,8 @@ class AutoCompletions:
 
     def threaded_completions_receiver(self) -> None:
         while True:
-            if not self.connected or not self.entered_editor or not self.to_update():
+            to_upd = self.to_update()
+            if not self.connected or not self.entered_editor or not to_upd:
                 continue
 
             self.receive_completions()
