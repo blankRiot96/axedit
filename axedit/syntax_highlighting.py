@@ -257,7 +257,10 @@ def line_wise_stitching(row: str, color_ranges: dict) -> pygame.Surface:
             if x in range:
                 color = ranged_color
 
-        char_surf = shared.FONT.render(char, True, color)
+        try:
+            char_surf = shared.FONT.render(char, True, color)
+        except pygame.error:
+            continue
         image.blit(char_surf, (x * shared.FONT_WIDTH, 0))
 
     return image

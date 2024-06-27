@@ -308,5 +308,8 @@ class Cursor:
             char = shared.chars[shared.cursor_pos.y][shared.cursor_pos.x]
         except IndexError:
             return
-        char_surf = shared.FONT.render(char, True, shared.theme["default-bg"])
+        try:
+            char_surf = shared.FONT.render(char, True, shared.theme["default-bg"])
+        except pygame.error:
+            return
         editor_surf.blit(char_surf, self.pos)

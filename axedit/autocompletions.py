@@ -128,7 +128,7 @@ class AutoCompletions:
         text = get_text()
         loc = (shared.cursor_pos.x, shared.cursor_pos.y + 1)
 
-        data = {"text": text, "loc": loc}
+        data = {"text": text, "loc": loc, "fuzzy": False}
         data = json.dumps(data)
         l = len(data.encode())
 
@@ -194,7 +194,8 @@ class AutoCompletions:
         # TODO: PREFIX-LEN AND STUFF
         if (
             self.completions
-            and len(self.completions[0]["name"]) == self.completions[0]["prefix-len"]
+            and len(self.completions[self.selected_index]["name"])
+            == self.completions[self.selected_index]["prefix-len"]
         ):
             self.completions.clear()
             return

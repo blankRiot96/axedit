@@ -84,9 +84,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
                 completions = [
                     {
                         "name": comp.name,
-                        "matched_indeces": list(
-                            range(comp.get_completion_prefix_length())
-                        ),
+                        # "matched_indeces": list(
+                        #     range(comp.get_completion_prefix_length())
+                        # ),
+                        "prefix-len": comp.get_completion_prefix_length(),
                         "type": comp.type,
                     }
                     for comp in completions
