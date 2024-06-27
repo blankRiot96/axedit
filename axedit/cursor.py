@@ -281,7 +281,8 @@ class Cursor:
         else:
             offset = -final_surf.get_height() + shared.FONT_HEIGHT
 
-        editor_surf.blit(final_surf, (-shared.scroll.x, offset + self.pos.y))
+        posy = shared.FONT_HEIGHT * shared.cursor_pos.y
+        editor_surf.blit(final_surf, (-shared.scroll.x, offset + posy))
         on_d()
 
     def update(self):

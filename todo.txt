@@ -1,11 +1,4 @@
-# Things pending
-- Autocompletion symbols
-- Autocomplete suggestion shuffling
-- Remaining modal commands (e, b, /, ?, f, F)
-- Remaining editor commands 
-
 # Bugs TODO
-- Bouncing highlights
 - Line number and curly scroll disalignment
 - Autocomplete disalignment on startup
 
