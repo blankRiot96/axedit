@@ -5,6 +5,7 @@ showcase.png
 main.bin
 *.exe
 *.prof
+*.austin
 
 # VSCode
 pylspconfig.yaml
