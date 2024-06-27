@@ -185,7 +185,9 @@ def offset_font_size(offset: int):
 
 def center_cursor():
     shared.scroll.y = -shared.cursor_pos.y * shared.FONT_HEIGHT
-    shared.scroll.y += shared.srect.height / 2
+    shared.scroll.y += (
+        int(shared.srect.height / (2 * shared.FONT_HEIGHT)) * shared.FONT_HEIGHT
+    )
     shared.scroll.y = min(shared.scroll.y, 0)
     shared.chars_changed = True
 

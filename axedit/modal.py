@@ -249,9 +249,7 @@ def on_right_brace():
         shared.cursor_pos.y = len(shared.chars) - 1
         shared.cursor_pos.x = len(shared.chars[shared.cursor_pos.y]) - 1
 
-    if (
-        shared.cursor_pos.y * shared.FONT_HEIGHT
-    ) + shared.scroll.y > shared.srect.height:
+    if (shared.cursor_pos.y * shared.FONT_HEIGHT) > shared.scroll.y:
         center_cursor()
 
 

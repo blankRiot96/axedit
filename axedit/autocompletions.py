@@ -205,10 +205,11 @@ class AutoCompletions:
             return
 
         for comp in self.completions[:]:
-            if (
-                comp["prefix-len"] == 0
-                and shared.chars[shared.cursor_pos.y][shared.cursor_pos.x - 1] != "."
-            ):
+            try:
+                char = shared.chars[shared.cursor_pos.y][shared.cursor_pos.x - 1]
+            except IndexError:
+                continue
+            if comp["prefix-len"] == 0 and char != ".":
                 self.completions.remove(comp)
 
     def threaded_completions_receiver(self) -> None:

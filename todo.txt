@@ -1,5 +1,4 @@
 # Bugs TODO
-- Line number and curly scroll disalignment
 
 
 autocompletion=[{'name': 'pass', 'prefix-len': 1},
