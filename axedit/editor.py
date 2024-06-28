@@ -94,7 +94,7 @@ class WriteMode:
         return [" "] * count
 
     def new_line(self):
-        if shared.autocompletion.completions:
+        if hasattr(shared, "autocompletion") and shared.autocompletion.completions:
             return
 
         line = self.get_line()
@@ -389,7 +389,11 @@ class Editor:
         self.on_scroll()
         self.handle_input()
         self.on_drag()
-        if shared.file_name is not None and shared.file_name.endswith(".py"):
+        if (
+            hasattr(shared, "autocompletion")
+            and shared.file_name is not None
+            and shared.file_name.endswith(".py")
+        ):
             shared.autocompletion.update()
             shared.linter.update()
 
@@ -406,6 +410,6 @@ class Editor:
         self.surf.blit(
             self.image, (-shared.scroll.x, (not is_python_file) * shared.scroll.y)
         )
-        if is_python_file:
+        if hasattr(shared, "autocompletion") and is_python_file:
             shared.autocompletion.draw(self.surf)
             shared.linter.draw(self.surf)

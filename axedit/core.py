@@ -1,5 +1,6 @@
 import os
 import platform
+from pathlib import Path
 
 import pygame
 from pygame._sdl2 import Window
@@ -37,8 +38,8 @@ class Core:
         shared.action_queue = []
         self.state_manager = StateManager()
         self.frame_no = 0
-        shared.autocompletion = AutoCompletions()
-        shared.linter = Linter()
+        # shared.autocompletion = AutoCompletions()
+        # shared.linter = Linter()
         self.debugger = Debugger()
         logger.debug("CORE INITIALIZED")
 
@@ -85,8 +86,8 @@ class Core:
         ):
             return
 
-        pygame.image.save(shared.screen, "showcase.png")
-        query = "convert showcase.png \( +clone -background black -shadow 50x10+15+15 \) +swap -background none -layers merge +repage showcase.png"
+        pygame.image.save(shared.screen, Path("/home/axis/p/editor/showcase.png"))
+        query = "convert ~/p/editor/showcase.png \( +clone -background black -shadow 50x10+15+15 \) +swap -background none -layers merge +repage ~/p/editor/showcase.png"
         os.system(query)
         logger.debug("Showcased screenshot")
 
@@ -107,7 +108,7 @@ class Core:
         shared.screen.fill(shared.theme["default-bg"])
         # shared.screen.blit(self.blur_effect, (0, 0))
         self.state_manager.draw()
-        # self.debugger.draw()
+        self.debugger.draw()
         pygame.display.flip()
 
     def run(self):

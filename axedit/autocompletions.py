@@ -64,13 +64,13 @@ class AutoCompletions:
         self.entered_editor = False
 
     def gen_blank(self):
-        if not self.completions:
-            width, height = 0, 0
-        else:
+        try:
             width = (
-                max(len(comp["name"]) for comp in self.completions) + 2
+                max(len(comp["name"]) for comp in self.completions) + 3
             ) * shared.FONT_WIDTH
             height = len(self.completions) * shared.FONT_HEIGHT
+        except ValueError:
+            width, height = 0, 0
 
         self.surf = pygame.Surface((width, height))
         self.surf.fill(shared.theme["light-bg"])
@@ -267,7 +267,9 @@ class AutoCompletions:
                 shared.theme["keyword"],
             )
 
-            self.surf.blit(symbol_surf, (0, index * shared.FONT_HEIGHT))
+            self.surf.blit(
+                symbol_surf, (shared.FONT_WIDTH / 2, index * shared.FONT_HEIGHT)
+            )
             self.surf.blit(
                 comp_surf, (symbol_surf.get_width() * 2, index * shared.FONT_HEIGHT)
             )
