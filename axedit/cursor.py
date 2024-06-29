@@ -215,6 +215,7 @@ class Cursor:
             upper_line = shared.chars[upper_meniscus_y]
 
         lines_to_delete = []
+        original_pos = (shared.visual_mode_axis.x, shared.visual_mode_axis.y)
         copy_output = ""
         for i, row in enumerate(range(lower_meniscus_y, upper_meniscus_y + 1)):
             size = 0
@@ -274,6 +275,7 @@ class Cursor:
             # )
 
             # Copy the deleted content to the clipboard
+            shared.history.delete(copy_output, original_pos)
             clipboard.copy(copy_output)
 
         if shared.cursor_pos.y < shared.visual_mode_axis.y:

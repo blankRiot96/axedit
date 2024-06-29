@@ -63,6 +63,7 @@ class WriteMode:
             shared.cursor.cursor_visible = True
 
     def on_write_char(self, event):
+        shared.history.insert(event.text, (shared.cursor_pos.x, shared.cursor_pos.y))
         self.write_char(event.text)
 
     def write_char(self, text):
@@ -389,6 +390,11 @@ class Editor:
             shared.cursor_x_changed = shared.cursor_pos.x != shared.previous_cursor_x
             shared.cursor_y_changed = shared.cursor_pos.y != shared.previous_cursor_y
 
+    def on_ctrl_z(self):
+        if not (shared.keys[pygame.K_LCTRL] and shared.kp[pygame.K_z]):
+            return
+        shared.history.undo()
+
     def update(self):
         if shared.typing_cmd:
             return
@@ -397,6 +403,7 @@ class Editor:
         self.on_scroll()
         self.handle_input()
         self.on_drag()
+        self.on_ctrl_z()
         if (
             hasattr(shared, "autocompletion")
             and shared.file_name is not None

@@ -15,6 +15,7 @@ from axedit.funcs import (
     set_windows_title_bar_color,
     write_config,
 )
+from axedit.input_queue import HistoryManager
 from axedit.linter import Linter
 from axedit.logs import logger
 from axedit.states import StateManager
@@ -41,6 +42,7 @@ class Core:
         shared.autocompletion = AutoCompletions()
         shared.linter = Linter()
         self.debugger = Debugger()
+        shared.history = HistoryManager()
         logger.debug("CORE INITIALIZED")
 
     def win_init(self):
@@ -108,7 +110,7 @@ class Core:
         shared.screen.fill(shared.theme["default-bg"])
         # shared.screen.blit(self.blur_effect, (0, 0))
         self.state_manager.draw()
-        self.debugger.draw()
+        # self.debugger.draw()
         pygame.display.flip()
 
     def run(self):

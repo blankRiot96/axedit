@@ -13,6 +13,7 @@ if t.TYPE_CHECKING:
     from axedit.autocompletions import AutoCompletions
     from axedit.classes import CharList, Pos
     from axedit.cursor import Cursor
+    from axedit.input_queue import HistoryManager
     from axedit.linter import Linter
 
 pygame.font.init()
@@ -78,6 +79,7 @@ theme: dict[
 config: tomlkit.TOMLDocument
 
 # Registers
+history: HistoryManager
 frame_cache: dict[t.Callable, t.Any]
 registered_number: int = 1
 action_queue: list[str]

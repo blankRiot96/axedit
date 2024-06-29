@@ -1,8 +1,68 @@
+import enum
 import re
 import typing as t
+from dataclasses import dataclass
 
 from axedit import shared
+from axedit.classes import CharList
 from axedit.utils import Time
+
+
+class Action(enum.Enum):
+    INSERT = enum.auto()
+    DELETE = enum.auto()
+
+
+@dataclass(slots=True, frozen=True)
+class HistoryElement:
+    text: str
+    pos: tuple[int, int]
+    action: Action
+
+
+class HistoryManager:
+    """Manages the file history"""
+
+    def __init__(self) -> None:
+        self.history: list[HistoryElement] = []
+
+    def insert(self, text: str, pos: tuple[int, int]):
+        self.history.append(HistoryElement(text, pos, Action.INSERT))
+
+    def delete(self, text: str, pos: tuple[int, int]):
+        self.history.append(HistoryElement(text, pos, Action.DELETE))
+
+    def _undo_insert(self, element: HistoryElement):
+        pass
+
+    def _undo_delete(self, element: HistoryElement):
+        carried_over = ""
+        lines = element.text.splitlines()
+        for i, line in enumerate(map(CharList, lines)):
+            if carried_over:
+                line.extend(carried_over)
+            y = element.pos[1] + i
+            x = 0 if i else element.pos[0]
+            try:
+                shared.chars[y][x:x] = line
+            except IndexError:
+                shared.chars.append(line)
+            carried_over = "".join(shared.chars[y][x + len(line) - len(carried_over) :])
+            if 0 < i < len(lines) - 1:
+                del shared.chars[y][x + len(line) - len(carried_over) :]
+            if i == 0:
+                del shared.chars[y][x + len(line) :]
+
+    def undo(self):
+        if not self.history:
+            return
+
+        element = self.history.pop()
+        if element.action == Action.INSERT:
+            self._undo_insert(element)
+        elif element.action == Action.DELETE:
+            self._undo_delete(element)
+
 
 PgKey: t.TypeAlias = int | str
 
