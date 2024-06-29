@@ -4,6 +4,7 @@ import socket
 import subprocess
 import sys
 import threading
+import time
 import typing as t
 from dataclasses import dataclass
 
@@ -216,6 +217,7 @@ class AutoCompletions:
         while True:
             to_upd = self.to_update()
             if not self.connected or not self.entered_editor or not to_upd:
+                time.sleep(0)
                 continue
 
             self.receive_completions()

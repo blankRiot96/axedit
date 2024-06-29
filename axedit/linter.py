@@ -4,6 +4,7 @@ import socket
 import subprocess
 import sys
 import threading
+import time
 
 import pygame
 
@@ -135,6 +136,7 @@ class Linter:
 
     def threaded_lints_receiver(self) -> None:
         while True:
+            time.sleep(0)
             if not self.connected:
                 continue
 
