@@ -39,8 +39,8 @@ class EditorState:
         self.reset_xy()
 
     def reset_xy(self):
-        self.previous_x = shared.cursor_pos.x
-        self.previous_y = shared.cursor_pos.y
+        shared.previous_cursor_x = shared.cursor_pos.x
+        shared.previous_cursor_y = shared.cursor_pos.y
 
     def shared_reset(self):
         shared.chars_changed = True
@@ -136,8 +136,8 @@ class EditorState:
         self.handle_font_offset()
         shared.cursor.update()
 
-        shared.cursor_x_changed = shared.cursor_pos.x != self.previous_x
-        shared.cursor_y_changed = shared.cursor_pos.y != self.previous_y
+        shared.cursor_x_changed = shared.cursor_pos.x != shared.previous_cursor_x
+        shared.cursor_y_changed = shared.cursor_pos.y != shared.previous_cursor_y
 
         self.editor.update()
         self.line_numbers.update()

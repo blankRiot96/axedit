@@ -84,6 +84,8 @@ action_queue: list[str]
 action_str: str
 scroll: pygame.Vector2
 line_number_digits: int = 6
+previous_cursor_x: int
+previous_cursor_y: int
 
 # Flags
 autocompleting = False

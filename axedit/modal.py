@@ -304,8 +304,10 @@ def on_zz():
 def on_gg():
     shared.scroll.x, shared.scroll.y = 0, 0
     shared.cursor_pos.x, shared.cursor_pos.y = 0, 0
+    shared.chars_changed = True
 
 
 def on_G():
     shared.cursor_pos.y = len(shared.chars) - 1
     shared.cursor_pos.x = len(shared.chars[-1])
+    center_cursor()

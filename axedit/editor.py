@@ -353,6 +353,12 @@ class Editor:
         for event in shared.events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 shared.cursor_pos = self.get_placement()
+                shared.cursor_x_changed = (
+                    shared.cursor_pos.x != shared.previous_cursor_x
+                )
+                shared.cursor_y_changed = (
+                    shared.cursor_pos.y != shared.previous_cursor_y
+                )
 
     def clear_queue(self):
         if shared.mode in (shared.FileState.NORMAL, shared.FileState.VISUAL):
@@ -380,6 +386,8 @@ class Editor:
                 self.first_drag = True
             shared.mode = FileState.VISUAL
             shared.cursor_pos = self.get_placement()
+            shared.cursor_x_changed = shared.cursor_pos.x != shared.previous_cursor_x
+            shared.cursor_y_changed = shared.cursor_pos.y != shared.previous_cursor_y
 
     def update(self):
         if shared.typing_cmd:
