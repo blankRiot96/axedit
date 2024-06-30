@@ -265,14 +265,22 @@ class Cursor:
 
         if shared.action_str == "d":
             # Join the two half eaten lines
-            shared.chars[lower_meniscus_y] = lower_line + upper_line
+            try:
+                if lower_meniscus_y == upper_meniscus_y:
+                    shared.chars[lower_meniscus_y] = lower_line
+                else:
+                    shared.chars[lower_meniscus_y] = lower_line + upper_line
+            except IndexError:
+                logger.info(f"{shared.cursor_pos = }")
+                logger.info(f"{len(shared.chars) = }; {lower_meniscus_y = };")
+
             try:
                 shared.chars.pop(lower_meniscus_y + 1)
             except IndexError:
                 pass
-            # shared.cursor_pos = Pos(
-            #     shared.visual_mode_axis.x, shared.visual_mode_axis.y
-            # )
+            shared.cursor_pos = Pos(
+                shared.visual_mode_axis.x, shared.visual_mode_axis.y
+            )
 
             # Copy the deleted content to the clipboard
             shared.history.delete(copy_output, original_pos)

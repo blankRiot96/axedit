@@ -132,12 +132,12 @@ class AutoCompletions:
         text = get_text()
         loc = (shared.cursor_pos.x, shared.cursor_pos.y + 1)
 
-        data = {"text": text, "loc": loc, "fuzzy": False}
-        data = json.dumps(data)
-        l = len(data.encode())
+        data_to_send = {"text": text, "loc": loc, "fuzzy": False}
+        data_to_send = json.dumps(data_to_send)
+        l = len(data_to_send.encode())
 
         try:
-            self.client_socket.sendall(f"{l};{data}".encode())
+            self.client_socket.sendall(f"{l};{data_to_send}".encode())
         except OSError:
             exit()
         while True:
@@ -162,6 +162,7 @@ class AutoCompletions:
                 # ***
                 break
             except socket.error as e:
+                logger.info(f"{data_to_send = }")
                 logger.error(e)
                 exit()
 

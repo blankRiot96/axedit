@@ -1,5 +1,6 @@
 import os
 import platform
+import time
 from pathlib import Path
 
 import pygame
@@ -46,7 +47,19 @@ class Core:
         logger.debug("CORE INITIALIZED")
 
     def win_init(self):
-        shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE, vsync=1)
+        pygame.display.set_caption(shared.APP_NAME)
+        shared.screen = pygame.display.set_mode((1100, 650), pygame.RESIZABLE)
+
+        refresh_rate = pygame.display.get_current_refresh_rate()
+        if refresh_rate == 0:
+            self.fps = 60
+        elif refresh_rate <= 120:
+            self.fps = refresh_rate
+        else:
+            self.fps = refresh_rate / 2
+
+        logger.debug(f"RUNNING AT {self.fps} FPS")
+
         shared.srect = shared.screen.get_rect()
         shared.frame_cache = {}
         shared.clock = pygame.Clock()
@@ -56,7 +69,6 @@ class Core:
         icon = get_icon(shared.theme["default-fg"])
         pygame.display.set_icon(icon)
 
-        pygame.display.set_caption(shared.APP_NAME)
         if platform.system() == "Windows":
             set_windows_title_bar_color()
             set_windows_title()
@@ -71,7 +83,7 @@ class Core:
     def shared_frame_refresh(self):
         shared.frame_cache.clear()
         shared.events = pygame.event.get()
-        shared.dt = shared.clock.tick() / 1000
+        shared.dt = shared.clock.tick(self.fps) / 1000
         shared.dt = min(shared.dt, 0.1)
         shared.keys = pygame.key.get_pressed()
         shared.kp = pygame.key.get_just_pressed()
@@ -104,11 +116,9 @@ class Core:
 
         self.on_ctrl_question()
         self.debugger.update()
-        # pygame.display.set_caption(f"{self.clock.get_fps():.0f}")
 
     def draw(self):
         shared.screen.fill(shared.theme["default-bg"])
-        # shared.screen.blit(self.blur_effect, (0, 0))
         self.state_manager.draw()
         # self.debugger.draw()
         pygame.display.flip()

@@ -53,7 +53,11 @@ class HistoryManager:
             if i == 0:
                 del shared.chars[y][x + len(line) :]
 
+        shared.cursor_pos.x = len(line) + x - len(carried_over)
+        shared.cursor_pos.y = y
+
     def undo(self):
+        return
         if not self.history:
             return
 
