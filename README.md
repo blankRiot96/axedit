@@ -41,4 +41,5 @@ Note: Writing to/Saving the file also invokes on-save hooks
 | `:line-numbers:relative on/off` | Set whether line no to be relative |
 
 ### Credits
-- [kleur](https://github.com/Suyashtnt/kleur) theme by [Suyashtnt](https://github.com/Suyashtnt/) 
+
+- [kleur](https://github.com/Suyashtnt/kleur) theme by [Suyashtnt](https://github.com/Suyashtnt/)
