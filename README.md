@@ -9,9 +9,29 @@
 
 </div>
 
-## Keymaps
+## About
 
-### Modal bindings
+Axedit is a light, fast and aesthetic modal editor for Python. Attempts to implement vim-like motions.
+
+## Installation
+
+```
+pip install axedit
+```
+
+## Usage
+
+Run `axe` on your project folder
+
+## Features
+
+### Provisions
+
+- Linting offered with `ruff`. Tracks your `pyproject.toml` or `ruff.toml` for ruff specific configuration
+- Autocompletions with `jedi`
+- Syntax highlighting self implemented (for now)
+
+### Modal Bindings
 
 | Keys  | Action      |
 | ----- | ----------- |
@@ -19,33 +39,38 @@
 | `v`   | Visual mode |
 | `ESC` | Normal mode |
 
-### Cursor bindings
+### Cursor Motions
 
- <!-- TODO: Continue this :) -->
+| Keys | Action                     |
+| ---- | -------------------------- |
+| `h`  | Move cursor left           |
+| `l`  | Move cursor right          |
+| `j`  | Move cursor down           |
+| `k`  | Move cursor up             |
+| `w`  | Move to the next word      |
+| `{`  | Move to previous paragraph |
+| `}`  | Move to next paragraph     |
+| `0`  | Move to start of the line  |
+| `$`  | Move to end of the line    |
 
-| Keys | Action            |
-| ---- | ----------------- |
-| `h`  | Move cursor left  |
-| `l`  | Move cursor right |
-| `j`  | Move cursor down  |
-| `k`  | Move cursor up    |
+### Editor Commands
 
-### Commands
-
-Note: Writing to/Saving the file also invokes on-save hooks
-
-| Command                         | Action                             |
-| ------------------------------- | ---------------------------------- |
-| `:`                             | Previous command                   |
-| `:q[uit]`                       | Quit the editor                    |
-| `:w[write]`                     | Write the file                     |
-| `:wq` or `:x`                   | Write and quit the editor          |
-| `:save[as] file-name`           | Save the file as                   |
-| `:rn` or `:rename`              | Rename the file                    |
-| `:theme theme-name`             | Set the theme of the editor        |
-| `:hooks`                        | Open the on-save hooks file        |
-| `:line-numbers:relative on/off` | Set whether line no to be relative |
+| Command               | Action                                   |
+| --------------------- | ---------------------------------------- |
+| `:q[uit]`             | Quit the editor                          |
+| `:w[write]`           | Write the file                           |
+| `:wq` or `:x`         | Write and quit the editor                |
+| `:save[as] file-name` | Save the file as                         |
+| `:rn` or `:rename`    | Rename the file                          |
+| `:theme theme-name`   | Set the theme of the editor              |
+| `:config`             | Open the config file                     |
+| `:reset-config`       | Reset the editor's config to its default |
+| `:reload-config`      | Apply the config                         |
+| `:rel-no on/off`      | Set whether line no to be relative       |
 
 ### Credits
 
-- [kleur](https://github.com/Suyashtnt/kleur) theme by [Suyashtnt](https://github.com/Suyashtnt/)
+- [Matt](https://github.com/Matiiss) - For VCing with me and frankly solving major issues which would have delayed the release by months otherwise
+- [Dylan](https://github.com/Dylan-DPC) - For always giving me direction on what to do
+- Tim - For suggesting the idea of a modal text editor
+- [Suyashtnt](https://github.com/Suyashtnt/) - For providing the [kleur](https://github.com/Suyashtnt/kleur) theme
