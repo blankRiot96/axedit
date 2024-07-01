@@ -1,6 +1,12 @@
 <div align="center">
-    <img src="https://github.com/blankRiot96/editor/assets/77634274/d087fa6e-7225-45f9-b100-53df78a3000f" width=700>
-    <img src="https://github.com/blankRiot96/editor/assets/77634274/b3e62314-2eb1-4ef9-860f-cfb640cd2b0c">
+    <img src="https://github.com/blankRiot96/editor/assets/77634274/d087fa6e-7225-45f9-b100-53df78a3000f" width=700><br>
+    <a href=""><img src="https://img.shields.io/badge/License-MIT-green"></a>
+    <a href=""><img src="https://img.shields.io/badge/Style-Black-black"></a>
+    <a href=""><img src="https://img.shields.io/badge/Python-3.12-blue"></a>
+    <a href=""><img src="https://img.shields.io/badge/Platforms-Windows, Mac, Linux-1E1E2E"></a>
+    <a href=""><img src="https://img.shields.io/badge/Contributors-Welcome-A6E3A1"></a><br>
+    <img src="https://github.com/blankRiot96/editor/assets/77634274/b3e62314-2eb1-4ef9-860f-cfb640cd2b0c"><br>
+
 </div>
 
 ## Keymaps
