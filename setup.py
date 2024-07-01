@@ -2,10 +2,10 @@ from pathlib import Path
 
 from setuptools import find_packages, setup
 
-VERSION = "0.1.1"
-DESCRIPTION = "Modal Editor"
-LONG_DESCRIPTION = """A Modal Text editor that
-focuses on aesthetics, functionality and usability."""
+VERSION = "0.1.2"
+DESCRIPTION = "Modal Text Editor"
+LONG_DESCRIPTION = """Axedit is a light, fast and aesthetic modal editor for Python. 
+Attempts to implement vim-like motions."""
 
 setup(
     name="axedit",
@@ -15,7 +15,15 @@ setup(
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     packages=find_packages(),
-    install_requires=["pygame-ce", "tomlkit", ""],
+    install_requires=[
+        "pygame-ce",
+        "tomlkit",
+        "jedi",
+        "colorama",
+        "PyYAML",
+        "rapidfuzz",
+        "clipboard",
+    ],
     python_requires=">=3.11",
     keywords=["editor"],
     classifiers=[
@@ -26,9 +34,5 @@ setup(
     ],
     entry_points={"console_scripts": ["axedit=axedit:main", "axe=axedit:main"]},
     include_package_data=True,
-    # data_files=[
-    #     "axedit/assets/fonts/IntoneMonoNerdFontMono-Regular.ttf",
-    #     "axedit/assets/images/logo.png",
-    # ],
     data_files=[str(p) for p in Path("axedit/assets/").rglob("*") if not p.is_dir()],
 )
