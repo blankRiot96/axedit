@@ -15,7 +15,7 @@ setup(
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     packages=find_packages(),
-    install_requires=["pygame-ce"],
+    install_requires=["pygame-ce", "tomlkit", ""],
     python_requires=">=3.11",
     keywords=["editor"],
     classifiers=[
@@ -30,5 +30,5 @@ setup(
     #     "axedit/assets/fonts/IntoneMonoNerdFontMono-Regular.ttf",
     #     "axedit/assets/images/logo.png",
     # ],
-    data_files=[str(p) for p in Path("assets/").rglob("*") if not p.is_dir()],
+    data_files=[str(p) for p in Path("axedit/assets/").rglob("*") if not p.is_dir()],
 )

@@ -10,7 +10,7 @@ from axedit import shared
 from axedit.funcs import safe_close_connections
 from axedit.logs import logger
 
-FOLDER_PATH = shared.AXE_FOLDER_PATH.parent
+FOLDER_PATH = shared.AXE_FOLDER_PATH
 LOG_FILE_PATH = FOLDER_PATH / "app.log"
 WARN_FILE_PATH = FOLDER_PATH / "warns.log"
 PROFILE_FILE_PATH = FOLDER_PATH / "main.prof"
@@ -20,7 +20,7 @@ def detached_main() -> None:
     """This function invokes the actual editor in a separate process
     and exits the terminal!"""
 
-    main_path = FOLDER_PATH / "main.py"
+    main_path = FOLDER_PATH / "__main__.py"
     command = [sys.executable, str(main_path.absolute()), "--hidden-debug"]
 
     if "--profile" in sys.argv:
