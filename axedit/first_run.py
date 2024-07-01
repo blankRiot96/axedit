@@ -32,7 +32,7 @@ def apply_config():
     shared.config = get_config()
     shared.FONT_SIZE = shared.config["font"]["size"]
     if shared.config["font"]["path"] not in ("default", False):
-        logger.debug("Applying path font")
+        logger.info("Applying path font")
         shared.FONT = pygame.Font(
             shared.config["font"]["path"], shared.config["font"]["size"]
         )
@@ -41,7 +41,7 @@ def apply_config():
         shared.FONT_HEIGHT = shared.FONT.get_height()
 
     elif shared.config["font"]["family"]:
-        logger.debug("Apply family font")
+        logger.info("Apply family font")
         shared.FONT = pygame.sysfont.SysFont(
             shared.config["font"]["family"], shared.config["font"]["size"]
         )

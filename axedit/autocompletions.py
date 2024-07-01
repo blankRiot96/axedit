@@ -81,7 +81,7 @@ class AutoCompletions:
         while True:
             try:
                 self.server_port = random.randint(1024, 65535)
-                logger.debug(f"AutoCompletion PORT={self.server_port}")
+                logger.info(f"AutoCompletion PORT={self.server_port}")
                 command = [
                     sys.executable,
                     str(lang_server_path.absolute()),

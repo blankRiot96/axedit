@@ -23,7 +23,7 @@ from axedit.states import StateManager
 
 
 def true_exit():
-    logger.debug("EXIT CALLED")
+    logger.info("EXIT CALLED")
     write_config()
     safe_close_connections()
 
@@ -44,7 +44,7 @@ class Core:
         shared.linter = Linter()
         self.debugger = Debugger()
         shared.history = HistoryManager()
-        logger.debug("CORE INITIALIZED")
+        logger.info("CORE INITIALIZED")
 
     def win_init(self):
         pygame.display.set_caption(shared.APP_NAME)
@@ -58,7 +58,7 @@ class Core:
         else:
             self.fps = refresh_rate / 2
 
-        logger.debug(f"RUNNING AT {self.fps} FPS")
+        logger.info(f"RUNNING AT {self.fps} FPS")
 
         shared.srect = shared.screen.get_rect()
         shared.frame_cache = {}
@@ -103,7 +103,7 @@ class Core:
         pygame.image.save(shared.screen, Path("/home/axis/p/editor/showcase.png"))
         query = "convert ~/p/editor/showcase.png \( +clone -background black -shadow 50x10+15+15 \) +swap -background none -layers merge +repage ~/p/editor/showcase.png"
         os.system(query)
-        logger.debug("Showcased screenshot")
+        logger.info("Showcased screenshot")
 
     def update(self):
         self.shared_frame_refresh()

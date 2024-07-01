@@ -28,7 +28,7 @@ class LineNumbers:
         max_line_digits = len(f"{shared.cursor_pos.y + end_of_page_lno:.0f}")
         shared.line_number_digits = max_line_digits + 4
 
-        # logger.debug(
+        # logger.info(
         #     f"{end_of_page_lno=}, {max_line_digits=}, {shared.line_number_digits=}"
         # )
 

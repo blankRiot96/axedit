@@ -22,7 +22,7 @@ def on_percent() -> None:
             row: list
             try:
                 start_find = shared.cursor_pos.x + 1 if y_offset == 0 else 0
-                # logger.debug(f"{"".join(row)=}, {brakies[current_char]=}, {start_find=}")
+                # logger.info(f"{"".join(row)=}, {brakies[current_char]=}, {start_find=}")
 
                 ignore_count = 0
                 for i, char in enumerate(row[start_find:]):
@@ -56,7 +56,7 @@ def on_percent() -> None:
                 start_find = shared.cursor_pos.x if y_offset == 0 else len(row)
 
                 ignore_count = 0
-                # logger.debug(row[:start_find][::-1])
+                # logger.info(row[:start_find][::-1])
                 for i, char in enumerate(row[:start_find][::-1]):
                     if char == current_char:
                         ignore_count += 1

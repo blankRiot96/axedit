@@ -49,7 +49,7 @@ class Linter:
         while True:
             try:
                 self.server_port = random.randint(1024, 65535)
-                logger.debug(f"Linter PORT={self.server_port}")
+                logger.info(f"Linter PORT={self.server_port}")
                 command = [
                     sys.executable,
                     str(lang_server_path.absolute()),
@@ -175,7 +175,12 @@ class Linter:
         bound_rect = squiggly_surf.get_bounding_rect()
         if shared.config["squiggly"]["type"] == "cut-off":
             bound_rect.width = squiggly_bum
-        squiggly_surf = squiggly_surf.subsurface(bound_rect).copy()
+        try:
+            squiggly_surf = squiggly_surf.subsurface(bound_rect).copy()
+        except ValueError:
+            logger.debug(bound_rect)
+            logger.debug(squiggly_bum)
+            pass
 
         squiggly_rect = pygame.Rect(
             (
@@ -187,7 +192,6 @@ class Linter:
         if shared.config["squiggly"]["type"] == "centered-free":
             squiggly_rect = squiggly_surf.get_rect(center=squiggly_rect.center)
         else:
-            ...
             squiggly_rect.y += shared.FONT_HEIGHT * 0.5
         editor_surf.blit(squiggly_surf, squiggly_rect)
 

@@ -22,8 +22,8 @@ if len(sys.argv) > 2 and sys.argv[2] == "--warn":
 
 class CustomFormatter(logging.Formatter):
     COLORS = {
-        logging.DEBUG: colorama.Fore.GREEN,
-        logging.INFO: colorama.Fore.WHITE,
+        logging.DEBUG: colorama.Fore.WHITE,
+        logging.INFO: colorama.Fore.GREEN,
         logging.WARNING: colorama.Fore.YELLOW,
         logging.ERROR: colorama.Fore.RED,
         logging.CRITICAL: colorama.Fore.MAGENTA,
