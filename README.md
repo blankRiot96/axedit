@@ -1,6 +1,6 @@
 <div align="center">
-    <h1>Modal Editor</h1>
-    A modal editor
+    <img src="https://github.com/blankRiot96/editor/assets/77634274/d087fa6e-7225-45f9-b100-53df78a3000f" width=700>
+    <img src="https://github.com/blankRiot96/editor/assets/77634274/b3e62314-2eb1-4ef9-860f-cfb640cd2b0c">
 </div>
 
 ## Keymaps
