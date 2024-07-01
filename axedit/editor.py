@@ -339,7 +339,7 @@ class Editor:
             y_pos = len(shared.chars) - 1
 
         if x_pos > len(shared.chars[y_pos]) - 1:
-            x_pos = len(shared.chars[y_pos])
+            x_pos = len(shared.chars[y_pos]) - 1
 
         x_pos = max(x_pos, 0)
         y_pos = max(y_pos, 0)
