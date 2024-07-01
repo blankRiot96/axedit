@@ -68,7 +68,7 @@ Run `axe` on your project folder
 | `:reload-config`      | Apply the config                         |
 | `:rel-no on/off`      | Set whether line no to be relative       |
 
-### Credits
+## Credits
 
 - [Matt](https://github.com/Matiiss) - For VCing with me and frankly solving major issues which would have delayed the release by months otherwise
 - [Dylan](https://github.com/Dylan-DPC) - For always giving me direction on what to do
