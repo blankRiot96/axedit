@@ -63,7 +63,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
             try:
                 completions = script.complete(y, x)
             except ValueError as e:
-                raise ValueError(e)
+                # raise ValueError(e)
+                completions = []
+
+                response = json.dumps(completions).encode()
+                response = f"{len(response)};{response.decode()}".encode()
+
+                conn.sendall(response)
+                continue
 
             if received_data["fuzzy"]:
                 prefix_name = received_data["prefix_name"]

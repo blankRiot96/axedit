@@ -164,7 +164,9 @@ class AutoCompletions:
             except socket.error as e:
                 logger.info(f"{data_to_send = }")
                 logger.error(e)
-                exit()
+                continue
+
+                # exit()
 
         if self.post_receive_clarity:
             self.post_receive_clarity = False
@@ -239,6 +241,9 @@ class AutoCompletions:
     def update(self):
         shared.autocompleting = bool(self.completions)
         self.entered_editor = True
+        if shared.mode != FileState.INSERT:
+            self.completions = []
+            return
         if not self.connected:
             return
 
