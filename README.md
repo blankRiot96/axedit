@@ -30,6 +30,8 @@ Run `axe` on your project folder
 - Linting offered with `ruff`. Tracks your `pyproject.toml` or `ruff.toml` for ruff specific configuration
 - Autocompletions with `jedi`
 - Syntax highlighting self implemented (for now)
+- 20+ Themes available - Gruvbox, Catppuccin, One Dark, Rosepine etc.
+- Font, Opacity, On Save hooks, Manner of squiggly lines and Theme are configurable. See [config.toml](https://github.com/blankRiot96/axedit/blob/main/axedit/assets/data/default_config/config.toml)
 
 ### Modal Bindings
 
