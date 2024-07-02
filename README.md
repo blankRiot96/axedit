@@ -59,7 +59,7 @@ Run `axe` on your project folder
 | Command               | Action                                   |
 | --------------------- | ---------------------------------------- |
 | `:q[uit]`             | Quit the editor                          |
-| `:w[write]`           | Write the file                           |
+| `:w[rite]`            | Write the file                           |
 | `:wq` or `:x`         | Write and quit the editor                |
 | `:save[as] file-name` | Save the file as                         |
 | `:rn` or `:rename`    | Rename the file                          |
