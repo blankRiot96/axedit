@@ -109,7 +109,7 @@ def main():
     profiling = "--profile" in sys.argv
     debugging = "--debug" in sys.argv or "--hidden-debug" in sys.argv
     if profiling and debugging:
-        main_path = shared.AXE_FOLDER_PATH.parent / "main.py"
+        main_path = shared.AXE_FOLDER_PATH / "__main__.py"
         os.system(
             f"{sys.executable} -m cProfile -o '{PROFILE_FILE_PATH.absolute()}' '{main_path.absolute()}' --debug"
         )
