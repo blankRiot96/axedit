@@ -132,6 +132,7 @@ def _gausian_sub(char: str):
 
 
 def set_windows_title_bar_color() -> None:
+    logger.info("Setting windows title bar color")
     from ctypes import byref, c_int, sizeof, windll
 
     info = pygame.display.get_wm_info()
@@ -149,8 +150,10 @@ def set_windows_title_bar_color() -> None:
 
 
 def set_windows_title() -> None:
-    if platform.system != "Windows":
+    if platform.system() != "Windows":
         return
+
+    logger.info("Setting windows title")
     title_bar_text = shared.APP_NAME
 
     if shared.file_name is not None:
