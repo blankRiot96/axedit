@@ -47,12 +47,16 @@ class LineNumbers:
         )
 
     def draw_lines(self):
+        rel = shared.config["line_numbers"]["relative"]
         max_lines = int(shared.srect.height / shared.FONT_HEIGHT)
         for i in range(max_lines):
             alpha = 150
 
             lno = i + self.scroll_char_offset
-            num = abs(shared.cursor_pos.y - lno)
+            if rel:
+                num = abs(shared.cursor_pos.y - lno)
+            else:
+                num = lno + 1
             if lno == shared.cursor_pos.y:
                 alpha = 255
                 num = lno + 1
