@@ -119,7 +119,7 @@ class CommandBar:
                 self.apply_selected_theme,
                 subs=get_available_theme_names(),
             ),
-            Command(":rel-no", exit, subs=["on", "off"]),
+            Command(":rel-no", ..., subs=["on", "off"]),
             Command((":rename", ":rn"), self.on_rename),
             Command(":config", self.go_to_config),
             Command(":reset-config", self.on_reset_config),

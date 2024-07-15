@@ -88,7 +88,10 @@ class EditorState:
 
         for event in shared.events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_EQUALS:
+                if (
+                    event.key in (pygame.K_EQUALS, pygame.K_PLUS)
+                    or event.unicode == "="
+                ):
                     offset_font_size(self.offset)
                     shared.action_queue.clear()
                 elif event.key == pygame.K_MINUS:
