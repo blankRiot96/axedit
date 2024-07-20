@@ -1,0 +1,12 @@
+[project]
+name = "axedit"
+version = "0.1.0.dev"
+dependencies = ["pygame-ce"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+axe = "axedit:cli.run"
+axedit = "axedit:cli.run"
