@@ -6,12 +6,16 @@ from axedit.internals import Internals
 
 
 class StateLike(t.Protocol):
+    """The blueprint of a state object"""
+
     def update(self): ...
 
     def draw(self): ...
 
 
 class StateManager:
+    """Handles the creation of new states"""
+
     def __init__(self, internals: Internals) -> None:
         self._internals = internals
         self.state_dict: dict[AppState, StateLike] = {
