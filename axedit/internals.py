@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pygame
 
+from axedit.enums import AppState
+
 
 class Internals:
     """Provides internals information via a strict API"""
@@ -13,6 +15,7 @@ class Internals:
         self._clock = pygame.Clock()
         self.dt = 0.0
         self.events: list[pygame.Event] = []
+        self.next_app_state: AppState | None = None
 
     @classmethod
     def register_path_selection(cls, path: Path) -> None:
