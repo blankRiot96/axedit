@@ -1,7 +1,7 @@
 [project]
 name = "axedit"
 version = "0.1.0.dev"
-dependencies = ["pygame-ce"]
+dependencies = ["pygame-ce", "click"]
 
 [build-system]
 requires = ["setuptools"]

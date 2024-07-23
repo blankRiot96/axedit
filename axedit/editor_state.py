@@ -1,3 +1,4 @@
+from axedit.editor_interface import EditorInterface
 from axedit.internals import Internals
 
 
@@ -6,9 +7,10 @@ class EditorState:
 
     def __init__(self, internals: Internals) -> None:
         self._internals = internals
+        self.interface = EditorInterface(self._internals)
 
     def update(self):
-        pass
+        self.interface.update()
 
     def draw(self):
-        pass
+        self.interface.draw()

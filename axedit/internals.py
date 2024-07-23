@@ -16,6 +16,7 @@ class Internals:
         self.dt = 0.0
         self.events: list[pygame.Event] = []
         self.next_app_state: AppState | None = None
+        self.window_rect = pygame.Rect(0, 0, 1100, 650)
 
     @classmethod
     def register_path_selection(cls, path: Path) -> None:
@@ -36,3 +37,5 @@ class Internals:
         for event in self.events:
             if event.type == pygame.QUIT:
                 raise SystemExit
+            elif event.type == pygame.VIDEORESIZE:
+                self.window_rect.size = event.size
