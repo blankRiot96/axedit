@@ -1,7 +1,10 @@
 import asyncio
+import logging
 
 from lsprotocol import types
 from pygls.lsp.client import BaseLanguageClient
+
+logging.basicConfig(level=logging.INFO)
 
 
 class LanguageClient(BaseLanguageClient):
@@ -25,26 +28,57 @@ class LanguageClient(BaseLanguageClient):
 async def main():
     client = LanguageClient("example-client", "v1")
     await client.start_io("basedpyright-langserver", "--stdio")
-    # await client.start_io("pyright-langserver", "--stdio")
+    # await client.start_io("pylsp")
     await client.initialize_async(
         types.InitializeParams(
-            capabilities=types.ClientCapabilities(),
-            root_uri="file:///home/axis/p/axedit",
+            capabilities=types.ClientCapabilities(
+                text_document=types.TextDocumentClientCapabilities(
+                    semantic_tokens=types.SemanticTokensClientCapabilities(
+                        requests=types.SemanticTokensClientCapabilitiesRequestsType(
+                            range=True, full=True
+                        ),
+                        # full list of token types & modifiers here:
+                        # https://github.com/DetachHead/basedpyright/blob/010fd19059944942311b7c5a4148ca30f892f8a0/packages/pyright-internal/src/languageService/semanticTokensProvider.ts#L19-L39
+                        token_types=["class", "type", "function"],
+                        token_modifiers=[],
+                        formats=[types.TokenFormat.Relative],
+                    )
+                )
+            ),
+            # capabilities=types.ClientCapabilities(),
+            # workspace_folders=[
+            #     types.WorkspaceFolder("folder", "file:///home/axis/p/axedit")
+            # ],
         )
     )
     client.initialized(types.InitializedParams())
+    client.workspace_did_change_configuration(
+        types.DidChangeConfigurationParams(types.ConfigurationParams([]))
+    )
+
+    @client.feature(types.WINDOW_LOG_MESSAGE)
+    def log_message(ls: LanguageClient, params: types.LogMessageParams):
+        pass
+
+    file_path = "file:///home/axis/p/axedit/tree.py"
+    client.text_document_did_open(
+        types.DidOpenTextDocumentParams(
+            text_document=types.TextDocumentItem(
+                uri=file_path, language_id="python", version=1, text="pr"
+            )
+        )
+    )
 
     response = await client.text_document_completion_async(
         types.CompletionParams(
-            types.TextDocumentIdentifier("file:///home/axis/p/axedit/axedit/cli.py"),
-            types.Position(0, 2),
+            types.TextDocumentIdentifier(file_path),
+            types.Position(0, 1),
         )
     )
-    print(f"AUTOCOMPLETE RESULTS = {response}")
+    print(f"AUTOCOMPLETE RESULTS = {[item.label for item in response.items]}")
+
     response = await client.text_document_semantic_tokens_full_async(
-        types.SemanticTokensParams(
-            types.TextDocumentIdentifier("file:///home/axis/p/axedit/axedit/cli.py")
-        )
+        types.SemanticTokensParams(types.TextDocumentIdentifier(file_path))
     )
     print(f"SEMANTIC TOKENS RESULT = {response}")
 

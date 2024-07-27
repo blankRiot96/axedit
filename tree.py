@@ -8,7 +8,7 @@ from rich.console import Console
 file = "test.rs" if len(sys.argv) == 1 else sys.argv[1]
 
 language = Path(file).suffix
-language_mapping = {".rs": "rust", ".py": "python"}
+language_mapping = {".rs": "rust", ".py": "python", ".c": "c"}
 
 language_id = language_mapping.get(language)
 module = __import__(f"tree_sitter_{language_id}")
