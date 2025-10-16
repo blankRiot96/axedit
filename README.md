@@ -10,7 +10,7 @@
 
 ## About
 
-Axedit is a light, fast and aesthetic modal editor for Python. Attempts to implement vim-like motions.
+Axedit is a modal text editor for Python. Attempts to implement vim-like motions.
 
 ## Installation
 
