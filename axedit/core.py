@@ -1,7 +1,4 @@
-import os
 import platform
-import time
-from pathlib import Path
 
 import pygame
 from pygame._sdl2 import Window
@@ -20,17 +17,6 @@ from axedit.input_queue import HistoryManager
 from axedit.linter import Linter
 from axedit.logs import logger
 from axedit.states import StateManager
-
-
-def true_exit():
-    logger.info("EXIT CALLED")
-    write_config()
-    safe_close_connections()
-
-    raise SystemExit
-
-
-__builtins__["exit"] = true_exit
 
 
 class Core:
@@ -76,7 +62,7 @@ class Core:
     def event_handler(self):
         for event in shared.events:
             if event.type == pygame.QUIT:
-                exit()
+                shared.running = False
             elif event.type == pygame.VIDEORESIZE:
                 shared.srect = shared.screen.get_rect()
 
@@ -92,19 +78,6 @@ class Core:
         shared.theme_changed = False
         shared.mouse_press = pygame.mouse.get_pressed()
 
-    def on_ctrl_question(self):
-        if not (
-            shared.keys[pygame.K_LCTRL]
-            and shared.keys[pygame.K_LSHIFT]
-            and shared.kp[pygame.K_SLASH]
-        ):
-            return
-
-        pygame.image.save(shared.screen, Path("/home/axis/p/editor/showcase.png"))
-        query = "convert ~/p/editor/showcase.png \( +clone -background black -shadow 50x10+15+15 \) +swap -background none -layers merge +repage ~/p/editor/showcase.png"
-        os.system(query)
-        logger.info("Showcased screenshot")
-
     def update(self):
         self.shared_frame_refresh()
         self.event_handler()
@@ -114,7 +87,6 @@ class Core:
                 set_windows_title_bar_color()
             pygame.display.set_icon(get_icon(shared.theme["default-fg"]))
 
-        self.on_ctrl_question()
         self.debugger.update()
 
     def draw(self):
@@ -127,3 +99,8 @@ class Core:
         while shared.running:
             self.update()
             self.draw()
+
+        write_config()
+        safe_close_connections()
+
+        logger.info("Exiting")

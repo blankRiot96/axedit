@@ -89,31 +89,27 @@ class Linter:
             self.client_socket.sendall(f"{l};{data}".encode())
         except OSError:
             logger.critical("exit by linter?")
-            exit()
+            shared.running = False
         while True:
             self.receiving = True
-            try:
+            data = self.client_socket.recv(1024)
+
+            if not data:
+                continue
+
+            received_data = data.decode()
+            size, received_data = received_data.split(";", 1)
+
+            size = int(size)
+            size -= len(data) - len(str(size)) - 1
+            while size > 0:
                 data = self.client_socket.recv(1024)
+                size -= 1024
 
-                if not data:
-                    continue
+                received_data += data.decode()
 
-                received_data = data.decode()
-                size, received_data = received_data.split(";", 1)
-
-                size = int(size)
-                size -= len(data) - len(str(size)) - 1
-                while size > 0:
-                    data = self.client_socket.recv(1024)
-                    size -= 1024
-
-                    received_data += data.decode()
-
-                # ***
-                break
-            except socket.error as e:
-                logger.error(e)
-                exit()
+            # ***
+            break
 
         self.receiving = False
         self.lints: list[dict] = json.loads(received_data)
@@ -147,7 +143,12 @@ class Linter:
             if not self.entered_editor or not self.to_update():
                 continue
 
-            self.receive_lints()
+            try:
+                self.receive_lints()
+            except socket.error as e:
+                logger.error(e)
+                shared.running = False
+                break
 
     def update(self):
         self.entered_editor = True

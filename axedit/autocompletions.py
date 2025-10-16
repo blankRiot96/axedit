@@ -139,34 +139,27 @@ class AutoCompletions:
         try:
             self.client_socket.sendall(f"{l};{data_to_send}".encode())
         except OSError:
-            exit()
+            shared.running = False
         while True:
             self.receiving = True
-            try:
-                data = self.client_socket.recv(1024)
+            data = self.client_socket.recv(1024)
 
-                if not data:
-                    continue
-
-                received_data = data.decode()
-                size, received_data = received_data.split(";", 1)
-
-                size = int(size)
-                size -= len(data) - len(str(size)) - 1
-                while size > 0:
-                    data = self.client_socket.recv(1024)
-                    size -= 1024
-
-                    received_data += data.decode()
-
-                # ***
-                break
-            except socket.error as e:
-                logger.info(f"{data_to_send = }")
-                logger.error(e)
+            if not data:
                 continue
 
-                # exit()
+            received_data = data.decode()
+            size, received_data = received_data.split(";", 1)
+
+            size = int(size)
+            size -= len(data) - len(str(size)) - 1
+            while size > 0:
+                data = self.client_socket.recv(1024)
+                size -= 1024
+
+                received_data += data.decode()
+
+            # ***
+            break
 
         if self.post_receive_clarity:
             self.post_receive_clarity = False
@@ -223,7 +216,11 @@ class AutoCompletions:
                 time.sleep(0)
                 continue
 
-            self.receive_completions()
+            try:
+                self.receive_completions()
+            except socket.error as e:
+                logger.error(e)
+                break
 
     def shuffle_suggestions(self):
         if shared.kp[pygame.K_DOWN]:

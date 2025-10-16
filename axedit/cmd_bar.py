@@ -154,7 +154,7 @@ class CommandBar:
 
     def on_save_exit(self):
         soft_save_file()
-        exit()
+        shared.running = False
 
     def on_rename(self):
         shared.naming_file = True
@@ -233,7 +233,7 @@ class CommandBar:
             self.selected_row = 0
 
     def on_quit(self):
-        exit()
+        shared.running = False
 
     def gen_blank_surf(self) -> None:
         self.surf = pygame.Surface((shared.srect.width, shared.FONT_HEIGHT))
