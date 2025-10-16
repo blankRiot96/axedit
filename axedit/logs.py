@@ -1,23 +1,20 @@
-import inspect
 import logging
-import sys
 import warnings
 from pathlib import Path
 
 import colorama
+from platformdirs import user_log_dir
 
-FILE_PATH = Path(inspect.getfile(inspect.currentframe()))
-LOG_FILE_PATH = FILE_PATH.parent.parent / "app.log"
-WARN_FILE_PATH = FILE_PATH.parent.parent / "warns.log"
+log_dir = Path(user_log_dir("axedit"))
+log_dir.mkdir(parents=True, exist_ok=True)
+
+LOG_FILE_PATH = log_dir / "app.log"
+WARN_FILE_PATH = log_dir / "warns.log"
 LOGGING_DATE_FMT = "%H:%M:%S"
 WHITELISTED_LOGGERS = ["axedit"]
 LOG_FORMAT = "[%(name)s](%(filename)s:%(lineno)d) %(message)s"
 
-if len(sys.argv) > 1 and sys.argv[1] in ("--debug", "--hidden-debug"):
-    warnings.simplefilter("always")
-
-if len(sys.argv) > 2 and sys.argv[2] == "--warn":
-    WHITELISTED_LOGGERS.append("py.warnings")
+warnings.simplefilter("always")
 
 
 class CustomFormatter(logging.Formatter):
@@ -41,17 +38,16 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def axe_filter(logger: logging.Logger) -> bool:
+def axe_filter(logger: logging.LogRecord) -> bool:
     return logger.name in WHITELISTED_LOGGERS
 
 
 handlers = []
 
-if len(sys.argv) > 1 and sys.argv[1] in ("--debug", "--hidden-debug"):
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(CustomFormatter())
-    stream_handler.addFilter(axe_filter)
-    handlers.append(stream_handler)
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(CustomFormatter())
+stream_handler.addFilter(axe_filter)
+handlers.append(stream_handler)
 
 file_handler = logging.FileHandler(LOG_FILE_PATH)
 file_handler.setFormatter(CustomFormatter())
@@ -70,6 +66,5 @@ logging.basicConfig(
     handlers=handlers,
 )
 
-# The main logger to use
 logger = logging.getLogger("axedit")
 logging.captureWarnings(True)

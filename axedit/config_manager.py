@@ -1,30 +1,19 @@
-"""File to check and perform certain actions before running the editor"""
-
-import os
-
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-import platform
-import sys
-from pathlib import Path
-
 import pygame
-import tomlkit
 
 from axedit import shared
 from axedit.funcs import get_config, get_config_path, offset_font_size, reset_config
 from axedit.logs import logger
 from axedit.themes import apply_theme
 
-# Create the config folder if it doesnt exist
-config_path = get_config_path()
-if not config_path.exists():
-    config_path.mkdir()
 
+def create_config_file():
+    config_path = get_config_path()
+    if not config_path.exists():
+        config_path.mkdir()
 
-# Add the config file if it doesnt exist
-config_file_path = config_path / "config.toml"
-if not config_file_path.exists() or not config_file_path.read_text().strip():
-    reset_config()
+    config_file_path = config_path / "config.toml"
+    if not config_file_path.exists() or not config_file_path.read_text().strip():
+        reset_config()
 
 
 def apply_config():
@@ -50,7 +39,3 @@ def apply_config():
 
     offset_font_size(shared.config["font"]["size"] - shared.FONT_SIZE)
     apply_theme(shared.config["theme"]["name"])
-
-
-if len(sys.argv) > 1 and sys.argv[1] in ("--debug", "--hidden-debug"):
-    apply_config()

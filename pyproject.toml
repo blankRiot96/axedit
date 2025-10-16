@@ -9,12 +9,12 @@ authors = [
     { name = "Axis (blankRiot96)", email = "blankRiot96@gmail.com" },
 ]
 description = "Axedit is a modal text editor that attempts to implement vim-like motions"
-readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "clipboard>=0.0.4",
     "colorama>=0.4.6",
     "jedi>=0.19.2",
+    "platformdirs>=4.5.0",
     "pygame-ce>=2.5.5",
     "pyyaml>=6.0.3",
     "rapidfuzz>=3.14.1",
