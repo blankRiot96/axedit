@@ -1,4 +1,4 @@
-from enum import Enum, StrEnum, auto
+from enum import Enum, auto
 
 
 class State(Enum):
@@ -7,7 +7,7 @@ class State(Enum):
     MAIN_MENU = auto()
 
 
-class FileState(StrEnum):
-    INSERT = auto()
-    VISUAL = auto()
-    NORMAL = auto()
+class FileState(Enum):
+    INSERT = "insert"
+    VISUAL = "visual"
+    NORMAL = "normal"

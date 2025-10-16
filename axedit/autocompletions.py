@@ -5,10 +5,10 @@ import subprocess
 import sys
 import threading
 import time
-import typing as t
 from dataclasses import dataclass
 
 import pygame
+import typing_extensions as t
 
 from axedit import shared
 from axedit.funcs import get_text

@@ -1,4 +1,4 @@
-import typing as t
+import typing_extensions as t
 
 from axedit import shared
 
