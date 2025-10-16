@@ -1,4 +1,5 @@
 # Custom
+test.py
 palette_tester.css
 snippets.txt
 showcase.png
@@ -10,7 +11,6 @@ main.bin
 # VSCode
 pylspconfig.yaml
 .vscode/
-test.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "axedit"
-version = "0.1.4"
+version = "0.1.6"
 authors = [
     { name = "Axis (blankRiot96)", email = "blankRiot96@gmail.com" },
 ]
@@ -24,6 +24,10 @@ keywords=["editor"]
 classifiers=[
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Text Editors",
     "Intended Audience :: Developers",
 ]

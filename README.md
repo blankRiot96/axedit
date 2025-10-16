@@ -27,7 +27,6 @@ or
 uv tool install axedit
 ```
 
-However, note that at this moment axedit does not currently detect environments, so the only way to get working autocomplete and other suggestions is to install it *in* the environment you want to use it in.
 
 ## Usage
 
@@ -42,6 +41,7 @@ Run `axedit` in your project folder
 - Syntax highlighting self implemented (for now)
 - 20+ Themes available - Gruvbox, Catppuccin, One Dark, Rosepine etc.
 - Font, Opacity, On Save hooks, Manner of squiggly lines and Theme are configurable. See [config.toml](https://github.com/blankRiot96/axedit/blob/main/axedit/assets/data/default_config/config.toml)
+- Detects your Python environment based on the shell you launch `axedit` from and uses it accordingly for autocomplete
 
 ### Modal Bindings
 

@@ -1,5 +1,8 @@
 import os
+import shutil
+import subprocess
 import sys
+import textwrap
 from pathlib import Path
 
 import pygame
@@ -10,8 +13,33 @@ from axedit.logs import logger
 from axedit.state_enums import FileState
 from axedit.utils import render_at
 
-V = sys.version_info.major, sys.version_info.minor, sys.version_info.micro
-VERSION_STR = ".".join(map(str, V))
+
+def get_environment_python_path() -> Path:
+    unix_python = shutil.which("python")
+    windows_python = shutil.which("py")
+
+    if unix_python is not None:
+        return Path(unix_python)
+    elif windows_python is not None:
+        return Path(windows_python)
+
+    raise FileNotFoundError("No Python found in the environment!")
+
+
+def get_version():
+    src = textwrap.dedent("""
+    import sys
+    V = sys.version_info.major, sys.version_info.minor, sys.version_info.micro
+    VERSION_STR = ".".join(map(str, V))
+    print(VERSION_STR)
+    """)
+
+    return subprocess.check_output(
+        [get_environment_python_path(), "-c", src], text=True
+    ).strip()
+
+
+VERSION_STR = get_version()
 
 
 def is_venv():

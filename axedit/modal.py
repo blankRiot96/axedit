@@ -194,7 +194,7 @@ def on_y():
 
 def on_p():
     try:
-        paste_output = clipboard.paste()
+        paste_output = pygame.scrap.get_text()
     except UnicodeDecodeError:
         return
     paste_lines = paste_output.split("\n")

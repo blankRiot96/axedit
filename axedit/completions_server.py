@@ -1,12 +1,31 @@
 import json
+import shutil
 import socket
 import sys
+from pathlib import Path
 
 import jedi
 from rapidfuzz import fuzz
 
 HOST = "127.0.0.1"
 PORT = int(sys.argv[1])
+
+
+def get_environment_python_path() -> Path:
+    unix_python = shutil.which("python")
+    windows_python = shutil.which("py")
+
+    if unix_python is not None:
+        return Path(unix_python)
+    elif windows_python is not None:
+        return Path(windows_python)
+
+    raise FileNotFoundError("No Python found in the environment!")
+
+
+jedi_environment = jedi.create_environment(
+    path=get_environment_python_path(), safe=False
+)
 
 
 def get_fuzzy_matched_indeces(name: str, item: str) -> list[int]:
@@ -57,7 +76,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
                 break
 
             received_data = json.loads(received_data)
-            script = jedi.Script(received_data["text"])
+            script = jedi.Script(received_data["text"], environment=jedi_environment)
 
             x, y = received_data["loc"]
             try:
