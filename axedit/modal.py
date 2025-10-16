@@ -2,7 +2,7 @@
 
 import re
 
-import clipboard
+import pygame
 
 from axedit import shared
 from axedit.classes import CharList, Pos
@@ -281,7 +281,7 @@ def on_dd():
         except IndexError:
             break
 
-    clipboard.copy(copy_output)
+    pygame.scrap.put_text(copy_output)
 
 
 def on_d():

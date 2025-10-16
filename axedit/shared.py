@@ -20,7 +20,7 @@ pygame.font.init()
 
 # Constants
 FONT_SIZE: int = 24
-APP_NAME = "axe"
+APP_NAME = "axedit"
 AXE_FOLDER_PATH = Path(__file__).parent
 ASSETS_FOLDER = AXE_FOLDER_PATH / "assets"
 FONT_PATH = ASSETS_FOLDER / "fonts/IntoneMonoNerdFontMono-Regular.ttf"

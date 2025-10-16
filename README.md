@@ -18,9 +18,20 @@ Axedit is a light, fast and aesthetic modal editor for Python. Attempts to imple
 pip install axedit
 ```
 
+You can also install it with `pipx` or `uv`:
+```
+pipx install axedit
+```
+or
+```
+uv tool install axedit
+```
+
+However, note that at this moment axedit does not currently detect environments, so the only way to get working autocomplete and other suggestions is to install it *in* the environment you want to use it in.
+
 ## Usage
 
-Run `axe` on your project folder
+Run `axedit` in your project folder
 
 ## Features
 

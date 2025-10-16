@@ -1,6 +1,5 @@
 from functools import partial
 
-import clipboard
 import pygame
 
 from axedit import shared
@@ -284,7 +283,7 @@ class Cursor:
 
             # Copy the deleted content to the clipboard
             shared.history.delete(copy_output, original_pos)
-            clipboard.copy(copy_output)
+            pygame.scrap.put_text(copy_output)
 
         if shared.cursor_pos.y < shared.visual_mode_axis.y:
             offset = 0

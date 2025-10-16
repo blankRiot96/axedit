@@ -7,7 +7,6 @@ name = "axedit"
 version = "0.1.4"
 source = { editable = "." }
 dependencies = [
-    { name = "clipboard" },
     { name = "colorama" },
     { name = "jedi" },
     { name = "platformdirs" },
@@ -20,7 +19,6 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "clipboard", specifier = ">=0.0.4" },
     { name = "colorama", specifier = ">=0.4.6" },
     { name = "jedi", specifier = ">=0.19.2" },
     { name = "platformdirs", specifier = ">=4.5.0" },
@@ -30,15 +28,6 @@ requires-dist = [
     { name = "tomlkit", specifier = ">=0.13.3" },
     { name = "typing-extensions", specifier = ">=4.15.0" },
 ]
-
-[[package]]
-name = "clipboard"
-version = "0.0.4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pyperclip" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/8a/38/17f3885713d0f39994563029942b1d31c93d4e56d80da505abfbfb3a3bc4/clipboard-0.0.4.tar.gz", hash = "sha256:a72a78e9c9bf68da1c3f29ee022417d13ec9e3824b511559fd2b702b1dd5b817", size = 1713, upload-time = "2014-05-22T12:49:08.683Z" }
 
 [[package]]
 name = "colorama"
@@ -132,15 +121,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/1c/45/f7de742f0892fb67fcd550b3a19cdd084ee11e5bdc9314bdefc058d96f12/pygame_ce-2.5.5-pp311-pypy311_pp73-manylinux2014_i686.manylinux_2_17_i686.whl", hash = "sha256:5f6c99999bd2e5c7f33e472b1154e6e72b340458ce4d2a61d39d4bb180224bf9", size = 12744365, upload-time = "2025-07-28T07:49:39.758Z" },
     { url = "https://files.pythonhosted.org/packages/48/4f/587f55265edb1994e3a03aa29f261d3e57daf4b4b826b8734bf0ceb1ddab/pygame_ce-2.5.5-pp311-pypy311_pp73-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:15bae81bff1750dfe0f087f1ba6a4395d9154bcb962118c87cc35da74d116b0a", size = 12392705, upload-time = "2025-07-28T07:49:49.53Z" },
     { url = "https://files.pythonhosted.org/packages/39/42/919e9acaf40b5828edd5f039becb9c0594e2d0846a0100bcb26fd96f72b7/pygame_ce-2.5.5-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:3f106be1d9daaf0f44c9b588a01efb6e520fe52de3da7332bc97eaa950e751ff", size = 10311535, upload-time = "2025-07-28T07:49:57.804Z" },
-]
-
-[[package]]
-name = "pyperclip"
-version = "1.11.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e8/52/d87eba7cb129b81563019d1679026e7a112ef76855d6159d24754dbd2a51/pyperclip-1.11.0.tar.gz", hash = "sha256:244035963e4428530d9e3a6101a1ef97209c6825edab1567beac148ccc1db1b6", size = 12185, upload-time = "2025-09-26T14:40:37.245Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/df/80/fc9d01d5ed37ba4c42ca2b55b4339ae6e200b456be3a1aaddf4a9fa99b8c/pyperclip-1.11.0-py3-none-any.whl", hash = "sha256:299403e9ff44581cb9ba2ffeed69c7aa96a008622ad0c46cb575ca75b5b84273", size = 11063, upload-time = "2025-09-26T14:40:36.069Z" },
 ]
 
 [[package]]
