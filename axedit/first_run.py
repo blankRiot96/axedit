@@ -23,7 +23,7 @@ if not config_path.exists():
 
 # Add the config file if it doesnt exist
 config_file_path = config_path / "config.toml"
-if not config_file_path.exists():
+if not config_file_path.exists() or not config_file_path.read_text().strip():
     reset_config()
 
 

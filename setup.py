@@ -2,7 +2,7 @@ from pathlib import Path
 
 from setuptools import find_packages, setup
 
-VERSION = "0.1.3.dev"
+VERSION = "0.1.3"
 DESCRIPTION = "Modal Text Editor"
 LONG_DESCRIPTION = """Axedit is a light, fast and aesthetic modal editor for Python. 
 Attempts to implement vim-like motions."""
