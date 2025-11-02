@@ -6,6 +6,7 @@ import argparse
 import subprocess
 import sys
 import time
+import traceback
 from datetime import datetime
 
 from axedit import shared
@@ -49,8 +50,11 @@ def launch_editor():
 
     from axedit.core import Core
 
-    core = Core()
-    core.run()
+    try:
+        core = Core()
+        core.run()
+    except Exception:
+        logger.critical(traceback.format_exc())
 
 
 def clear_logs():

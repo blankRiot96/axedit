@@ -1,3 +1,11 @@
+Things to do:
+  - Disect vim mode
+  - Use treesitter for syntax highlighting
+  - Replace shared.chars logic
+  - Redesign editor navigation (more UI clunk)
+  - Plugin LSPs support
+
+
 # Bugs TODO
 
 
